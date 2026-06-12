@@ -1,0 +1,302 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>MarginPulse — Sabit Giderler</title>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<style>
+*{box-sizing:border-box;margin:0;padding:0;}
+body{font-family:'Segoe UI',system-ui,sans-serif;background:#F0F4F8;display:flex;min-height:100vh;}
+.sidebar{width:200px;background:#0F1F3D;padding:1.5rem 1rem;display:flex;flex-direction:column;gap:4px;flex-shrink:0;}
+.logo{font-size:18px;font-weight:700;color:#EFF6FF;margin-bottom:1.75rem;padding:0 0.5rem;}
+.logo span{color:#2563EB;}
+.nav{font-size:12.5px;color:#93B4D4;padding:8px 10px;border-radius:8px;display:flex;align-items:center;gap:8px;cursor:pointer;text-decoration:none;}
+.nav.active{background:rgba(37,99,235,0.2);color:#EFF6FF;font-weight:600;}
+.nav.disabled{opacity:0.4;cursor:not-allowed;}
+.dot{width:6px;height:6px;border-radius:50%;background:currentColor;flex-shrink:0;}
+.main{flex:1;padding:1.5rem;max-width:920px;}
+.title{font-size:20px;font-weight:700;color:#0F1F3D;margin-bottom:1.25rem;}
+.month-nav{display:flex;align-items:center;gap:12px;margin-bottom:1rem;background:#fff;border:1px solid #E2E8F0;border-radius:10px;padding:10px 16px;}
+.month-nav button{background:#F1F5F9;border:none;border-radius:6px;width:30px;height:30px;cursor:pointer;font-size:16px;color:#475569;}
+.month-nav button:hover{background:#E2E8F0;}
+.month-label{font-size:14px;font-weight:700;color:#0F1F3D;flex:1;text-align:center;}
+.copy-notice{background:#EFF6FF;border:1px solid #BFDBFE;color:#1d4ed8;font-size:12px;padding:8px 14px;border-radius:8px;margin-bottom:1rem;display:none;align-items:center;justify-content:space-between;}
+.copy-notice.show{display:flex;}
+.copy-notice button{background:#2563EB;color:#fff;border:none;border-radius:6px;padding:5px 12px;font-size:11px;cursor:pointer;}
+.card{background:#fff;border:1px solid #E2E8F0;border-radius:12px;padding:1.25rem;margin-bottom:1rem;}
+.card-title{font-size:13px;font-weight:700;color:#1E293B;margin-bottom:1rem;display:flex;align-items:center;gap:8px;}
+table{width:100%;border-collapse:collapse;font-size:12px;}
+th{text-align:left;color:#64748B;font-weight:500;font-size:11px;padding:0 8px 6px 0;border-bottom:1px solid #E2E8F0;}
+td{padding:7px 8px 7px 0;border-bottom:1px solid #F1F5F9;color:#1E293B;}
+td input,td select{width:100%;padding:6px 8px;border:1px solid #E2E8F0;border-radius:6px;font-size:12px;}
+.col-eq{font-weight:600;white-space:nowrap;color:#0F1F3D;}
+.btn-del{background:none;border:none;color:#EF4444;cursor:pointer;font-size:16px;padding:0 4px;}
+.btn-add-row{background:#F1F5F9;color:#475569;border:none;border-radius:6px;padding:6px 12px;font-size:11px;margin-top:8px;cursor:pointer;}
+.preset-cats{display:flex;gap:6px;flex-wrap:wrap;margin-top:10px;}
+.preset{font-size:11px;padding:5px 12px;border-radius:20px;border:1px dashed #CBD5E1;background:#fff;color:#64748B;cursor:pointer;}
+.preset:hover{border-color:#2563EB;color:#2563EB;}
+.total-box{background:#0F1F3D;border-radius:10px;padding:16px 20px;color:#fff;display:flex;justify-content:space-between;align-items:center;margin-top:8px;}
+.total-box .lbl{font-size:12px;color:#93B4D4;}
+.total-box .val{font-size:24px;font-weight:700;}
+.save-bar{display:flex;gap:10px;align-items:center;margin-top:1rem;}
+.btn-save{background:#059669;color:#fff;border:none;border-radius:8px;padding:10px 20px;font-size:13px;font-weight:600;cursor:pointer;}
+.btn-save:hover{background:#047857;}
+.status{font-size:12px;color:#64748B;}
+.tax-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px;}
+.tax-field label{font-size:11px;color:#64748B;display:block;margin-bottom:4px;}
+.tax-field select,.tax-field input{width:100%;padding:9px 12px;border:1px solid #E2E8F0;border-radius:8px;font-size:13px;}
+.tax-result{background:#FEF3C7;border-radius:8px;padding:12px 16px;margin-top:12px;font-size:13px;color:#92400E;}
+.tax-result strong{font-size:16px;}
+.empty{text-align:center;color:#94A3B8;font-size:13px;padding:1rem;}
+</style>
+</head>
+<body>
+<div class="sidebar">
+  <div class="logo">Margin<span>Pulse</span></div>
+  <a class="nav" href="urunler.html"><span class="dot"></span>Ürün karlılığı</a>
+  <div class="nav active"><span class="dot"></span>Sabit giderler</div>
+  <div class="nav disabled"><span class="dot"></span>Dashboard</div>
+  <div class="nav disabled"><span class="dot"></span>Simülatör</div>
+</div>
+
+<div class="main">
+  <div class="title">Sabit Giderler</div>
+
+  <!-- Ay navigasyonu -->
+  <div class="month-nav">
+    <button onclick="changeMonth(-1)">‹</button>
+    <div class="month-label" id="monthLabel">—</div>
+    <button onclick="changeMonth(1)">›</button>
+  </div>
+
+  <div class="copy-notice" id="copyNotice">
+    <span id="copyText">Bu ay boş. Önceki aydan giderleri kopyalayabilirsin.</span>
+    <button onclick="copyFromPrevMonth()">Önceki aydan kopyala</button>
+  </div>
+
+  <!-- Gider tablosu -->
+  <div class="card">
+    <div class="card-title">Gider Kalemleri
+      <span style="margin-left:auto;font-size:11px;color:#94A3B8;">Aylık karşılık otomatik hesaplanır</span>
+    </div>
+    <table>
+      <thead><tr>
+        <th>Kategori</th>
+        <th style="width:110px">Tutar (€)</th>
+        <th style="width:110px">Periyot</th>
+        <th style="width:110px">Aylık karşılık</th>
+        <th style="width:30px"></th>
+      </tr></thead>
+      <tbody id="costRows"></tbody>
+    </table>
+    <button class="btn-add-row" onclick="addCostRow()">+ Gider ekle</button>
+    <div class="preset-cats" id="presets">
+      <div class="preset" onclick="addCostRow('Kira')">+ Kira</div>
+      <div class="preset" onclick="addCostRow('Elektrik')">+ Elektrik</div>
+      <div class="preset" onclick="addCostRow('Su')">+ Su</div>
+      <div class="preset" onclick="addCostRow('Gaz')">+ Gaz</div>
+      <div class="preset" onclick="addCostRow('Personel maaşı')">+ Personel</div>
+      <div class="preset" onclick="addCostRow('İnternet & telefon')">+ İnternet</div>
+      <div class="preset" onclick="addCostRow('Sigorta')">+ Sigorta</div>
+      <div class="preset" onclick="addCostRow('Muhasebe')">+ Muhasebe</div>
+      <div class="preset" onclick="addCostRow('Temizlik')">+ Temizlik</div>
+    </div>
+    <div class="total-box">
+      <span class="lbl">Toplam aylık sabit gider</span>
+      <span class="val" id="totalMonthly">€0</span>
+    </div>
+    <div class="save-bar">
+      <button class="btn-save" onclick="saveCosts()">Bu Ayı Kaydet</button>
+      <span class="status" id="saveStatus"></span>
+    </div>
+  </div>
+
+  <!-- Vergi modülü -->
+  <div class="card">
+    <div class="card-title">📊 Vergi Tahmini</div>
+    <div class="tax-grid">
+      <div class="tax-field">
+        <label>Ülke & şirket tipi</label>
+        <select id="taxType" onchange="calcTax()">
+          <option value="nl_zzp">Hollanda — ZZP (şahıs)</option>
+          <option value="nl_bv">Hollanda — BV (limited)</option>
+          <option value="tr_sahis">Türkiye — Şahıs</option>
+          <option value="tr_limited">Türkiye — Limited</option>
+        </select>
+      </div>
+      <div class="tax-field">
+        <label>Aylık net kâr tahmini (€)</label>
+        <input id="taxProfit" type="number" placeholder="3000" oninput="calcTax()" />
+      </div>
+    </div>
+    <div class="tax-result" id="taxResult" style="display:none;"></div>
+  </div>
+</div>
+
+<script>
+const SUPABASE_URL = 'https://dmklhurvzahoiaklsnwo.supabase.co';
+const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImRta2xodXJ2emFob2lha2xzbndvIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODAxNjQxNjMsImV4cCI6MjA5NTc0MDE2M30.e-jJJ_Ru3pDKBnK_cw63pHhl_TN44LXAIC7P8w9mSns';
+const sb = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+
+const MONTHS = ['Ocak','Şubat','Mart','Nisan','Mayıs','Haziran','Temmuz','Ağustos','Eylül','Ekim','Kasım','Aralık'];
+let currentDate = new Date();
+currentDate.setDate(1);
+
+function monthKey(d) { return d.getFullYear() + '-' + String(d.getMonth()+1).padStart(2,'0'); }
+function monthLabel(d) { return MONTHS[d.getMonth()] + ' ' + d.getFullYear(); }
+
+const PERIOD_DIVISORS = { monthly:1, quarterly:3, semiannual:6, annual:12 };
+const PERIOD_LABELS = { monthly:'Aylık', quarterly:'3 Aylık', semiannual:'6 Aylık', annual:'Yıllık' };
+
+function changeMonth(delta) {
+  currentDate.setMonth(currentDate.getMonth() + delta);
+  document.getElementById('monthLabel').textContent = monthLabel(currentDate);
+  loadCosts();
+}
+
+function addCostRow(category='', amount='', period='monthly') {
+  const tbody = document.getElementById('costRows');
+  const tr = document.createElement('tr');
+  tr.innerHTML = `
+    <td><input class="cat" placeholder="Gider adı" value="${category}" /></td>
+    <td><input type="number" class="amount" placeholder="0" value="${amount}" oninput="recalc()" /></td>
+    <td><select class="period" onchange="recalc()">
+      <option value="monthly" ${period==='monthly'?'selected':''}>Aylık</option>
+      <option value="quarterly" ${period==='quarterly'?'selected':''}>3 Aylık</option>
+      <option value="semiannual" ${period==='semiannual'?'selected':''}>6 Aylık</option>
+      <option value="annual" ${period==='annual'?'selected':''}>Yıllık</option>
+    </select></td>
+    <td class="col-eq">€0</td>
+    <td><button class="btn-del" onclick="this.closest('tr').remove();recalc();">×</button></td>
+  `;
+  tbody.appendChild(tr);
+  recalc();
+}
+
+function recalc() {
+  let total = 0;
+  document.querySelectorAll('#costRows tr').forEach(tr => {
+    const amount = parseFloat(tr.querySelector('.amount').value) || 0;
+    const period = tr.querySelector('.period').value;
+    const eq = amount / PERIOD_DIVISORS[period];
+    tr.querySelector('.col-eq').textContent = '€' + eq.toFixed(0);
+    total += eq;
+  });
+  document.getElementById('totalMonthly').textContent = '€' + total.toFixed(0);
+}
+
+async function saveCosts() {
+  const mk = monthKey(currentDate);
+  setStatus('Kaydediliyor...', '#64748B');
+
+  // Önce bu ayın eski kayıtlarını sil
+  await sb.from('fixed_costs').delete().eq('month', mk);
+
+  // Yeni satırları topla
+  const rows = [];
+  document.querySelectorAll('#costRows tr').forEach(tr => {
+    const category = tr.querySelector('.cat').value.trim();
+    const amount = parseFloat(tr.querySelector('.amount').value) || 0;
+    const period = tr.querySelector('.period').value;
+    if (category && amount > 0) {
+      rows.push({
+        category, amount, period,
+        monthly_equivalent: amount / PERIOD_DIVISORS[period],
+        month: mk
+      });
+    }
+  });
+
+  if (rows.length === 0) { setStatus('⚠️ En az bir gider gir', '#DC2626'); return; }
+
+  const { error } = await sb.from('fixed_costs').insert(rows);
+  if (error) { setStatus('❌ ' + error.message, '#DC2626'); console.error(error); }
+  else { setStatus('✅ Kaydedildi!', '#059669'); }
+}
+
+async function loadCosts() {
+  const mk = monthKey(currentDate);
+  const { data, error } = await sb.from('fixed_costs').select('*').eq('month', mk).order('created_at');
+
+  const tbody = document.getElementById('costRows');
+  tbody.innerHTML = '';
+  document.getElementById('copyNotice').classList.remove('show');
+
+  if (error) { setStatus('Yüklenemedi: '+error.message, '#DC2626'); return; }
+
+  if (!data || data.length === 0) {
+    // Bu ay boş — önceki ayda veri var mı kontrol et
+    const prev = new Date(currentDate); prev.setMonth(prev.getMonth()-1);
+    const { data: prevData } = await sb.from('fixed_costs').select('*').eq('month', monthKey(prev));
+    if (prevData && prevData.length > 0) {
+      document.getElementById('copyText').textContent =
+        `${monthLabel(currentDate)} boş. ${monthLabel(prev)} ayından ${prevData.length} gider kopyalanabilir.`;
+      document.getElementById('copyNotice').classList.add('show');
+    }
+    addCostRow();
+  } else {
+    data.forEach(c => addCostRow(c.category, c.amount, c.period));
+  }
+  recalc();
+}
+
+async function copyFromPrevMonth() {
+  const prev = new Date(currentDate); prev.setMonth(prev.getMonth()-1);
+  const { data } = await sb.from('fixed_costs').select('*').eq('month', monthKey(prev));
+  if (data && data.length > 0) {
+    document.getElementById('costRows').innerHTML = '';
+    data.forEach(c => addCostRow(c.category, c.amount, c.period));
+    document.getElementById('copyNotice').classList.remove('show');
+    recalc();
+    setStatus('📋 Kopyalandı — kaydetmeyi unutma', '#1d4ed8');
+  }
+}
+
+function setStatus(msg, color) {
+  const el = document.getElementById('saveStatus');
+  el.textContent = msg; el.style.color = color;
+  if (msg.startsWith('✅')) setTimeout(()=>{el.textContent='';}, 2500);
+}
+
+// ====== VERGİ TAHMİNİ ======
+function calcTax() {
+  const type = document.getElementById('taxType').value;
+  const profit = parseFloat(document.getElementById('taxProfit').value) || 0;
+  const resultEl = document.getElementById('taxResult');
+
+  if (profit <= 0) { resultEl.style.display='none'; return; }
+
+  const annualProfit = profit * 12;
+  let rate, note, taxAmount;
+
+  // Basitleştirilmiş tahmini oranlar — kullanıcıya yaklaşık fikir vermek için
+  if (type === 'nl_zzp') {
+    rate = annualProfit < 75000 ? 0.3693 : 0.495;
+    note = 'Hollanda gelir vergisi (box 1). ZZP indirimleri hariç kaba tahmin.';
+  } else if (type === 'nl_bv') {
+    rate = annualProfit < 200000 ? 0.19 : 0.258;
+    note = 'Hollanda kurumlar vergisi (vennootschapsbelasting). Maaş/temettü hariç.';
+  } else if (type === 'tr_sahis') {
+    rate = 0.20;
+    note = 'Türkiye gelir vergisi — kademeli sistemde yaklaşık ortalama oran.';
+  } else if (type === 'tr_limited') {
+    rate = 0.25;
+    note = 'Türkiye kurumlar vergisi (%25).';
+  }
+
+  taxAmount = profit * rate;
+  resultEl.style.display = 'block';
+  resultEl.innerHTML = `
+    Aylık tahmini vergi karşılığı: <strong>€${taxAmount.toFixed(0)}</strong>
+    (yaklaşık %${(rate*100).toFixed(1)})<br>
+    <span style="font-size:11px;opacity:0.8;">${note} Bu bir tahmindir, kesin hesap için mali müşavirine danış.</span>
+  `;
+}
+
+// ====== BAŞLANGIÇ ======
+document.getElementById('monthLabel').textContent = monthLabel(currentDate);
+loadCosts();
+</script>
+</body>
+</html>

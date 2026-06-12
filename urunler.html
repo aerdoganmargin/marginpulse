@@ -1,0 +1,391 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>MarginPulse — Ürün Karlılığı</title>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<style>
+*{box-sizing:border-box;margin:0;padding:0;}
+body{font-family:'Segoe UI',system-ui,sans-serif;background:#F0F4F8;display:flex;min-height:100vh;}
+.sidebar{width:200px;background:#0F1F3D;padding:1.5rem 1rem;display:flex;flex-direction:column;gap:4px;flex-shrink:0;}
+.logo{font-size:18px;font-weight:700;color:#EFF6FF;margin-bottom:1.75rem;padding:0 0.5rem;}
+.logo span{color:#2563EB;}
+.nav{font-size:12.5px;color:#93B4D4;padding:8px 10px;border-radius:8px;display:flex;align-items:center;gap:8px;cursor:pointer;}
+.nav.active{background:rgba(37,99,235,0.2);color:#EFF6FF;font-weight:600;}
+.nav.disabled{opacity:0.4;cursor:not-allowed;}
+.dot{width:6px;height:6px;border-radius:50%;background:currentColor;flex-shrink:0;}
+.main{flex:1;padding:1.5rem;max-width:920px;}
+.title{font-size:20px;font-weight:700;color:#0F1F3D;margin-bottom:1.25rem;display:flex;justify-content:space-between;align-items:center;}
+.btn-blue{background:#2563EB;color:#fff;border:none;border-radius:8px;padding:9px 18px;font-size:13px;font-weight:600;cursor:pointer;}
+.btn-blue:hover{background:#1d4ed8;}
+.btn-ghost{background:#fff;color:#475569;border:1px solid #E2E8F0;border-radius:8px;padding:9px 16px;font-size:13px;font-weight:600;cursor:pointer;}
+.btn-ghost:hover{background:#F8FAFC;}
+.card{background:#fff;border:1px solid #E2E8F0;border-radius:12px;padding:1.25rem;margin-bottom:1rem;}
+.card-title{font-size:13px;font-weight:700;color:#1E293B;margin-bottom:1rem;display:flex;align-items:center;gap:8px;}
+.badge-num{width:22px;height:22px;border-radius:50%;background:#2563EB;color:#fff;font-size:11px;font-weight:700;display:flex;align-items:center;justify-content:center;}
+.row{display:flex;gap:8px;margin-bottom:10px;}
+.row input,.row select{flex:1;padding:9px 12px;border:1px solid #E2E8F0;border-radius:8px;font-size:13px;}
+.cats{display:flex;gap:6px;flex-wrap:wrap;margin-top:8px;}
+.cat{font-size:11px;padding:5px 14px;border-radius:20px;border:1px solid #E2E8F0;background:#fff;color:#64748B;cursor:pointer;}
+.cat.active{background:#0F1F3D;color:#fff;border-color:#0F1F3D;}
+.porsiyon{display:flex;align-items:center;gap:8px;margin-top:10px;background:#F8FAFC;border-radius:8px;padding:8px 12px;}
+.porsiyon label{font-size:11px;color:#64748B;white-space:nowrap;}
+.porsiyon input{width:60px;padding:5px 8px;border:1px solid #E2E8F0;border-radius:6px;font-size:12px;}
+.porsiyon select{font-size:12px;padding:5px 8px;border:1px solid #E2E8F0;border-radius:6px;}
+table{width:100%;border-collapse:collapse;font-size:12px;}
+th{text-align:left;color:#64748B;font-weight:500;font-size:11px;padding:0 8px 6px 0;border-bottom:1px solid #E2E8F0;}
+td{padding:7px 8px 7px 0;border-bottom:1px solid #F1F5F9;color:#1E293B;}
+td input,td select{width:100%;padding:5px 8px;border:1px solid #E2E8F0;border-radius:6px;font-size:11.5px;}
+.col-cost{font-weight:600;white-space:nowrap;}
+.btn-del{background:none;border:none;color:#EF4444;cursor:pointer;font-size:16px;padding:0 4px;}
+.btn-add-row{background:#F1F5F9;color:#475569;border:none;border-radius:6px;padding:6px 12px;font-size:11px;margin-top:8px;cursor:pointer;}
+.hint-row{font-size:11px;color:#94A3B8;margin-top:6px;}
+.total{text-align:right;font-size:13px;margin-top:10px;color:#64748B;}
+.total strong{color:#1E293B;font-size:14px;}
+.sales{display:grid;grid-template-columns:1fr 1fr 1fr;gap:12px;margin-top:8px;}
+.sf label{font-size:11px;color:#64748B;display:block;margin-bottom:4px;}
+.sf input{width:100%;padding:9px 12px;border:1px solid #E2E8F0;border-radius:8px;font-size:13px;}
+.result{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;}
+.metric{background:#F8FAFC;border-radius:8px;padding:12px 14px;}
+.metric .lbl{font-size:10px;color:#64748B;margin-bottom:4px;}
+.metric .val{font-size:18px;font-weight:700;color:#059669;}
+.metric .val.dark{color:#0F1F3D;}
+.metric .val.blue{color:#2563EB;}
+.save-bar{display:flex;gap:10px;align-items:center;margin-top:1rem;}
+.btn-save{background:#059669;color:#fff;border:none;border-radius:8px;padding:10px 20px;font-size:13px;font-weight:600;cursor:pointer;}
+.btn-save:hover{background:#047857;}
+.status{font-size:12px;color:#64748B;}
+.saved-item{display:flex;justify-content:space-between;align-items:center;padding:12px 14px;border:1px solid #E2E8F0;border-radius:8px;margin-bottom:6px;font-size:13px;cursor:pointer;transition:background .15s;}
+.saved-item:hover{background:#F8FAFC;}
+.saved-item .info{color:#1E293B;}
+.saved-item .right{display:flex;align-items:center;gap:10px;}
+.margin-tag{font-size:11px;font-weight:700;padding:2px 10px;border-radius:20px;}
+.tag-green{background:#D1FAE5;color:#059669;}
+.tag-yellow{background:#FEF3C7;color:#D97706;}
+.tag-red{background:#FEE2E2;color:#DC2626;}
+.item-del{background:none;border:none;color:#CBD5E1;cursor:pointer;font-size:18px;}
+.item-del:hover{color:#EF4444;}
+.empty{text-align:center;color:#94A3B8;font-size:13px;padding:1rem;}
+.edit-banner{background:#EFF6FF;border:1px solid #BFDBFE;color:#1d4ed8;font-size:12px;padding:8px 14px;border-radius:8px;margin-bottom:1rem;display:none;align-items:center;justify-content:space-between;}
+.edit-banner.show{display:flex;}
+.edit-banner button{background:none;border:none;color:#1d4ed8;cursor:pointer;font-size:12px;text-decoration:underline;}
+</style>
+</head>
+<body>
+<div class="sidebar">
+  <div class="logo">Margin<span>Pulse</span></div>
+  <div class="nav active"><span class="dot"></span>Ürün karlılığı</div>
+  <a class="nav" href="giderler.html" style="text-decoration:none;"><span class="dot"></span>Sabit giderler</a>
+  <div class="nav disabled"><span class="dot"></span>Dashboard</div>
+  <div class="nav disabled"><span class="dot"></span>Simülatör</div>
+</div>
+
+<div class="main">
+  <div class="title">Ürün Karlılığı <button class="btn-ghost" onclick="resetForm()">+ Yeni ürün</button></div>
+
+  <div class="edit-banner" id="editBanner">
+    <span id="editText">Düzenleme modu</span>
+    <button onclick="resetForm()">İptal et, yeni ürün başlat</button>
+  </div>
+
+  <!-- Adım 1 -->
+  <div class="card">
+    <div class="card-title"><span class="badge-num">1</span> Ürün adı ve kategori</div>
+    <div class="row"><input id="productName" placeholder="Örn: Saç kavurma" /></div>
+    <div class="cats" id="categories">
+      <div class="cat active" data-cat="Et yemeği">Et yemeği</div>
+      <div class="cat" data-cat="Yemek">Yemek</div>
+      <div class="cat" data-cat="İçecek">İçecek</div>
+      <div class="cat" data-cat="Tatlı">Tatlı</div>
+      <div class="cat" data-cat="Aperatif">Aperatif</div>
+    </div>
+    <div class="porsiyon">
+      <label>1 porsiyon =</label>
+      <input id="portionSize" type="number" value="200" />
+      <select id="portionUnit"><option>g</option><option>ml</option><option>adet</option></select>
+      <span style="font-size:11px;color:#94A3B8;">Referans porsiyon büyüklüğü</span>
+    </div>
+  </div>
+
+  <!-- Adım 2 -->
+  <div class="card">
+    <div class="card-title"><span class="badge-num">2</span> Reçete &amp; maliyet
+      <span style="margin-left:auto;font-size:11px;color:#94A3B8;">Maliyet otomatik hesaplanır</span>
+    </div>
+    <table>
+      <thead><tr>
+        <th>Malzeme</th>
+        <th style="width:75px">Miktar</th>
+        <th style="width:65px">Birim</th>
+        <th style="width:105px">Birim fiyat (€)</th>
+        <th style="width:80px">Maliyet</th>
+        <th style="width:30px"></th>
+      </tr></thead>
+      <tbody id="ingredients"></tbody>
+    </table>
+    <button class="btn-add-row" onclick="addIngredient()">+ Malzeme ekle</button>
+    <div class="hint-row">💡 g/ml için fiyatı €/kg veya €/lt gir · adet için €/adet gir</div>
+    <div class="total">Toplam hammadde maliyeti: <strong id="totalCost">€0.00</strong> / porsiyon</div>
+  </div>
+
+  <!-- Adım 3 -->
+  <div class="card">
+    <div class="card-title"><span class="badge-num">3</span> Satış fiyatı &amp; adet</div>
+    <div class="sales">
+      <div class="sf"><label>Satış fiyatı (porsiyon)</label><input id="salePrice" type="number" placeholder="18.50" oninput="calculate()" /></div>
+      <div class="sf"><label>Geçen ay - gerçek adet</label><input id="lastMonthQty" type="number" placeholder="120" oninput="calculate()" /></div>
+      <div class="sf"><label>Gelecek ay - tahmini adet</label><input id="nextMonthQty" type="number" placeholder="140" oninput="calculate()" /></div>
+    </div>
+  </div>
+
+  <!-- Adım 4: Sonuç -->
+  <div class="card">
+    <div class="card-title" style="color:#059669">✓ Karlılık özeti</div>
+    <div class="result">
+      <div class="metric"><div class="lbl">Brüt marj</div><div class="val" id="grossMargin">—</div></div>
+      <div class="metric"><div class="lbl">Birim kar</div><div class="val" id="unitProfit">—</div></div>
+      <div class="metric"><div class="lbl">Geçen ay gelir</div><div class="val dark" id="lastRevenue">—</div></div>
+      <div class="metric"><div class="lbl">Tahmini gelir</div><div class="val blue" id="nextRevenue">—</div></div>
+    </div>
+    <div class="save-bar">
+      <button class="btn-save" id="saveBtn" onclick="saveProduct()">Ürünü Kaydet</button>
+      <span class="status" id="saveStatus"></span>
+    </div>
+  </div>
+
+  <!-- Kayıtlı ürünler -->
+  <div class="card">
+    <div class="card-title">Kayıtlı Ürünler <span style="margin-left:auto;font-size:11px;color:#94A3B8;">Düzenlemek için tıkla</span></div>
+    <div class="saved-list" id="savedList"><div class="empty">Henüz ürün kaydedilmedi.</div></div>
+  </div>
+</div>
+
+<script>
+const SUPABASE_URL = 'https://dmklhurvzahoiaklsnwo.supabase.co';
+const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImRta2xodXJ2emFob2lha2xzbndvIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODAxNjQxNjMsImV4cCI6MjA5NTc0MDE2M30.e-jJJ_Ru3pDKBnK_cw63pHhl_TN44LXAIC7P8w9mSns';
+const sb = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+
+let selectedCategory = 'Et yemeği';
+let editingId = null; // düzenleme modunda ürün id'si
+
+document.getElementById('categories').addEventListener('click', (e) => {
+  if (e.target.classList.contains('cat')) {
+    document.querySelectorAll('.cat').forEach(c => c.classList.remove('active'));
+    e.target.classList.add('active');
+    selectedCategory = e.target.dataset.cat;
+  }
+});
+
+function selectCategory(cat) {
+  selectedCategory = cat;
+  document.querySelectorAll('.cat').forEach(c => {
+    c.classList.toggle('active', c.dataset.cat === cat);
+  });
+}
+
+// ====== MALZEME SATIRLARI ======
+function addIngredient(name='', qty='', unit='g', price='') {
+  const tbody = document.getElementById('ingredients');
+  const tr = document.createElement('tr');
+  tr.innerHTML = `
+    <td><input class="ing-name" placeholder="Malzeme adı" value="${name}" /></td>
+    <td><input type="number" class="qty" placeholder="200" value="${qty}" oninput="calcRow(this)" /></td>
+    <td><select class="unit" onchange="calcRow(this)">
+      <option ${unit==='g'?'selected':''}>g</option>
+      <option ${unit==='ml'?'selected':''}>ml</option>
+      <option ${unit==='adet'?'selected':''}>adet</option>
+    </select></td>
+    <td><input type="number" class="price" placeholder="24" value="${price}" oninput="calcRow(this)" /></td>
+    <td class="col-cost">€0.00</td>
+    <td><button class="btn-del" onclick="this.closest('tr').remove();calculate();">×</button></td>
+  `;
+  tbody.appendChild(tr);
+  if(qty && price) calcRow(tr.querySelector('.qty'));
+}
+
+function rowCost(tr) {
+  const qty = parseFloat(tr.querySelector('.qty').value) || 0;
+  const price = parseFloat(tr.querySelector('.price').value) || 0;
+  const unit = tr.querySelector('.unit').value;
+  // adet → direkt qty*price; g/ml → qty/1000 * price (€/kg veya €/lt)
+  return unit === 'adet' ? qty * price : (qty / 1000) * price;
+}
+
+function calcRow(input) {
+  const tr = input.closest('tr');
+  tr.querySelector('.col-cost').textContent = '€' + rowCost(tr).toFixed(2);
+  calculate();
+}
+
+function getTotalCost() {
+  let total = 0;
+  document.querySelectorAll('#ingredients tr').forEach(tr => total += rowCost(tr));
+  return total;
+}
+
+function getRecipe() {
+  const recipe = [];
+  document.querySelectorAll('#ingredients tr').forEach(tr => {
+    const name = tr.querySelector('.ing-name').value.trim();
+    const qty = parseFloat(tr.querySelector('.qty').value) || 0;
+    const unit = tr.querySelector('.unit').value;
+    const price = parseFloat(tr.querySelector('.price').value) || 0;
+    if (name || qty || price) recipe.push({name, qty, unit, price});
+  });
+  return recipe;
+}
+
+// ====== ANA HESAPLAMA ======
+function calculate() {
+  const totalCost = getTotalCost();
+  document.getElementById('totalCost').textContent = '€' + totalCost.toFixed(2);
+
+  const salePrice = parseFloat(document.getElementById('salePrice').value) || 0;
+  const lastQty = parseFloat(document.getElementById('lastMonthQty').value) || 0;
+  const nextQty = parseFloat(document.getElementById('nextMonthQty').value) || 0;
+
+  if (salePrice > 0) {
+    const unitProfit = salePrice - totalCost;
+    const grossMargin = (unitProfit / salePrice) * 100;
+    document.getElementById('grossMargin').textContent = '%' + grossMargin.toFixed(1);
+    document.getElementById('unitProfit').textContent = '€' + unitProfit.toFixed(2);
+    document.getElementById('lastRevenue').textContent = '€' + (salePrice * lastQty).toFixed(0);
+    document.getElementById('nextRevenue').textContent = '€' + (salePrice * nextQty).toFixed(0);
+
+    const mEl = document.getElementById('grossMargin');
+    const pEl = document.getElementById('unitProfit');
+    let color = '#059669';
+    if (grossMargin < 0) color = '#DC2626';
+    else if (grossMargin < 30) color = '#D97706';
+    mEl.style.color = color; pEl.style.color = color;
+  } else {
+    ['grossMargin','unitProfit','lastRevenue','nextRevenue'].forEach(id => document.getElementById(id).textContent='—');
+  }
+}
+
+// ====== KAYDET / GÜNCELLE ======
+async function saveProduct() {
+  const name = document.getElementById('productName').value.trim();
+  if (!name) { setStatus('⚠️ Ürün adı gir', '#DC2626'); return; }
+
+  const payload = {
+    name: name,
+    category: selectedCategory,
+    sale_price: parseFloat(document.getElementById('salePrice').value) || 0,
+    ingredient_cost: getTotalCost(),
+    last_month_qty: parseInt(document.getElementById('lastMonthQty').value) || 0,
+    next_month_qty: parseInt(document.getElementById('nextMonthQty').value) || 0,
+    recipe: getRecipe()
+  };
+
+  setStatus('Kaydediliyor...', '#64748B');
+
+  let error;
+  if (editingId) {
+    ({ error } = await sb.from('products').update(payload).eq('id', editingId));
+  } else {
+    ({ error } = await sb.from('products').insert([payload]));
+  }
+
+  if (error) {
+    setStatus('❌ Hata: ' + error.message, '#DC2626');
+    console.error(error);
+  } else {
+    setStatus(editingId ? '✅ Güncellendi!' : '✅ Kaydedildi!', '#059669');
+    resetForm();
+    loadProducts();
+  }
+}
+
+function setStatus(msg, color) {
+  const el = document.getElementById('saveStatus');
+  el.textContent = msg;
+  el.style.color = color;
+  if (msg.startsWith('✅')) setTimeout(()=>{el.textContent='';}, 2500);
+}
+
+// ====== FORMU SIFIRLA ======
+function resetForm() {
+  editingId = null;
+  document.getElementById('productName').value = '';
+  document.getElementById('salePrice').value = '';
+  document.getElementById('lastMonthQty').value = '';
+  document.getElementById('nextMonthQty').value = '';
+  document.getElementById('portionSize').value = '200';
+  document.getElementById('ingredients').innerHTML = '';
+  addIngredient(); addIngredient();
+  selectCategory('Et yemeği');
+  document.getElementById('editBanner').classList.remove('show');
+  document.getElementById('saveBtn').textContent = 'Ürünü Kaydet';
+  calculate();
+}
+
+// ====== ÜRÜNÜ DÜZENLEMEYE AÇ ======
+function editProduct(p) {
+  editingId = p.id;
+  document.getElementById('productName').value = p.name || '';
+  document.getElementById('salePrice').value = p.sale_price || '';
+  document.getElementById('lastMonthQty').value = p.last_month_qty || '';
+  document.getElementById('nextMonthQty').value = p.next_month_qty || '';
+  selectCategory(p.category || 'Et yemeği');
+
+  document.getElementById('ingredients').innerHTML = '';
+  const recipe = p.recipe || [];
+  if (recipe.length === 0) { addIngredient(); addIngredient(); }
+  else recipe.forEach(r => addIngredient(r.name, r.qty, r.unit, r.price));
+
+  document.getElementById('editBanner').classList.add('show');
+  document.getElementById('editText').textContent = `"${p.name}" düzenleniyor`;
+  document.getElementById('saveBtn').textContent = 'Değişiklikleri Kaydet';
+  calculate();
+  window.scrollTo({top:0, behavior:'smooth'});
+}
+
+// ====== ÜRÜN SİL ======
+async function deleteProduct(id, name, event) {
+  event.stopPropagation();
+  if (!confirm(`"${name}" silinsin mi?`)) return;
+  const { error } = await sb.from('products').delete().eq('id', id);
+  if (error) { alert('Silinemedi: ' + error.message); }
+  else { loadProducts(); if(editingId===id) resetForm(); }
+}
+
+// ====== KAYITLI ÜRÜNLERİ YÜKLE ======
+async function loadProducts() {
+  const { data, error } = await sb.from('products').select('*').order('created_at', {ascending:false});
+  const list = document.getElementById('savedList');
+
+  if (error) { list.innerHTML = '<div class="empty">Yüklenemedi: '+error.message+'</div>'; return; }
+  if (!data || data.length === 0) { list.innerHTML = '<div class="empty">Henüz ürün kaydedilmedi.</div>'; return; }
+
+  list.innerHTML = '';
+  data.forEach(p => {
+    const sp = p.sale_price || 0;
+    const profit = sp - (p.ingredient_cost || 0);
+    const margin = sp > 0 ? (profit / sp * 100) : 0;
+    let tagClass = 'tag-green';
+    if (margin < 0) tagClass = 'tag-red';
+    else if (margin < 30) tagClass = 'tag-yellow';
+
+    const item = document.createElement('div');
+    item.className = 'saved-item';
+    item.onclick = () => editProduct(p);
+    item.innerHTML = `
+      <div class="info"><strong>${p.name}</strong> <span style="color:#94A3B8">· ${p.category||'—'} · €${sp.toFixed(2)}</span></div>
+      <div class="right">
+        <span class="margin-tag ${tagClass}">%${margin.toFixed(1)} marj</span>
+        <button class="item-del" title="Sil">🗑</button>
+      </div>
+    `;
+    item.querySelector('.item-del').onclick = (e) => deleteProduct(p.id, p.name, e);
+    list.appendChild(item);
+  });
+}
+
+// ====== BAŞLANGIÇ ======
+resetForm();
+loadProducts();
+</script>
+</body>
+</html>
