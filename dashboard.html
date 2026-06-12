@@ -1,0 +1,267 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>MarginPulse — Dashboard</title>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<style>
+*{box-sizing:border-box;margin:0;padding:0;}
+body{font-family:'Segoe UI',system-ui,sans-serif;background:#F0F4F8;display:flex;min-height:100vh;}
+.sidebar{width:200px;background:#0F1F3D;padding:1.5rem 1rem;display:flex;flex-direction:column;gap:4px;flex-shrink:0;}
+.logo{font-size:18px;font-weight:700;color:#EFF6FF;margin-bottom:1.75rem;padding:0 0.5rem;}
+.logo span{color:#2563EB;}
+.nav{font-size:12.5px;color:#93B4D4;padding:8px 10px;border-radius:8px;display:flex;align-items:center;gap:8px;cursor:pointer;text-decoration:none;}
+.nav.active{background:rgba(37,99,235,0.2);color:#EFF6FF;font-weight:600;}
+.nav.disabled{opacity:0.4;cursor:not-allowed;}
+.dot{width:6px;height:6px;border-radius:50%;background:currentColor;flex-shrink:0;}
+.main{flex:1;padding:1.5rem;max-width:980px;}
+.title{font-size:20px;font-weight:700;color:#0F1F3D;margin-bottom:0.35rem;}
+.subtitle{font-size:12px;color:#94A3B8;margin-bottom:1.25rem;}
+.card{background:#fff;border:1px solid #E2E8F0;border-radius:12px;padding:1.25rem;margin-bottom:1rem;}
+.card-title{font-size:13px;font-weight:700;color:#1E293B;margin-bottom:1rem;}
+/* Alarmlar */
+.alarm{display:flex;align-items:flex-start;gap:10px;padding:12px 14px;border-radius:10px;margin-bottom:8px;font-size:13px;}
+.alarm.red{background:#FEF2F2;border:1px solid #FECACA;}
+.alarm.yellow{background:#FFFBEB;border:1px solid #FDE68A;}
+.alarm.green{background:#F0FDF4;border:1px solid #BBF7D0;}
+.alarm .ico{font-size:16px;flex-shrink:0;}
+.alarm .body{flex:1;}
+.alarm .head{font-weight:700;color:#1E293B;margin-bottom:2px;}
+.alarm .desc{color:#64748B;font-size:12px;}
+.pill{display:inline-block;background:#fff;border:1px solid #E2E8F0;border-radius:20px;padding:3px 10px;font-size:11px;color:#475569;margin-top:6px;}
+/* P&L */
+.pnl-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;}
+.pnl-box{border-radius:10px;padding:16px;}
+.pnl-box .lbl{font-size:11px;margin-bottom:6px;opacity:0.8;}
+.pnl-box .val{font-size:24px;font-weight:700;}
+.pnl-rev{background:#EFF6FF;color:#1d4ed8;}
+.pnl-cost{background:#FEF3F2;color:#DC2626;}
+.pnl-net{background:#0F1F3D;color:#fff;}
+.pnl-net.loss .val{color:#FCA5A5;}
+.pnl-net.profit .val{color:#6EE7B7;}
+/* Tablo */
+table{width:100%;border-collapse:collapse;font-size:12px;}
+th{text-align:left;color:#64748B;font-weight:500;font-size:11px;padding:0 8px 8px 0;border-bottom:1px solid #E2E8F0;}
+th.r,td.r{text-align:right;}
+td{padding:9px 8px 9px 0;border-bottom:1px solid #F1F5F9;color:#1E293B;}
+.margin-tag{font-size:11px;font-weight:700;padding:2px 10px;border-radius:20px;}
+.tag-green{background:#D1FAE5;color:#059669;}
+.tag-yellow{background:#FEF3C7;color:#D97706;}
+.tag-red{background:#FEE2E2;color:#DC2626;}
+.empty{text-align:center;color:#94A3B8;font-size:13px;padding:1.5rem;}
+.forecast{display:flex;align-items:center;gap:16px;background:#F8FAFC;border-radius:10px;padding:16px;}
+.forecast .big{font-size:28px;font-weight:700;color:#0F1F3D;}
+.forecast .lbl{font-size:12px;color:#64748B;}
+</style>
+</head>
+<body>
+<div class="sidebar">
+  <div class="logo">Margin<span>Pulse</span></div>
+  <a class="nav" href="urunler.html"><span class="dot"></span>Ürün karlılığı</a>
+  <a class="nav" href="giderler.html"><span class="dot"></span>Sabit giderler</a>
+  <div class="nav active"><span class="dot"></span>Dashboard</div>
+  <div class="nav disabled"><span class="dot"></span>Simülatör</div>
+</div>
+
+<div class="main">
+  <div class="title">Dashboard</div>
+  <div class="subtitle" id="subtitle">Yükleniyor…</div>
+
+  <!-- Alarmlar -->
+  <div class="card">
+    <div class="card-title">🔔 Alarmlar &amp; Öneriler</div>
+    <div id="alarms"><div class="empty">Hesaplanıyor…</div></div>
+  </div>
+
+  <!-- P&L Özeti -->
+  <div class="card">
+    <div class="card-title">💰 Bu Ay — Kâr / Zarar Özeti</div>
+    <div class="pnl-grid">
+      <div class="pnl-box pnl-rev"><div class="lbl">Tahmini Gelir</div><div class="val" id="revenue">—</div></div>
+      <div class="pnl-box pnl-cost"><div class="lbl">Toplam Gider</div><div class="val" id="costs">—</div></div>
+      <div class="pnl-box pnl-net" id="netBox"><div class="lbl">Net Sonuç (NOI)</div><div class="val" id="net">—</div></div>
+    </div>
+    <div style="font-size:11px;color:#94A3B8;margin-top:10px;" id="pnlNote"></div>
+  </div>
+
+  <!-- Kategori karlılığı -->
+  <div class="card">
+    <div class="card-title">📦 Ürün Karlılığı</div>
+    <table>
+      <thead><tr>
+        <th>Ürün</th><th>Kategori</th>
+        <th class="r">Satış €</th><th class="r">Maliyet €</th>
+        <th class="r">Birim kâr</th><th class="r">Marj</th>
+      </tr></thead>
+      <tbody id="productRows"></tbody>
+    </table>
+  </div>
+
+  <!-- Gelecek ay tahmini -->
+  <div class="card">
+    <div class="card-title">📈 Gelecek Ay Tahmini</div>
+    <div class="forecast">
+      <div>
+        <div class="big" id="forecastRevenue">—</div>
+        <div class="lbl">tahmini gelir (ürünlerin gelecek ay adetlerine göre)</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+const SUPABASE_URL = 'https://dmklhurvzahoiaklsnwo.supabase.co';
+const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImRta2xodXJ2emFob2lha2xzbndvIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODAxNjQxNjMsImV4cCI6MjA5NTc0MDE2M30.e-jJJ_Ru3pDKBnK_cw63pHhl_TN44LXAIC7P8w9mSns';
+const sb = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+
+const MONTHS = ['Ocak','Şubat','Mart','Nisan','Mayıs','Haziran','Temmuz','Ağustos','Eylül','Ekim','Kasım','Aralık'];
+const now = new Date();
+const monthKey = now.getFullYear() + '-' + String(now.getMonth()+1).padStart(2,'0');
+const monthName = MONTHS[now.getMonth()] + ' ' + now.getFullYear();
+
+function eur(n){ return '€' + Math.round(n).toLocaleString('tr-TR'); }
+
+async function loadDashboard() {
+  document.getElementById('subtitle').textContent = monthName + ' · otomatik hesaplanır';
+
+  // Verileri çek
+  const { data: products } = await sb.from('products').select('*');
+  const { data: costs } = await sb.from('fixed_costs').select('*').eq('month', monthKey);
+
+  const prods = products || [];
+  const fixedCosts = costs || [];
+
+  // --- Gelir & gider hesapla ---
+  let monthlyRevenue = 0;     // geçen ay adet × satış fiyatı
+  let forecastRevenue = 0;    // gelecek ay adet × satış fiyatı
+  prods.forEach(p => {
+    const sp = p.sale_price || 0;
+    monthlyRevenue += sp * (p.last_month_qty || 0);
+    forecastRevenue += sp * (p.next_month_qty || 0);
+  });
+
+  // Değişken maliyet (ürün başına hammadde × adet)
+  let variableCost = 0;
+  prods.forEach(p => {
+    variableCost += (p.ingredient_cost || 0) * (p.last_month_qty || 0);
+  });
+
+  const totalFixed = fixedCosts.reduce((s,c) => s + (c.monthly_equivalent || 0), 0);
+  const totalCost = variableCost + totalFixed;
+  const net = monthlyRevenue - totalCost;
+
+  // --- P&L kutuları ---
+  document.getElementById('revenue').textContent = eur(monthlyRevenue);
+  document.getElementById('costs').textContent = eur(totalCost);
+  document.getElementById('net').textContent = eur(net);
+  document.getElementById('pnlNote').textContent =
+    `Gelir: geçen ay satış adetleri × fiyat · Gider: değişken (${eur(variableCost)}) + sabit (${eur(totalFixed)})`;
+
+  const netBox = document.getElementById('netBox');
+  netBox.classList.toggle('loss', net < 0);
+  netBox.classList.toggle('profit', net >= 0);
+
+  document.getElementById('forecastRevenue').textContent = eur(forecastRevenue);
+
+  // --- Ürün tablosu ---
+  const tbody = document.getElementById('productRows');
+  if (prods.length === 0) {
+    tbody.innerHTML = '<tr><td colspan="6" class="empty">Henüz ürün yok. Ürün Karlılığı modülünden ekle.</td></tr>';
+  } else {
+    tbody.innerHTML = '';
+    prods.forEach(p => {
+      const sp = p.sale_price || 0;
+      const cost = p.ingredient_cost || 0;
+      const profit = sp - cost;
+      const margin = sp > 0 ? (profit/sp*100) : 0;
+      let tag = 'tag-green'; if (margin < 0) tag='tag-red'; else if (margin < 30) tag='tag-yellow';
+      tbody.innerHTML += `<tr>
+        <td><strong>${p.name}</strong></td>
+        <td style="color:#94A3B8">${p.category||'—'}</td>
+        <td class="r">€${sp.toFixed(2)}</td>
+        <td class="r">€${cost.toFixed(2)}</td>
+        <td class="r">€${profit.toFixed(2)}</td>
+        <td class="r"><span class="margin-tag ${tag}">%${margin.toFixed(0)}</span></td>
+      </tr>`;
+    });
+  }
+
+  // --- ALARMLAR ---
+  const alarms = [];
+
+  // Kritik: net zarar
+  if (prods.length > 0 && net < 0) {
+    alarms.push({
+      type:'red', ico:'🔴', head:`Bu ay ${eur(Math.abs(net))} açık veriyorsun`,
+      desc:'Gelirin giderlerini karşılamıyor.',
+      pill:`Açığı kapatmak için gelir ${eur(Math.abs(net))} artmalı ya da gider azalmalı`
+    });
+  }
+
+  // Zarar eden ürünler
+  prods.forEach(p => {
+    const sp = p.sale_price||0, cost=p.ingredient_cost||0;
+    const margin = sp>0 ? ((sp-cost)/sp*100) : 0;
+    if (sp>0 && margin < 0) {
+      alarms.push({
+        type:'red', ico:'🔴', head:`"${p.name}" zarar ettiriyor`,
+        desc:`Maliyet (€${cost.toFixed(2)}) satış fiyatından (€${sp.toFixed(2)}) yüksek.`,
+        pill:`Önerilen min. fiyat: €${(cost/0.7).toFixed(2)} (%30 marj için)`
+      });
+    } else if (sp>0 && margin < 20) {
+      alarms.push({
+        type:'yellow', ico:'🟡', head:`"${p.name}" marjı düşük (%${margin.toFixed(0)})`,
+        desc:'Düşük kârlılık — fiyat veya maliyet gözden geçirilebilir.',
+        pill:`%30 marj için fiyat: €${(cost/0.7).toFixed(2)}`
+      });
+    }
+  });
+
+  // Sabit gider girilmemiş
+  if (fixedCosts.length === 0) {
+    alarms.push({
+      type:'yellow', ico:'🟡', head:'Bu ay sabit gider girilmemiş',
+      desc:'Doğru kâr/zarar için kira, elektrik vb. giderleri ekle.',
+      pill:'Sabit Giderler modülüne git'
+    });
+  }
+
+  // Pozitif
+  if (prods.length > 0 && net > 0) {
+    alarms.push({
+      type:'green', ico:'🟢', head:`Bu ay ${eur(net)} kârdasın`,
+      desc:'Gelirin giderlerini karşılıyor ve kâr bırakıyor. 👏',
+      pill:`Net marj: %${monthlyRevenue>0?(net/monthlyRevenue*100).toFixed(0):0}`
+    });
+  }
+
+  if (prods.length === 0) {
+    alarms.push({
+      type:'yellow', ico:'🟡', head:'Henüz veri yok',
+      desc:'Ürün Karlılığı ve Sabit Giderler modüllerinden veri girince dashboard otomatik dolar.',
+      pill:'Ürün eklemeye başla'
+    });
+  }
+
+  const alarmsEl = document.getElementById('alarms');
+  alarmsEl.innerHTML = '';
+  // sırala: kırmızı > sarı > yeşil
+  const order = {red:0, yellow:1, green:2};
+  alarms.sort((a,b)=>order[a.type]-order[b.type]);
+  alarms.forEach(a => {
+    alarmsEl.innerHTML += `<div class="alarm ${a.type}">
+      <span class="ico">${a.ico}</span>
+      <div class="body">
+        <div class="head">${a.head}</div>
+        <div class="desc">${a.desc}</div>
+        ${a.pill ? `<span class="pill">💡 ${a.pill}</span>` : ''}
+      </div>
+    </div>`;
+  });
+}
+
+loadDashboard();
+</script>
+</body>
+</html>
