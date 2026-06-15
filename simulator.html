@@ -66,6 +66,21 @@ input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:22px;heigh
 .total-impact .val.pos{color:#6EE7B7;}
 .total-impact .val.neg{color:#FCA5A5;}
 .note-saved{background:#EFF6FF;border:1px solid #BFDBFE;color:#1d4ed8;font-size:11px;padding:8px 12px;border-radius:8px;margin-top:8px;}
+.mini-dash{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-top:12px;}
+.mini-col{border-radius:10px;padding:16px;}
+.mini-col.now{background:#F8FAFC;border:1px solid #E2E8F0;}
+.mini-col.after{background:#EFF6FF;border:1px solid #BFDBFE;}
+.mini-col h4{font-size:11px;text-transform:uppercase;letter-spacing:0.5px;margin-bottom:12px;color:#64748B;}
+.mini-col.after h4{color:#1d4ed8;}
+.mini-row{display:flex;justify-content:space-between;font-size:13px;padding:7px 0;border-bottom:1px solid rgba(0,0,0,0.05);}
+.mini-row .lbl{color:#64748B;}
+.mini-row .val{font-weight:700;color:#0F1F3D;}
+.mini-row.net{border-bottom:none;padding-top:10px;margin-top:4px;border-top:2px solid rgba(0,0,0,0.08);}
+.mini-row.net .val.pos{color:#059669;}
+.mini-row.net .val.neg{color:#DC2626;}
+.dash-delta{text-align:center;font-size:13px;font-weight:700;padding:12px;border-radius:10px;margin-top:12px;}
+.dash-delta.pos{background:#F0FDF4;color:#059669;border:1px solid #BBF7D0;}
+.dash-delta.neg{background:#FEF2F2;color:#DC2626;border:1px solid #FECACA;}
 </style>
 </head>
 <body>
@@ -140,6 +155,29 @@ input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:22px;heigh
         <span class="lbl">Tüm senaryoların toplam aylık etkisi</span>
         <span class="val" id="totalImpactVal">€0</span>
       </div>
+    </div>
+
+    <!-- Mini Dashboard -->
+    <div class="card" id="miniDashCard" style="display:none;">
+      <div class="card-title">📊 Gelecek Ay Tahmini — Bu Değişikliklerle</div>
+      <div class="mini-dash">
+        <div class="mini-col now">
+          <h4>Değişiklik yokken</h4>
+          <div class="mini-row"><span class="lbl">Tahmini gelir</span><span class="val" id="md_rev_now">—</span></div>
+          <div class="mini-row"><span class="lbl">Değişken gider</span><span class="val" id="md_var_now">—</span></div>
+          <div class="mini-row"><span class="lbl">Sabit gider</span><span class="val" id="md_fix_now">—</span></div>
+          <div class="mini-row net"><span class="lbl">Net sonuç</span><span class="val" id="md_net_now">—</span></div>
+        </div>
+        <div class="mini-col after">
+          <h4>Senaryolar uygulanırsa</h4>
+          <div class="mini-row"><span class="lbl">Tahmini gelir</span><span class="val" id="md_rev_after">—</span></div>
+          <div class="mini-row"><span class="lbl">Değişken gider</span><span class="val" id="md_var_after">—</span></div>
+          <div class="mini-row"><span class="lbl">Sabit gider</span><span class="val" id="md_fix_after">—</span></div>
+          <div class="mini-row net"><span class="lbl">Net sonuç</span><span class="val" id="md_net_after">—</span></div>
+        </div>
+      </div>
+      <div class="dash-delta" id="dashDelta"></div>
+      <div style="font-size:11px;color:#94A3B8;margin-top:10px;">Gelir: ürünlerin gelecek ay tahmini adetleri × fiyat · Sabit gider: bu ayki sabit giderler</div>
     </div>
 
   <div class="card" id="emptyCard">
@@ -323,6 +361,7 @@ async function loadScenarios() {
   if (!data || data.length === 0) {
     list.innerHTML = '<div class="empty">Henüz senaryo eklenmedi. Yukarıdan ürün seçip değişiklik ekle.</div>';
     totalBox.style.display = 'none';
+    document.getElementById('miniDashCard').style.display = 'none';
     return;
   }
 
@@ -350,6 +389,78 @@ async function loadScenarios() {
   const valEl = document.getElementById('totalImpactVal');
   valEl.textContent = (total>=0?'+':'') + '€' + Math.round(total).toLocaleString('tr-TR');
   valEl.className = 'val ' + (total >= 0 ? 'pos' : 'neg');
+
+  // Mini dashboard'u güncelle
+  updateMiniDash(data);
+}
+
+// ====== MİNİ DASHBOARD ======
+async function updateMiniDash(scenarios) {
+  const card = document.getElementById('miniDashCard');
+  if (!scenarios || scenarios.length === 0) { card.style.display = 'none'; return; }
+  card.style.display = 'block';
+
+  // Tüm ürünler + sabit giderler
+  const { data: products } = await sb.from('products').select('*');
+  const now = new Date();
+  const mk = now.getFullYear() + '-' + String(now.getMonth()+1).padStart(2,'0');
+  const { data: costs } = await sb.from('fixed_costs').select('*').eq('month', mk);
+
+  const prods = products || [];
+  const totalFixed = (costs||[]).reduce((s,c)=>s+(parseFloat(c.monthly_equivalent)||0),0);
+
+  // Her ürün için: en son eklenen senaryosunu bul (varsa)
+  const latestScenario = {};
+  scenarios.forEach(s => {
+    if (!latestScenario[s.product_id]) latestScenario[s.product_id] = s; // zaten created_at desc sıralı
+  });
+
+  let revNow=0, varNow=0, revAfter=0, varAfter=0;
+
+  prods.forEach(p => {
+    const qty = p.next_month_qty || 0;
+    const price = p.sale_price || 0;
+    const cost = p.ingredient_cost || 0;
+
+    revNow += price * qty;
+    varNow += cost * qty;
+
+    // senaryo varsa yeni değerleri kullan
+    const sc = latestScenario[p.id];
+    const aPrice = sc ? parseFloat(sc.new_price) : price;
+    const aCost = sc ? parseFloat(sc.new_cost) : cost;
+    revAfter += aPrice * qty;
+    varAfter += aCost * qty;
+  });
+
+  const netNow = revNow - varNow - totalFixed;
+  const netAfter = revAfter - varAfter - totalFixed;
+  const diff = netAfter - netNow;
+
+  const f0 = n => '€' + Math.round(n).toLocaleString('tr-TR');
+
+  document.getElementById('md_rev_now').textContent = f0(revNow);
+  document.getElementById('md_var_now').textContent = f0(varNow);
+  document.getElementById('md_fix_now').textContent = f0(totalFixed);
+  document.getElementById('md_rev_after').textContent = f0(revAfter);
+  document.getElementById('md_var_after').textContent = f0(varAfter);
+  document.getElementById('md_fix_after').textContent = f0(totalFixed);
+
+  const netNowEl = document.getElementById('md_net_now');
+  const netAfterEl = document.getElementById('md_net_after');
+  netNowEl.textContent = f0(netNow);
+  netNowEl.className = 'val ' + (netNow>=0?'pos':'neg');
+  netAfterEl.textContent = f0(netAfter);
+  netAfterEl.className = 'val ' + (netAfter>=0?'pos':'neg');
+
+  const deltaEl = document.getElementById('dashDelta');
+  if (diff >= 0) {
+    deltaEl.className = 'dash-delta pos';
+    deltaEl.textContent = `✓ Bu değişikliklerle net sonucun aylık ${f0(diff)} iyileşir`;
+  } else {
+    deltaEl.className = 'dash-delta neg';
+    deltaEl.textContent = `⚠ Bu değişikliklerle net sonucun aylık ${f0(Math.abs(diff))} kötüleşir`;
+  }
 }
 
 async function deleteScenario(id) {
