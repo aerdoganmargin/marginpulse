@@ -49,6 +49,23 @@ input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:22px;heigh
 .insight .head{font-weight:700;color:#1E293B;margin-bottom:2px;}
 .insight .desc{color:#64748B;font-size:12px;}
 .empty{text-align:center;color:#94A3B8;font-size:13px;padding:1.5rem;}
+.btn-add-scenario{background:#2563EB;color:#fff;border:none;border-radius:8px;padding:11px 20px;font-size:13px;font-weight:600;cursor:pointer;margin-top:1rem;width:100%;}
+.btn-add-scenario:hover{background:#1d4ed8;}
+.scenario-item{display:flex;align-items:center;justify-content:space-between;padding:11px 14px;border:1px solid #E2E8F0;border-radius:8px;margin-bottom:8px;font-size:13px;}
+.scenario-item .info{flex:1;}
+.scenario-item .name{font-weight:700;color:#1E293B;}
+.scenario-item .detail{font-size:11px;color:#64748B;margin-top:2px;}
+.scenario-item .impact{font-weight:700;font-size:13px;margin-right:10px;}
+.impact.pos{color:#059669;}
+.impact.neg{color:#DC2626;}
+.scenario-item .del{background:none;border:none;color:#CBD5E1;cursor:pointer;font-size:16px;}
+.scenario-item .del:hover{color:#EF4444;}
+.total-impact{background:#0F1F3D;border-radius:10px;padding:18px 20px;color:#fff;display:flex;justify-content:space-between;align-items:center;margin-top:12px;}
+.total-impact .lbl{font-size:12px;color:#93B4D4;}
+.total-impact .val{font-size:26px;font-weight:700;}
+.total-impact .val.pos{color:#6EE7B7;}
+.total-impact .val.neg{color:#FCA5A5;}
+.note-saved{background:#EFF6FF;border:1px solid #BFDBFE;color:#1d4ed8;font-size:11px;padding:8px 12px;border-radius:8px;margin-top:8px;}
 </style>
 </head>
 <body>
@@ -111,8 +128,19 @@ input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:22px;heigh
       </div>
 
       <div class="insight" id="insight"></div>
+
+      <button class="btn-add-scenario" onclick="addScenario()">+ Bu değişikliği senaryoya ekle</button>
     </div>
-  </div>
+
+    <!-- Biriken senaryolar -->
+    <div class="card">
+      <div class="card-title">🧪 Senaryo Planı <span style="font-weight:400;color:#94A3B8;font-size:11px;">— gerçek fiyatların değişmez, sadece "ya şöyle olsaydı?" planı</span></div>
+      <div id="scenarioList"><div class="empty">Henüz senaryo eklenmedi. Yukarıdan ürün seçip değişiklik ekle.</div></div>
+      <div class="total-impact" id="totalImpact" style="display:none;">
+        <span class="lbl">Tüm senaryoların toplam aylık etkisi</span>
+        <span class="val" id="totalImpactVal">€0</span>
+      </div>
+    </div>
 
   <div class="card" id="emptyCard">
     <div class="empty">Simüle etmek için bir ürün seç. Ürün yoksa önce Ürün Karlılığı modülünden ekle.</div>
@@ -248,13 +276,89 @@ function simulate() {
 function deltaTag(newVal, oldVal, inverse=false) {
   if (Math.abs(newVal - oldVal) < 0.01) return '';
   const up = newVal > oldVal;
-  // inverse: maliyet için artış kötü (kırmızı)
   const good = inverse ? !up : up;
   const arrow = up ? '▲' : '▼';
   return `<span class="delta ${good?'up':'down'}">${arrow}</span>`;
 }
 
+// ====== SENARYO EKLE ======
+async function addScenario() {
+  if (!currentProduct) return;
+  const p = currentProduct;
+  const pct = parseInt(document.getElementById('slider').value);
+  if (pct === 0) { alert('Önce bir değişiklik yap (kaydırıcıyı oynat).'); return; }
+
+  const basePrice = p.sale_price || 0;
+  const baseCost = p.ingredient_cost || 0;
+  const qty = p.last_month_qty || 0;
+
+  let newPrice = basePrice, newCost = baseCost;
+  if (scenario === 'price') newPrice = basePrice * (1 + pct/100);
+  else newCost = baseCost * (1 + pct/100);
+
+  const baseMonthly = (basePrice - baseCost) * qty;
+  const newMonthly = (newPrice - newCost) * qty;
+  const impact = newMonthly - baseMonthly;
+
+  const { error } = await sb.from('scenarios').insert([{
+    product_id: p.id,
+    product_name: p.name,
+    scenario_type: scenario,
+    change_pct: pct,
+    old_price: basePrice, new_price: newPrice,
+    old_cost: baseCost, new_cost: newCost,
+    monthly_impact: impact
+  }]);
+
+  if (error) { alert('Eklenemedi: ' + error.message); console.error(error); }
+  else { loadScenarios(); }
+}
+
+// ====== SENARYOLARI YÜKLE ======
+async function loadScenarios() {
+  const { data } = await sb.from('scenarios').select('*').order('created_at', {ascending:false});
+  const list = document.getElementById('scenarioList');
+  const totalBox = document.getElementById('totalImpact');
+
+  if (!data || data.length === 0) {
+    list.innerHTML = '<div class="empty">Henüz senaryo eklenmedi. Yukarıdan ürün seçip değişiklik ekle.</div>';
+    totalBox.style.display = 'none';
+    return;
+  }
+
+  list.innerHTML = '';
+  let total = 0;
+  data.forEach(s => {
+    total += parseFloat(s.monthly_impact) || 0;
+    const typeLabel = s.scenario_type === 'price' ? 'Fiyat' : 'Maliyet';
+    const sign = s.change_pct >= 0 ? '+' : '';
+    const impact = parseFloat(s.monthly_impact) || 0;
+    const impactCls = impact >= 0 ? 'pos' : 'neg';
+    const impactSign = impact >= 0 ? '+' : '';
+
+    list.innerHTML += `<div class="scenario-item">
+      <div class="info">
+        <div class="name">${s.product_name}</div>
+        <div class="detail">${typeLabel} ${sign}%${s.change_pct} · €${(s.old_price||0).toFixed(2)}→€${(s.new_price||0).toFixed(2)}${s.scenario_type==='cost'?' (maliyet €'+(s.old_cost||0).toFixed(2)+'→€'+(s.new_cost||0).toFixed(2)+')':''}</div>
+      </div>
+      <span class="impact ${impactCls}">${impactSign}€${Math.round(impact)}/ay</span>
+      <button class="del" onclick="deleteScenario('${s.id}')">×</button>
+    </div>`;
+  });
+
+  totalBox.style.display = 'flex';
+  const valEl = document.getElementById('totalImpactVal');
+  valEl.textContent = (total>=0?'+':'') + '€' + Math.round(total).toLocaleString('tr-TR');
+  valEl.className = 'val ' + (total >= 0 ? 'pos' : 'neg');
+}
+
+async function deleteScenario(id) {
+  await sb.from('scenarios').delete().eq('id', id);
+  loadScenarios();
+}
+
 loadProducts();
+loadScenarios();
 </script>
 </body>
 </html>
