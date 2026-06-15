@@ -144,7 +144,8 @@ input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:22px;heigh
 
       <div class="insight" id="insight"></div>
 
-      <button class="btn-add-scenario" onclick="addScenario()">+ Bu değişikliği senaryoya ekle</button>
+      <button class="btn-add-scenario" id="addScenarioBtn" onclick="addScenario()">+ Bu değişikliği senaryoya ekle</button>
+      <button class="btn-add-scenario" id="editCancelBtn" onclick="cancelEdit()" style="display:none;background:#E2E8F0;color:#475569;margin-top:8px;">İptal et</button>
     </div>
   </div>
 
@@ -190,6 +191,7 @@ const sb = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 let allProducts = [];
 let currentProduct = null;
 let scenario = 'price';
+let editingScenarioId = null;
 
 function eur(n){ return '€' + n.toLocaleString('tr-TR',{minimumFractionDigits:2,maximumFractionDigits:2}); }
 function eur0(n){ return '€' + Math.round(n).toLocaleString('tr-TR'); }
@@ -333,7 +335,7 @@ async function addScenario() {
   const newMonthly = (newPrice - newCost) * qty;
   const impact = newMonthly - baseMonthly;
 
-  const { error } = await sb.from('scenarios').insert([{
+  const payload = {
     product_id: p.id,
     product_name: p.name,
     scenario_type: scenario,
@@ -341,10 +343,52 @@ async function addScenario() {
     old_price: basePrice, new_price: newPrice,
     old_cost: baseCost, new_cost: newCost,
     monthly_impact: impact
-  }]);
+  };
 
-  if (error) { alert('Eklenemedi: ' + error.message); console.error(error); }
-  else { loadScenarios(); }
+  let error;
+  if (editingScenarioId) {
+    ({ error } = await sb.from('scenarios').update(payload).eq('id', editingScenarioId));
+  } else {
+    ({ error } = await sb.from('scenarios').insert([payload]));
+  }
+
+  if (error) { alert('Kaydedilemedi: ' + error.message); console.error(error); }
+  else {
+    cancelEdit();
+    loadScenarios();
+  }
+}
+
+// ====== SENARYOYU DÜZENLEMEYE YÜKLE ======
+function editScenario(id) {
+  const id2 = id;
+  sb.from('scenarios').select('*').eq('id', id2).single().then(({data: s}) => {
+    if (!s) return;
+    // Ürünü seç
+    currentProduct = allProducts.find(p => p.id === s.product_id) || null;
+    if (!currentProduct) { alert('Bu senaryonun ürünü bulunamadı (silinmiş olabilir).'); return; }
+    document.getElementById('productSelect').value = s.product_id;
+    document.getElementById('simArea').style.display = 'block';
+    // Sekmeyi ayarla
+    scenario = s.scenario_type;
+    document.querySelectorAll('.tab').forEach(t => t.classList.toggle('active', t.dataset.scenario===scenario));
+    document.getElementById('sliderTitle').textContent =
+      scenario==='price' ? 'Satış fiyatı değişimi' : 'Hammadde maliyeti değişimi';
+    // Yüzdeyi ayarla
+    document.getElementById('slider').value = s.change_pct;
+    // Düzenleme moduna geç
+    editingScenarioId = id2;
+    document.getElementById('addScenarioBtn').textContent = '✓ Senaryoyu güncelle';
+    document.getElementById('editCancelBtn').style.display = 'inline-block';
+    simulate();
+    window.scrollTo({top:0, behavior:'smooth'});
+  });
+}
+
+function cancelEdit() {
+  editingScenarioId = null;
+  document.getElementById('addScenarioBtn').textContent = '+ Bu değişikliği senaryoya ekle';
+  document.getElementById('editCancelBtn').style.display = 'none';
 }
 
 // ====== SENARYOLARI YÜKLE ======
@@ -376,7 +420,8 @@ async function loadScenarios() {
         <div class="detail">${typeLabel} ${sign}%${s.change_pct} · €${(s.old_price||0).toFixed(2)}→€${(s.new_price||0).toFixed(2)}${s.scenario_type==='cost'?' (maliyet €'+(s.old_cost||0).toFixed(2)+'→€'+(s.new_cost||0).toFixed(2)+')':''}</div>
       </div>
       <span class="impact ${impactCls}">${impactSign}€${Math.round(impact)}/ay</span>
-      <button class="del" onclick="deleteScenario('${s.id}')">×</button>
+      <button class="del" onclick="editScenario('${s.id}')" title="Düzenle" style="color:#94A3B8;">✎</button>
+      <button class="del" onclick="deleteScenario('${s.id}')" title="Sil">×</button>
     </div>`;
   });
 
