@@ -1,0 +1,260 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>MarginPulse — Fiyat Simülatörü</title>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<style>
+*{box-sizing:border-box;margin:0;padding:0;}
+body{font-family:'Segoe UI',system-ui,sans-serif;background:#F0F4F8;display:flex;min-height:100vh;}
+.sidebar{width:200px;background:#0F1F3D;padding:1.5rem 1rem;display:flex;flex-direction:column;gap:4px;flex-shrink:0;}
+.logo{font-size:18px;font-weight:700;color:#EFF6FF;margin-bottom:1.75rem;padding:0 0.5rem;}
+.logo span{color:#2563EB;}
+.nav{font-size:12.5px;color:#93B4D4;padding:8px 10px;border-radius:8px;display:flex;align-items:center;gap:8px;cursor:pointer;text-decoration:none;}
+.nav.active{background:rgba(37,99,235,0.2);color:#EFF6FF;font-weight:600;}
+.dot{width:6px;height:6px;border-radius:50%;background:currentColor;flex-shrink:0;}
+.main{flex:1;padding:1.5rem;max-width:920px;}
+.title{font-size:20px;font-weight:700;color:#0F1F3D;margin-bottom:0.35rem;}
+.subtitle{font-size:12px;color:#94A3B8;margin-bottom:1.25rem;}
+.card{background:#fff;border:1px solid #E2E8F0;border-radius:12px;padding:1.25rem;margin-bottom:1rem;}
+.card-title{font-size:13px;font-weight:700;color:#1E293B;margin-bottom:1rem;}
+.select-row{display:flex;gap:10px;align-items:center;}
+.select-row select{flex:1;padding:10px 12px;border:1px solid #E2E8F0;border-radius:8px;font-size:13px;}
+.tabs{display:flex;gap:8px;margin-bottom:1rem;}
+.tab{flex:1;text-align:center;padding:10px;border-radius:8px;font-size:12.5px;font-weight:600;cursor:pointer;border:1px solid #E2E8F0;background:#fff;color:#64748B;}
+.tab.active{background:#0F1F3D;color:#fff;border-color:#0F1F3D;}
+.slider-box{margin:1.25rem 0;}
+.slider-label{display:flex;justify-content:space-between;font-size:12px;color:#64748B;margin-bottom:8px;}
+.slider-label strong{color:#0F1F3D;font-size:14px;}
+input[type=range]{width:100%;height:6px;border-radius:3px;background:#E2E8F0;outline:none;-webkit-appearance:none;}
+input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:22px;height:22px;border-radius:50%;background:#2563EB;cursor:pointer;border:3px solid #fff;box-shadow:0 1px 4px rgba(0,0,0,0.2);}
+.compare{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-top:1rem;}
+.col{border-radius:10px;padding:16px;}
+.col.before{background:#F8FAFC;border:1px solid #E2E8F0;}
+.col.after{background:#EFF6FF;border:1px solid #BFDBFE;}
+.col h4{font-size:11px;text-transform:uppercase;letter-spacing:0.5px;margin-bottom:12px;color:#64748B;}
+.col.after h4{color:#1d4ed8;}
+.metric{display:flex;justify-content:space-between;font-size:13px;padding:6px 0;border-bottom:1px solid rgba(0,0,0,0.05);}
+.metric .lbl{color:#64748B;}
+.metric .val{font-weight:700;color:#0F1F3D;}
+.delta{font-size:11px;font-weight:600;padding:1px 7px;border-radius:20px;margin-left:6px;}
+.delta.up{background:#D1FAE5;color:#059669;}
+.delta.down{background:#FEE2E2;color:#DC2626;}
+.insight{border-radius:10px;padding:14px 16px;margin-top:1rem;font-size:13px;display:flex;gap:10px;align-items:flex-start;}
+.insight.green{background:#F0FDF4;border:1px solid #BBF7D0;}
+.insight.yellow{background:#FFFBEB;border:1px solid #FDE68A;}
+.insight.red{background:#FEF2F2;border:1px solid #FECACA;}
+.insight .ico{font-size:18px;}
+.insight .head{font-weight:700;color:#1E293B;margin-bottom:2px;}
+.insight .desc{color:#64748B;font-size:12px;}
+.empty{text-align:center;color:#94A3B8;font-size:13px;padding:1.5rem;}
+</style>
+</head>
+<body>
+<div class="sidebar">
+  <div class="logo">Margin<span>Pulse</span></div>
+  <a class="nav" href="urunler.html"><span class="dot"></span>Ürün karlılığı</a>
+  <a class="nav" href="giderler.html"><span class="dot"></span>Sabit giderler</a>
+  <a class="nav" href="dashboard.html"><span class="dot"></span>Dashboard</a>
+  <div class="nav active"><span class="dot"></span>Simülatör</div>
+</div>
+
+<div class="main">
+  <div class="title">Fiyat Simülatörü</div>
+  <div class="subtitle">"Ne olur?" senaryolarını test et — fiyat veya maliyet değiştir, sonucu anında gör.</div>
+
+  <!-- Ürün seçimi -->
+  <div class="card">
+    <div class="card-title">Ürün seç</div>
+    <div class="select-row">
+      <select id="productSelect" onchange="onProductChange()"><option value="">Yükleniyor…</option></select>
+    </div>
+  </div>
+
+  <!-- Simülasyon -->
+  <div id="simArea" style="display:none;">
+    <div class="card">
+      <div class="tabs">
+        <div class="tab active" data-scenario="price" onclick="switchScenario('price')">📈 Satış fiyatı değiştir</div>
+        <div class="tab" data-scenario="cost" onclick="switchScenario('cost')">📦 Hammadde maliyeti değiştir</div>
+      </div>
+
+      <div class="slider-box">
+        <div class="slider-label">
+          <span id="sliderTitle">Satış fiyatı değişimi</span>
+          <strong id="sliderValue">%0</strong>
+        </div>
+        <input type="range" id="slider" min="-30" max="50" value="0" step="1" oninput="simulate()" />
+        <div style="display:flex;justify-content:space-between;font-size:10px;color:#CBD5E1;margin-top:4px;">
+          <span>-%30</span><span>0</span><span>+%50</span>
+        </div>
+      </div>
+
+      <div class="compare">
+        <div class="col before">
+          <h4>Şu an</h4>
+          <div class="metric"><span class="lbl">Satış fiyatı</span><span class="val" id="b_price">—</span></div>
+          <div class="metric"><span class="lbl">Birim maliyet</span><span class="val" id="b_cost">—</span></div>
+          <div class="metric"><span class="lbl">Birim kâr</span><span class="val" id="b_profit">—</span></div>
+          <div class="metric"><span class="lbl">Brüt marj</span><span class="val" id="b_margin">—</span></div>
+          <div class="metric"><span class="lbl">Aylık kâr (tahmini)</span><span class="val" id="b_monthly">—</span></div>
+        </div>
+        <div class="col after">
+          <h4>Senaryo sonrası</h4>
+          <div class="metric"><span class="lbl">Satış fiyatı</span><span class="val" id="a_price">—</span></div>
+          <div class="metric"><span class="lbl">Birim maliyet</span><span class="val" id="a_cost">—</span></div>
+          <div class="metric"><span class="lbl">Birim kâr</span><span class="val" id="a_profit">—</span></div>
+          <div class="metric"><span class="lbl">Brüt marj</span><span class="val" id="a_margin">—</span></div>
+          <div class="metric"><span class="lbl">Aylık kâr (tahmini)</span><span class="val" id="a_monthly">—</span></div>
+        </div>
+      </div>
+
+      <div class="insight" id="insight"></div>
+    </div>
+  </div>
+
+  <div class="card" id="emptyCard">
+    <div class="empty">Simüle etmek için bir ürün seç. Ürün yoksa önce Ürün Karlılığı modülünden ekle.</div>
+  </div>
+</div>
+
+<script>
+const SUPABASE_URL = 'https://dmklhurvzahoiaklsnwo.supabase.co';
+const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImRta2xodXJ2emFob2lha2xzbndvIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODAxNjQxNjMsImV4cCI6MjA5NTc0MDE2M30.e-jJJ_Ru3pDKBnK_cw63pHhl_TN44LXAIC7P8w9mSns';
+const sb = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+
+let allProducts = [];
+let currentProduct = null;
+let scenario = 'price';
+
+function eur(n){ return '€' + n.toLocaleString('tr-TR',{minimumFractionDigits:2,maximumFractionDigits:2}); }
+function eur0(n){ return '€' + Math.round(n).toLocaleString('tr-TR'); }
+
+async function loadProducts() {
+  const { data } = await sb.from('products').select('*').order('name');
+  allProducts = data || [];
+  const sel = document.getElementById('productSelect');
+  if (allProducts.length === 0) {
+    sel.innerHTML = '<option value="">Henüz ürün yok</option>';
+    return;
+  }
+  sel.innerHTML = '<option value="">— Ürün seç —</option>';
+  allProducts.forEach(p => {
+    sel.innerHTML += `<option value="${p.id}">${p.name} (€${(p.sale_price||0).toFixed(2)})</option>`;
+  });
+}
+
+function onProductChange() {
+  const id = document.getElementById('productSelect').value;
+  currentProduct = allProducts.find(p => p.id === id) || null;
+  if (currentProduct) {
+    document.getElementById('simArea').style.display = 'block';
+    document.getElementById('emptyCard').style.display = 'none';
+    document.getElementById('slider').value = 0;
+    simulate();
+  } else {
+    document.getElementById('simArea').style.display = 'none';
+    document.getElementById('emptyCard').style.display = 'block';
+  }
+}
+
+function switchScenario(s) {
+  scenario = s;
+  document.querySelectorAll('.tab').forEach(t => t.classList.toggle('active', t.dataset.scenario===s));
+  document.getElementById('sliderTitle').textContent =
+    s==='price' ? 'Satış fiyatı değişimi' : 'Hammadde maliyeti değişimi';
+  document.getElementById('slider').value = 0;
+  simulate();
+}
+
+function simulate() {
+  if (!currentProduct) return;
+  const p = currentProduct;
+  const basePrice = p.sale_price || 0;
+  const baseCost = p.ingredient_cost || 0;
+  const qty = p.last_month_qty || 0;
+  const pct = parseInt(document.getElementById('slider').value);
+
+  document.getElementById('sliderValue').textContent = (pct>=0?'+':'') + '%' + pct;
+
+  // Senaryoya göre yeni değerler
+  let newPrice = basePrice, newCost = baseCost;
+  if (scenario === 'price') newPrice = basePrice * (1 + pct/100);
+  else newCost = baseCost * (1 + pct/100);
+
+  // ŞU AN
+  const baseProfit = basePrice - baseCost;
+  const baseMargin = basePrice>0 ? (baseProfit/basePrice*100) : 0;
+  const baseMonthly = baseProfit * qty;
+
+  document.getElementById('b_price').textContent = eur(basePrice);
+  document.getElementById('b_cost').textContent = eur(baseCost);
+  document.getElementById('b_profit').textContent = eur(baseProfit);
+  document.getElementById('b_margin').textContent = '%' + baseMargin.toFixed(1);
+  document.getElementById('b_monthly').textContent = eur0(baseMonthly);
+
+  // SENARYO SONRASI
+  const newProfit = newPrice - newCost;
+  const newMargin = newPrice>0 ? (newProfit/newPrice*100) : 0;
+  const newMonthly = newProfit * qty;
+
+  document.getElementById('a_price').innerHTML = eur(newPrice) + deltaTag(newPrice, basePrice);
+  document.getElementById('a_cost').innerHTML = eur(newCost) + deltaTag(newCost, baseCost, true);
+  document.getElementById('a_profit').innerHTML = eur(newProfit) + deltaTag(newProfit, baseProfit);
+  document.getElementById('a_margin').textContent = '%' + newMargin.toFixed(1);
+  document.getElementById('a_monthly').innerHTML = eur0(newMonthly) + deltaTag(newMonthly, baseMonthly);
+
+  // INSIGHT
+  const insight = document.getElementById('insight');
+  const monthlyDiff = newMonthly - baseMonthly;
+  let cls, ico, head, desc;
+
+  if (newProfit < 0) {
+    cls='red'; ico='🔴';
+    head='Bu senaryoda zarar ediyorsun';
+    desc=`Birim başına ${eur(Math.abs(newProfit))} zarar. Bu fiyat/maliyet sürdürülebilir değil.`;
+  } else if (newMargin < 20) {
+    cls='yellow'; ico='🟡';
+    head=`Marj %${newMargin.toFixed(0)}'a düşüyor — riskli bölge`;
+    desc=`Aylık kâr ${monthlyDiff>=0?'+':''}${eur0(monthlyDiff)} değişir. Marj %20 altında dalgalanmalara açık.`;
+  } else {
+    cls='green'; ico='🟢';
+    if (monthlyDiff >= 0) {
+      head=`Aylık kârın ${eur0(monthlyDiff)} artıyor`;
+      desc=`Yeni marj %${newMargin.toFixed(0)}. Sağlıklı bölgede.`;
+    } else {
+      head=`Aylık kârın ${eur0(Math.abs(monthlyDiff))} azalıyor ama hâlâ kârdasın`;
+      desc=`Yeni marj %${newMargin.toFixed(0)}. ${scenario==='price'?'Fiyat düşüşü':'Maliyet artışı'} satışları artırırsa telafi edilebilir.`;
+    }
+  }
+
+  // Break-even bilgisi
+  let beNote = '';
+  if (scenario === 'cost' && baseProfit > 0) {
+    const maxCost = basePrice; // fiyata eşit olunca kâr sıfır
+    const maxCostPct = ((maxCost - baseCost)/baseCost*100);
+    beNote = ` Maliyet en fazla %${maxCostPct.toFixed(0)} artarsa başabaş noktasına gelirsin.`;
+  } else if (scenario === 'price' && baseCost > 0) {
+    const minPrice = baseCost;
+    const minPricePct = ((minPrice - basePrice)/basePrice*100);
+    beNote = ` Fiyatı %${Math.abs(minPricePct).toFixed(0)} düşürürsen başabaş noktasına inersin.`;
+  }
+
+  insight.className = 'insight ' + cls;
+  insight.innerHTML = `<span class="ico">${ico}</span><div><div class="head">${head}</div><div class="desc">${desc}${beNote}</div></div>`;
+}
+
+function deltaTag(newVal, oldVal, inverse=false) {
+  if (Math.abs(newVal - oldVal) < 0.01) return '';
+  const up = newVal > oldVal;
+  // inverse: maliyet için artış kötü (kırmızı)
+  const good = inverse ? !up : up;
+  const arrow = up ? '▲' : '▼';
+  return `<span class="delta ${good?'up':'down'}">${arrow}</span>`;
+}
+
+loadProducts();
+</script>
+</body>
+</html>
