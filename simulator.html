@@ -146,42 +146,39 @@ input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:22px;heigh
 
       <button class="btn-add-scenario" onclick="addScenario()">+ Bu değişikliği senaryoya ekle</button>
     </div>
+  </div>
 
-    <!-- Biriken senaryolar -->
-    <div class="card">
-      <div class="card-title">🧪 Senaryo Planı <span style="font-weight:400;color:#94A3B8;font-size:11px;">— gerçek fiyatların değişmez, sadece "ya şöyle olsaydı?" planı</span></div>
-      <div id="scenarioList"><div class="empty">Henüz senaryo eklenmedi. Yukarıdan ürün seçip değişiklik ekle.</div></div>
-      <div class="total-impact" id="totalImpact" style="display:none;">
-        <span class="lbl">Tüm senaryoların toplam aylık etkisi</span>
-        <span class="val" id="totalImpactVal">€0</span>
+  <!-- Biriken senaryolar (her zaman görünür) -->
+  <div class="card">
+    <div class="card-title">🧪 Senaryo Planı <span style="font-weight:400;color:#94A3B8;font-size:11px;">— gerçek fiyatların değişmez, sadece "ya şöyle olsaydı?" planı</span></div>
+    <div id="scenarioList"><div class="empty">Henüz senaryo eklenmedi. Yukarıdan ürün seçip değişiklik ekle.</div></div>
+    <div class="total-impact" id="totalImpact" style="display:none;">
+      <span class="lbl">Tüm senaryoların toplam aylık etkisi</span>
+      <span class="val" id="totalImpactVal">€0</span>
+    </div>
+  </div>
+
+  <!-- Mini Dashboard (her zaman görünür) -->
+  <div class="card" id="miniDashCard" style="display:none;">
+    <div class="card-title">📊 Gelecek Ay Tahmini — Bu Değişikliklerle</div>
+    <div class="mini-dash">
+      <div class="mini-col now">
+        <h4>Değişiklik yokken</h4>
+        <div class="mini-row"><span class="lbl">Tahmini gelir</span><span class="val" id="md_rev_now">—</span></div>
+        <div class="mini-row"><span class="lbl">Değişken gider</span><span class="val" id="md_var_now">—</span></div>
+        <div class="mini-row"><span class="lbl">Sabit gider</span><span class="val" id="md_fix_now">—</span></div>
+        <div class="mini-row net"><span class="lbl">Net sonuç</span><span class="val" id="md_net_now">—</span></div>
+      </div>
+      <div class="mini-col after">
+        <h4>Senaryolar uygulanırsa</h4>
+        <div class="mini-row"><span class="lbl">Tahmini gelir</span><span class="val" id="md_rev_after">—</span></div>
+        <div class="mini-row"><span class="lbl">Değişken gider</span><span class="val" id="md_var_after">—</span></div>
+        <div class="mini-row"><span class="lbl">Sabit gider</span><span class="val" id="md_fix_after">—</span></div>
+        <div class="mini-row net"><span class="lbl">Net sonuç</span><span class="val" id="md_net_after">—</span></div>
       </div>
     </div>
-
-    <!-- Mini Dashboard -->
-    <div class="card" id="miniDashCard" style="display:none;">
-      <div class="card-title">📊 Gelecek Ay Tahmini — Bu Değişikliklerle</div>
-      <div class="mini-dash">
-        <div class="mini-col now">
-          <h4>Değişiklik yokken</h4>
-          <div class="mini-row"><span class="lbl">Tahmini gelir</span><span class="val" id="md_rev_now">—</span></div>
-          <div class="mini-row"><span class="lbl">Değişken gider</span><span class="val" id="md_var_now">—</span></div>
-          <div class="mini-row"><span class="lbl">Sabit gider</span><span class="val" id="md_fix_now">—</span></div>
-          <div class="mini-row net"><span class="lbl">Net sonuç</span><span class="val" id="md_net_now">—</span></div>
-        </div>
-        <div class="mini-col after">
-          <h4>Senaryolar uygulanırsa</h4>
-          <div class="mini-row"><span class="lbl">Tahmini gelir</span><span class="val" id="md_rev_after">—</span></div>
-          <div class="mini-row"><span class="lbl">Değişken gider</span><span class="val" id="md_var_after">—</span></div>
-          <div class="mini-row"><span class="lbl">Sabit gider</span><span class="val" id="md_fix_after">—</span></div>
-          <div class="mini-row net"><span class="lbl">Net sonuç</span><span class="val" id="md_net_after">—</span></div>
-        </div>
-      </div>
-      <div class="dash-delta" id="dashDelta"></div>
-      <div style="font-size:11px;color:#94A3B8;margin-top:10px;">Gelir: ürünlerin gelecek ay tahmini adetleri × fiyat · Sabit gider: bu ayki sabit giderler</div>
-    </div>
-
-  <div class="card" id="emptyCard">
-    <div class="empty">Simüle etmek için bir ürün seç. Ürün yoksa önce Ürün Karlılığı modülünden ekle.</div>
+    <div class="dash-delta" id="dashDelta"></div>
+    <div style="font-size:11px;color:#94A3B8;margin-top:10px;">Gelir: ürünlerin gelecek ay tahmini adetleri × fiyat · Sabit gider: bu ayki sabit giderler</div>
   </div>
 </div>
 
@@ -216,12 +213,10 @@ function onProductChange() {
   currentProduct = allProducts.find(p => p.id === id) || null;
   if (currentProduct) {
     document.getElementById('simArea').style.display = 'block';
-    document.getElementById('emptyCard').style.display = 'none';
     document.getElementById('slider').value = 0;
     simulate();
   } else {
     document.getElementById('simArea').style.display = 'none';
-    document.getElementById('emptyCard').style.display = 'block';
   }
 }
 
