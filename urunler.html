@@ -79,6 +79,7 @@ td input,td select{width:100%;padding:5px 8px;border:1px solid #E2E8F0;border-ra
   <a class="nav" href="giderler.html" style="text-decoration:none;"><span class="dot"></span>Sabit giderler</a>
   <a class="nav" href="dashboard.html" style="text-decoration:none;"><span class="dot"></span>Dashboard</a>
   <a class="nav" href="simulator.html" style="text-decoration:none;"><span class="dot"></span>Simülatör</a>
+  <div style="margin-top:auto;padding-top:1rem;"><div class="nav" onclick="logout()" style="cursor:pointer;color:#F87171;"><span class="dot"></span>Çıkış yap</div></div>
 </div>
 
 <div class="main">
@@ -165,6 +166,24 @@ td input,td select{width:100%;padding:5px 8px;border:1px solid #E2E8F0;border-ra
 const SUPABASE_URL = 'https://dmklhurvzahoiaklsnwo.supabase.co';
 const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImRta2xodXJ2emFob2lha2xzbndvIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODAxNjQxNjMsImV4cCI6MjA5NTc0MDE2M30.e-jJJ_Ru3pDKBnK_cw63pHhl_TN44LXAIC7P8w9mSns';
 const sb = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+// ====== GİRİŞ KONTROLÜ ======
+let currentUser = null;
+(async () => {
+  const { data } = await sb.auth.getSession();
+  if (!data.session) { window.location.href = "login.html"; return; }
+  currentUser = data.session.user;
+})();
+async function requireUser() {
+  if (currentUser) return currentUser;
+  const { data } = await sb.auth.getSession();
+  if (!data.session) { window.location.href = "login.html"; return null; }
+  currentUser = data.session.user;
+  return currentUser;
+}
+async function logout() {
+  await sb.auth.signOut();
+  window.location.href = "login.html";
+}
 
 let selectedCategory = 'Et yemeği';
 let editingId = null; // düzenleme modunda ürün id'si
@@ -281,10 +300,14 @@ async function saveProduct() {
 
   setStatus('Kaydediliyor...', '#64748B');
 
+  const user = await requireUser();
+  if (!user) return;
+
   let error;
   if (editingId) {
     ({ error } = await sb.from('products').update(payload).eq('id', editingId));
   } else {
+    payload.user_id = user.id;
     ({ error } = await sb.from('products').insert([payload]));
   }
 

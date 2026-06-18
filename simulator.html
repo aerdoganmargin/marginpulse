@@ -189,6 +189,24 @@ input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:22px;heigh
 const SUPABASE_URL = 'https://dmklhurvzahoiaklsnwo.supabase.co';
 const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImRta2xodXJ2emFob2lha2xzbndvIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODAxNjQxNjMsImV4cCI6MjA5NTc0MDE2M30.e-jJJ_Ru3pDKBnK_cw63pHhl_TN44LXAIC7P8w9mSns';
 const sb = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+// ====== GİRİŞ KONTROLÜ ======
+let currentUser = null;
+(async () => {
+  const { data } = await sb.auth.getSession();
+  if (!data.session) { window.location.href = "login.html"; return; }
+  currentUser = data.session.user;
+})();
+async function requireUser() {
+  if (currentUser) return currentUser;
+  const { data } = await sb.auth.getSession();
+  if (!data.session) { window.location.href = "login.html"; return null; }
+  currentUser = data.session.user;
+  return currentUser;
+}
+async function logout() {
+  await sb.auth.signOut();
+  window.location.href = "login.html";
+}
 
 let allProducts = [];
 let currentProduct = null;
@@ -348,9 +366,12 @@ async function addScenario() {
   };
 
   let error;
+  const user = await requireUser();
+  if (!user) return;
   if (editingScenarioId) {
     ({ error } = await sb.from('scenarios').update(payload).eq('id', editingScenarioId));
   } else {
+    payload.user_id = user.id;
     ({ error } = await sb.from('scenarios').insert([payload]));
   }
 

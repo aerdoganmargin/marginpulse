@@ -4,7 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>MarginPulse</title>
-<meta http-equiv="refresh" content="0; url=urunler.html">
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <style>
 body{font-family:'Segoe UI',system-ui,sans-serif;background:#0F1F3D;color:#EFF6FF;display:flex;align-items:center;justify-content:center;height:100vh;margin:0;}
 .box{text-align:center;}
@@ -18,6 +18,13 @@ body{font-family:'Segoe UI',system-ui,sans-serif;background:#0F1F3D;color:#EFF6F
   <div class="logo">Margin<span>Pulse</span></div>
   <div class="sub">Yükleniyor…</div>
 </div>
-<script>window.location.href='urunler.html';</script>
+<script>
+const SUPABASE_URL = 'https://dmklhurvzahoiaklsnwo.supabase.co';
+const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImRta2xodXJ2emFob2lha2xzbndvIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODAxNjQxNjMsImV4cCI6MjA5NTc0MDE2M30.e-jJJ_Ru3pDKBnK_cw63pHhl_TN44LXAIC7P8w9mSns';
+const sb = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+sb.auth.getSession().then(({data}) => {
+  window.location.href = data.session ? 'urunler.html' : 'login.html';
+});
+</script>
 </body>
 </html>

@@ -62,6 +62,7 @@ td{padding:9px 8px 9px 0;border-bottom:1px solid #F1F5F9;color:#1E293B;}
   <a class="nav" href="giderler.html"><span class="dot"></span>Sabit giderler</a>
   <div class="nav active"><span class="dot"></span>Dashboard</div>
   <a class="nav" href="simulator.html" style="text-decoration:none;"><span class="dot"></span>Simülatör</a>
+  <div style="margin-top:auto;padding-top:1rem;"><div class="nav" onclick="logout()" style="cursor:pointer;color:#F87171;"><span class="dot"></span>Çıkış yap</div></div>
 </div>
 
 <div class="main">
@@ -114,6 +115,24 @@ td{padding:9px 8px 9px 0;border-bottom:1px solid #F1F5F9;color:#1E293B;}
 const SUPABASE_URL = 'https://dmklhurvzahoiaklsnwo.supabase.co';
 const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImRta2xodXJ2emFob2lha2xzbndvIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODAxNjQxNjMsImV4cCI6MjA5NTc0MDE2M30.e-jJJ_Ru3pDKBnK_cw63pHhl_TN44LXAIC7P8w9mSns';
 const sb = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+// ====== GİRİŞ KONTROLÜ ======
+let currentUser = null;
+(async () => {
+  const { data } = await sb.auth.getSession();
+  if (!data.session) { window.location.href = "login.html"; return; }
+  currentUser = data.session.user;
+})();
+async function requireUser() {
+  if (currentUser) return currentUser;
+  const { data } = await sb.auth.getSession();
+  if (!data.session) { window.location.href = "login.html"; return null; }
+  currentUser = data.session.user;
+  return currentUser;
+}
+async function logout() {
+  await sb.auth.signOut();
+  window.location.href = "login.html";
+}
 
 const MONTHS = ['Ocak','Şubat','Mart','Nisan','Mayıs','Haziran','Temmuz','Ağustos','Eylül','Ekim','Kasım','Aralık'];
 const now = new Date();
