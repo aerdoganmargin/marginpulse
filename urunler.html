@@ -287,7 +287,12 @@ async function suggestRecipe() {
     const resp = await fetch('/api/recipe', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ productName: name, category: selectedCategory })
+      body: JSON.stringify({
+        productName: name,
+        category: selectedCategory,
+        portionSize: document.getElementById('portionSize').value,
+        portionUnit: document.getElementById('portionUnit').value
+      })
     });
 
     const data = await resp.json();
@@ -302,7 +307,8 @@ async function suggestRecipe() {
     calculate();
 
     status.style.color = '#059669';
-    status.innerHTML = '✅ AI ' + data.recipe.length + ' malzeme ekledi. ⚠️ Fiyatlar tahminidir — kendi tedarikçi fiyatınla güncelle.';
+    const assumptionText = data.assumption ? '<br>📌 ' + data.assumption : '';
+    status.innerHTML = '✅ AI ' + data.recipe.length + ' malzeme ekledi.' + assumptionText + '<br>⚠️ Fiyatlar tahminidir — kendi tedarikçi fiyatınla güncelle.';
   } catch (err) {
     status.style.color = '#DC2626';
     status.textContent = '❌ ' + (err.message || 'Bir hata oluştu, tekrar dene');
