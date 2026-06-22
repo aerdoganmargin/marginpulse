@@ -112,8 +112,9 @@ td input,td select{width:100%;padding:5px 8px;border:1px solid #E2E8F0;border-ra
   <!-- Adım 2 -->
   <div class="card">
     <div class="card-title"><span class="badge-num">2</span> Reçete &amp; maliyet
-      <span style="margin-left:auto;font-size:11px;color:#94A3B8;">Maliyet otomatik hesaplanır</span>
+      <button id="aiBtn" onclick="suggestRecipe()" style="margin-left:auto;background:linear-gradient(135deg,#2563EB,#3B82F6);color:#fff;border:none;border-radius:8px;padding:7px 14px;font-size:12px;font-weight:600;cursor:pointer;display:flex;align-items:center;gap:6px;">✨ AI ile öner</button>
     </div>
+    <div id="aiStatus" style="font-size:12px;color:#64748B;margin-bottom:10px;display:none;"></div>
     <table>
       <thead><tr>
         <th>Malzeme</th>
@@ -253,6 +254,63 @@ function getRecipe() {
     if (name || qty || price) recipe.push({name, qty, unit, price});
   });
   return recipe;
+}
+
+// ====== AI REÇETE ÖNERİSİ ======
+async function suggestRecipe() {
+  const name = document.getElementById('productName').value.trim();
+  const btn = document.getElementById('aiBtn');
+  const status = document.getElementById('aiStatus');
+
+  if (!name) {
+    status.style.display = 'block';
+    status.style.color = '#DC2626';
+    status.textContent = '⚠️ Önce ürün adını gir (örn. Adana kebap)';
+    return;
+  }
+
+  // Mevcut malzeme var mı kontrol et — varsa onay sor
+  const existing = getRecipe();
+  if (existing.length > 0) {
+    const ok = confirm('Mevcut malzemeler silinip AI önerisiyle değiştirilecek. Devam edilsin mi?');
+    if (!ok) return;
+  }
+
+  btn.disabled = true;
+  btn.style.opacity = '0.6';
+  btn.innerHTML = '⏳ Düşünüyor…';
+  status.style.display = 'block';
+  status.style.color = '#64748B';
+  status.textContent = 'AI reçeteyi hazırlıyor, birkaç saniye sürebilir…';
+
+  try {
+    const resp = await fetch('/api/recipe', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ productName: name, category: selectedCategory })
+    });
+
+    const data = await resp.json();
+
+    if (!resp.ok || !data.recipe) {
+      throw new Error(data.error || 'Reçete alınamadı');
+    }
+
+    // Mevcut malzemeleri temizle, AI önerisiyle doldur
+    document.getElementById('ingredients').innerHTML = '';
+    data.recipe.forEach(r => addIngredient(r.name, r.qty, r.unit, r.price));
+    calculate();
+
+    status.style.color = '#059669';
+    status.innerHTML = '✅ AI ' + data.recipe.length + ' malzeme ekledi. ⚠️ Fiyatlar tahminidir — kendi tedarikçi fiyatınla güncelle.';
+  } catch (err) {
+    status.style.color = '#DC2626';
+    status.textContent = '❌ ' + (err.message || 'Bir hata oluştu, tekrar dene');
+  } finally {
+    btn.disabled = false;
+    btn.style.opacity = '1';
+    btn.innerHTML = '✨ AI ile öner';
+  }
 }
 
 // ====== ANA HESAPLAMA ======
