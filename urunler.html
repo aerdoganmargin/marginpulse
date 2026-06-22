@@ -103,9 +103,9 @@ td input,td select{width:100%;padding:5px 8px;border:1px solid #E2E8F0;border-ra
     </div>
     <div class="porsiyon">
       <label>1 porsiyon =</label>
-      <input id="portionSize" type="number" value="200" />
+      <input id="portionSize" type="number" placeholder="opsiyonel" />
       <select id="portionUnit"><option>g</option><option>ml</option><option>adet</option></select>
-      <span style="font-size:11px;color:#94A3B8;">Referans porsiyon büyüklüğü</span>
+      <span style="font-size:11px;color:#94A3B8;">Boş bırakırsan AI tipik porsiyonu kendi tahmin eder</span>
     </div>
   </div>
 
@@ -399,7 +399,7 @@ function resetForm() {
   document.getElementById('salePrice').value = '';
   document.getElementById('lastMonthQty').value = '';
   document.getElementById('nextMonthQty').value = '';
-  document.getElementById('portionSize').value = '200';
+  document.getElementById('portionSize').value = '';
   document.getElementById('ingredients').innerHTML = '';
   addIngredient(); addIngredient();
   selectCategory('Et yemeği');
