@@ -7,7 +7,7 @@ export default async function handler(req, res) {
     return res.status(405).json({ error: 'Method not allowed' });
   }
 
-  const { productName, category } = req.body || {};
+  const { productName, category, portionSize, portionUnit } = req.body || {};
 
   if (!productName || productName.trim().length === 0) {
     return res.status(400).json({ error: 'Ürün adı gerekli' });
@@ -18,24 +18,42 @@ export default async function handler(req, res) {
     return res.status(500).json({ error: 'API key yapılandırılmamış' });
   }
 
+  // Porsiyon bilgisi (kullanıcı girmişse)
+  const sizeNum = Number(portionSize);
+  const hasPortion = sizeNum > 0;
+  let portionLine;
+
+  if (hasPortion && portionUnit === 'adet') {
+    portionLine = `ÇOK ÖNEMLİ — PORSİYON: Bu üründe 1 porsiyon = ${sizeNum} ADET "${productName}" demektir. Yani tabakta ${sizeNum} tane "${productName}" var. Malzeme miktarlarını TAM ${sizeNum} adet için hesapla.
+Örnek mantık: 1 adet için 50g kıyma gerekiyorsa, ${sizeNum} adet için ${sizeNum} × 50 = ${sizeNum*50}g kıyma yazmalısın. Tüm malzemeleri bu şekilde ${sizeNum} ile çarp.`;
+  } else if (hasPortion) {
+    portionLine = `ÇOK ÖNEMLİ — PORSİYON: Bu üründe 1 porsiyon = ${sizeNum} ${portionUnit} demektir. Yani bir tabak servis ${sizeNum} ${portionUnit} ağırlığında/hacmindedir. Tüm malzemelerin toplamı yaklaşık ${sizeNum} ${portionUnit} olacak şekilde reçeteyi hesapla.`;
+  } else {
+    portionLine = `PORSİYON: Kullanıcı porsiyon boyutu belirtmedi. Bu yemek için en tipik 1 porsiyonu sen varsay.`;
+  }
+
   // Claude'a göndereceğimiz talimat
-  const prompt = `Sen bir restoran maliyet uzmanısın. Aşağıdaki yemek için 1 porsiyonluk tipik bir reçete oluştur.
+  const prompt = `Sen bir restoran maliyet uzmanısın. Aşağıdaki yemek için reçete oluştur.
 
 Yemek: "${productName}"${category ? ` (Kategori: ${category})` : ''}
 
-Her malzeme için:
-- name: malzeme adı (Türkçe, kısa)
-- qty: 1 porsiyon için miktar (sayı)
-- unit: "g", "ml" veya "adet"
-- price: bu malzemenin Avrupa/Hollanda piyasasında tahmini birim fiyatı — g/ml için €/kg veya €/lt cinsinden, adet için €/adet cinsinden (sayı, ondalık nokta ile)
+${portionLine}
+
+Cevabını şu JSON formatında ver:
+{
+  "assumption": "Reçeteyi tam olarak hangi porsiyon/miktar için hesapladığını tek cümleyle açıkla (örn: '3 adet içli köfte için hesaplandı')",
+  "ingredients": [
+    {"name":"malzeme adı (Türkçe, kısa)","qty":miktar (sayı),"unit":"g/ml/adet","price":tahmini birim fiyat}
+  ]
+}
+
+Malzeme miktarı (qty) kuralı: yukarıda belirtilen porsiyon büyüklüğünün TAMAMI için toplam miktar olmalı. Porsiyon kaç adetse o kadar adedin toplam malzemesini ver.
+
+Fiyat (price) kuralı: g/ml için €/kg veya €/lt cinsinden, adet için €/adet cinsinden. Avrupa/Hollanda 2025 piyasasına göre yaklaşık.
 
 ÖNEMLİ:
-- Sadece geçerli JSON dizisi döndür, başka hiçbir şey yazma (markdown, açıklama, backtick YOK).
-- 4-8 ana malzeme yeterli.
-- Fiyatlar Avrupa/Hollanda 2025 piyasasına göre yaklaşık olsun.
-
-Örnek format:
-[{"name":"Dana kıyma","qty":180,"unit":"g","price":12.5},{"name":"Tuz","qty":3,"unit":"g","price":0.8}]`;
+- Sadece geçerli JSON döndür, başka hiçbir şey yazma (markdown, backtick YOK).
+- 4-8 ana malzeme yeterli.`;
 
   try {
     const response = await fetch('https://api.anthropic.com/v1/messages', {
@@ -68,22 +86,25 @@ Her malzeme için:
     text = text.replace(/```json/gi, '').replace(/```/g, '').trim();
 
     // JSON parse et
-    let recipe;
+    let parsed;
     try {
-      recipe = JSON.parse(text);
+      parsed = JSON.parse(text);
     } catch (e) {
-      // Bazen metin içinde JSON dizisini bul
-      const match = text.match(/\[[\s\S]*\]/);
+      // Bazen metin içinde JSON objesini bul
+      const match = text.match(/\{[\s\S]*\}/);
       if (match) {
-        recipe = JSON.parse(match[0]);
+        parsed = JSON.parse(match[0]);
       } else {
         throw new Error('JSON parse edilemedi');
       }
     }
 
-    // Doğrulama: dizi mi ve beklenen alanlar var mı
-    if (!Array.isArray(recipe)) throw new Error('Geçersiz format');
-    recipe = recipe
+    // ingredients dizisi + assumption notu
+    let ingredients = parsed.ingredients;
+    const assumption = typeof parsed.assumption === 'string' ? parsed.assumption : '';
+
+    if (!Array.isArray(ingredients)) throw new Error('Geçersiz format');
+    ingredients = ingredients
       .filter(r => r && r.name)
       .map(r => ({
         name: String(r.name).slice(0, 60),
@@ -92,7 +113,7 @@ Her malzeme için:
         price: Number(r.price) || 0
       }));
 
-    return res.status(200).json({ recipe });
+    return res.status(200).json({ recipe: ingredients, assumption });
 
   } catch (err) {
     console.error('Reçete üretim hatası:', err);
