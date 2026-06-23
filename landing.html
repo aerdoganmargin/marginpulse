@@ -87,7 +87,7 @@ h1,h2,h3,.display{font-family:'Sora',sans-serif;}
 .pricing{background:var(--navy);color:#fff;}
 .pricing .sec-eyebrow{color:var(--mint);}
 .pricing .sec-sub{color:#9FB2CC;}
-.price-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:20px;margin-top:48px;}
+.price-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:20px;margin-top:48px;max-width:760px;margin-left:auto;margin-right:auto;}
 .plan{background:var(--navy-2);border:1px solid rgba(255,255,255,0.1);border-radius:18px;padding:32px 26px;position:relative;}
 .plan.featured{border-color:var(--blue);box-shadow:0 0 0 1px var(--blue), 0 20px 50px rgba(37,99,235,0.25);}
 .plan-badge{position:absolute;top:-12px;left:50%;transform:translateX(-50%);background:var(--blue);color:#fff;font-size:11px;font-weight:700;padding:5px 14px;border-radius:20px;letter-spacing:0.3px;}
@@ -163,7 +163,7 @@ footer{border-top:1px solid var(--line);background:var(--soft);}
     <div>
       <div class="eyebrow"><span class="pulse-dot"></span> Restoran &amp; kafeler için kârlılık yönetimi</div>
       <h1>Hangi ürün <span class="accent">kazandırıyor</span>, hangisi <span class="accent">kaybettiriyor</span>?</h1>
-      <p class="lead">MarginPulse her tabağın maliyetini, kârını ve marjını hesaplar. Sadece kayıt tutmaz — ne yapman gerektiğini söyler. Muhasebe yazılımı değil, kâr danışmanı.</p>
+      <p class="lead">MarginPulse her tabağın maliyetini, kârını ve marjını hesaplar. Sadece kayıt tutmaz — ne yapman gerektiğini söyler. Muhasebe yazılımı değil, kârlılık danışmanı.</p>
       <div class="hero-cta">
         <a href="login.html" class="btn btn-primary btn-lg">Ücretsiz başla</a>
         <a href="#nasil" class="btn btn-ghost btn-lg" style="color:#fff;border-color:rgba(255,255,255,0.2);">Nasıl çalışır?</a>
@@ -253,50 +253,38 @@ footer{border-top:1px solid var(--line);background:var(--soft);}
       <!-- Starter -->
       <div class="plan">
         <div class="plan-name">Starter</div>
-        <div class="plan-desc">Tek başına yöneten küçük işletmeler için.</div>
+        <div class="plan-desc">İşletmesini kendi yöneten restoran ve kafeler için.</div>
         <div class="plan-price">€<span data-m="29" data-y="24">29</span><span class="per">/ay</span></div>
         <div class="plan-year" data-ytext="Yıllık €290 — 2 ay bedava">&nbsp;</div>
         <ul class="plan-features">
           <li><span class="tick">✓</span> Uygulamanın tamamına erişim</li>
-          <li><span class="tick">✓</span> 4 modül (ürün, gider, dashboard, simülatör)</li>
+          <li><span class="tick">✓</span> 4 modül: ürün, gider, dashboard, simülatör</li>
+          <li><span class="tick">✓</span> AI reçete önerisi</li>
           <li><span class="tick">✓</span> Sınırsız ürün ve senaryo</li>
+          <li><span class="tick">✓</span> E-posta desteği</li>
           <li><span class="tick">✓</span> 30 gün ücretsiz deneme</li>
         </ul>
         <a href="login.html" class="btn btn-plan">Ücretsiz dene</a>
       </div>
 
-      <!-- Pro -->
-      <div class="plan featured">
-        <div class="plan-badge">EN POPÜLER</div>
-        <div class="plan-name">Pro</div>
-        <div class="plan-desc">Büyümek isteyen, desteğe değer veren işletmeler.</div>
-        <div class="plan-price">€<span data-m="79" data-y="65">79</span><span class="per">/ay</span></div>
-        <div class="plan-year" data-ytext="Yıllık €790 — 2 ay bedava">&nbsp;</div>
-        <ul class="plan-features">
-          <li><span class="tick">✓</span> Starter'daki her şey</li>
-          <li><span class="tick">✓</span> Ayda 2 × 30 dk birebir online destek</li>
-          <li><span class="tick">✓</span> Kurulum yardımı</li>
-          <li><span class="tick">✓</span> Öncelikli e-posta desteği</li>
-        </ul>
-        <a href="login.html" class="btn btn-plan-featured">Pro ile başla</a>
-      </div>
-
       <!-- Business -->
-      <div class="plan">
+      <div class="plan featured">
+        <div class="plan-badge">DANIŞMANLIK DAHİL</div>
         <div class="plan-name">Business</div>
-        <div class="plan-desc">Birden fazla şube veya yoğun operasyon.</div>
+        <div class="plan-desc">Rakamlarını birlikte yorumlayacak bir uzman isteyenler için.</div>
         <div class="plan-price">€<span data-m="189" data-y="157">189</span><span class="per">/ay</span></div>
         <div class="plan-year" data-ytext="Yıllık €1.890 — 2 ay bedava">&nbsp;</div>
         <ul class="plan-features">
-          <li><span class="tick">✓</span> Pro'daki her şey</li>
-          <li><span class="tick">✓</span> Ayda 3 × 30 dk birebir destek</li>
-          <li><span class="tick">✓</span> Ayda 90 dk stratejik danışmanlık</li>
-          <li><span class="tick">✓</span> Özel raporlama</li>
+          <li><span class="tick">✓</span> Starter'daki her şey</li>
+          <li><span class="tick">✓</span> <strong style="color:#fff;">Ayda 2 saat birebir danışmanlık</strong></li>
+          <li><span class="tick">✓</span> Kârlılığını bir finans uzmanıyla birlikte yorumla</li>
+          <li><span class="tick">✓</span> Sana özel kârlılık raporu (grafikli)</li>
+          <li><span class="tick">✓</span> Öncelikli destek</li>
         </ul>
-        <a href="login.html" class="btn btn-plan">Business seç</a>
+        <a href="login.html" class="btn btn-plan-featured">Business ile başla</a>
       </div>
     </div>
-    <p style="text-align:center;color:#7E92AD;font-size:13px;margin-top:28px;">Ayrıca: birebir eğitim €70/saat · İstediğin zaman iptal edebilirsin</p>
+    <p style="text-align:center;color:#7E92AD;font-size:13px;margin-top:28px;">Ek birebir eğitim/danışmanlık: €70/saat · İstediğin zaman iptal edebilirsin</p>
   </div>
 </section>
 
