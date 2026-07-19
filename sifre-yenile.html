@@ -1,0 +1,108 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>MarginPulse — Yeni Şifre</title>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<style>
+*{box-sizing:border-box;margin:0;padding:0;}
+body{font-family:'Segoe UI',system-ui,sans-serif;background:#0F1F3D;display:flex;align-items:center;justify-content:center;min-height:100vh;padding:1rem;}
+.box{background:#fff;border-radius:16px;padding:2.5rem;width:100%;max-width:400px;box-shadow:0 10px 40px rgba(0,0,0,0.3);}
+.logo{font-size:26px;font-weight:700;color:#0F1F3D;text-align:center;margin-bottom:0.5rem;}
+.logo span{color:#2563EB;}
+.tagline{font-size:12px;color:#94A3B8;text-align:center;margin-bottom:2rem;}
+.field{margin-bottom:1rem;}
+.field label{font-size:12px;color:#64748B;display:block;margin-bottom:6px;}
+.field input{width:100%;padding:11px 14px;border:1px solid #E2E8F0;border-radius:8px;font-size:14px;}
+.field input:focus{outline:none;border-color:#2563EB;}
+.btn{width:100%;background:#2563EB;color:#fff;border:none;border-radius:8px;padding:12px;font-size:14px;font-weight:600;cursor:pointer;margin-top:0.5rem;}
+.btn:hover{background:#1d4ed8;}
+.btn:disabled{opacity:0.6;cursor:not-allowed;}
+.msg{font-size:13px;text-align:center;margin-top:1rem;padding:10px;border-radius:8px;display:none;}
+.msg.error{background:#FEF2F2;color:#DC2626;display:block;}
+.msg.success{background:#F0FDF4;color:#059669;display:block;}
+.msg.info{background:#EFF6FF;color:#1d4ed8;display:block;}
+.link{display:block;text-align:center;margin-top:16px;font-size:12.5px;color:#2563EB;text-decoration:none;}
+</style>
+</head>
+<body>
+<div class="box">
+  <div class="logo">Margin<span>Pulse</span></div>
+  <div class="tagline">Yeni şifreni belirle</div>
+
+  <div id="formArea" style="display:none;">
+    <div class="field">
+      <label>Yeni şifre</label>
+      <input id="pw1" type="password" placeholder="En az 6 karakter" />
+    </div>
+    <div class="field">
+      <label>Yeni şifre (tekrar)</label>
+      <input id="pw2" type="password" placeholder="••••••••" />
+    </div>
+    <button class="btn" id="saveBtn" onclick="savePassword()">Şifreyi güncelle</button>
+  </div>
+
+  <div class="msg" id="msg"></div>
+  <a href="login.html" class="link" id="loginLink" style="display:none;">Giriş sayfasına git</a>
+</div>
+
+<script>
+const SUPABASE_URL = 'https://dmklhurvzahoiaklsnwo.supabase.co';
+const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImRta2xodXJ2emFob2lha2xzbndvIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODAxNjQxNjMsImV4cCI6MjA5NTc0MDE2M30.e-jJJ_Ru3pDKBnK_cw63pHhl_TN44LXAIC7P8w9mSns';
+const sb = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+
+function showMsg(text, type) {
+  const el = document.getElementById('msg');
+  el.innerHTML = text;
+  el.className = 'msg ' + type;
+}
+
+// Sayfa açıldığında: sıfırlama linkiyle mi gelindi kontrol et
+(async () => {
+  showMsg('Kontrol ediliyor…', 'info');
+
+  // Supabase, maildeki linkten gelen bilgiyi otomatik oturuma çevirir
+  // Kısa bir bekleme ile oturumu kontrol edelim
+  await new Promise(r => setTimeout(r, 600));
+  const { data } = await sb.auth.getSession();
+
+  if (data.session) {
+    document.getElementById('formArea').style.display = 'block';
+    showMsg('Yeni şifreni belirleyebilirsin.', 'info');
+  } else {
+    showMsg('❌ Bu bağlantı geçersiz veya süresi dolmuş.<br>Lütfen giriş sayfasından tekrar "Şifremi unuttum" de.', 'error');
+    document.getElementById('loginLink').style.display = 'block';
+  }
+})();
+
+async function savePassword() {
+  const pw1 = document.getElementById('pw1').value;
+  const pw2 = document.getElementById('pw2').value;
+  const btn = document.getElementById('saveBtn');
+
+  if (pw1.length < 6) { showMsg('Şifre en az 6 karakter olmalı', 'error'); return; }
+  if (pw1 !== pw2) { showMsg('Şifreler aynı değil', 'error'); return; }
+
+  btn.disabled = true;
+  btn.textContent = 'Güncelleniyor…';
+
+  const { error } = await sb.auth.updateUser({ password: pw1 });
+
+  if (error) {
+    showMsg('Güncellenemedi: ' + error.message, 'error');
+    btn.disabled = false;
+    btn.textContent = 'Şifreyi güncelle';
+  } else {
+    document.getElementById('formArea').style.display = 'none';
+    showMsg('✅ Şifren güncellendi! Şimdi yeni şifrenle giriş yapabilirsin.', 'success');
+    document.getElementById('loginLink').style.display = 'block';
+    // Güvenlik: oturumu kapat, temiz giriş yapsın
+    setTimeout(async () => { await sb.auth.signOut(); }, 1000);
+  }
+}
+
+document.addEventListener('keydown', e => { if (e.key === 'Enter') savePassword(); });
+</script>
+</body>
+</html>
