@@ -296,29 +296,6 @@ async function loadDashboard() {
       });
     }
 
-    // --- 3) BAŞABAŞ NOKTASI ---
-    const totalUnits = stats.reduce((s,x)=>s+x.q, 0);
-    const totalContribution = monthlyRevenue - variableCost;      // katkı payı
-    const cmRatio = monthlyRevenue>0 ? totalContribution/monthlyRevenue : 0;
-    const avgContribution = totalUnits>0 ? totalContribution/totalUnits : 0;
-
-    if (totalFixed > 0 && cmRatio > 0 && avgContribution > 0) {
-      const beRevenue = totalFixed / cmRatio;
-      const beUnits = Math.ceil(totalFixed / avgContribution);
-      const gap = beRevenue - monthlyRevenue;
-      alarms.push({
-        type: gap > 0 ? 'yellow' : 'blue',
-        ico:'⚖️',
-        head:`Kâra geçmek için gereken ciro: ${eur(beRevenue)} (≈ ${beUnits.toLocaleString('tr-TR')} tabak)`,
-        desc: `Her tabak, hammadde gideri düştükten sonra ortalama €${avgContribution.toFixed(2)} bırakıyor. Bu, sabit giderlerini (${eur(totalFixed)}) karşılamaya gidiyor.<br>`
-          + `<strong>Hesap:</strong> ${eur(totalFixed)} sabit gider ÷ €${avgContribution.toFixed(2)} katkı = ${beUnits.toLocaleString('tr-TR')} tabak<br>`
-          + (gap > 0
-              ? `Şu an ${eur(monthlyRevenue)} cirodasın — kâra geçmek için ${eur(gap)} daha gerekiyor.`
-              : `Şu an ${eur(monthlyRevenue)} cirodasın, bu noktayı ${eur(-gap)} aştın. Fazlası kâr.`),
-        pill:`Toplam giderinden farklı, çünkü hammadde gideri satışla birlikte azalıp artıyor — sabit giderler ise değişmiyor`
-      });
-    }
-
     // --- 4) GİDER OPTİMİZASYONU ---
     if (monthlyRevenue > 0) {
       const foodRatio = variableCost/monthlyRevenue*100;
