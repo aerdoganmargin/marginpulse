@@ -25,6 +25,7 @@ body{font-family:'Segoe UI',system-ui,sans-serif;background:#F0F4F8;display:flex
 .alarm.red{background:#FEF2F2;border:1px solid #FECACA;}
 .alarm.yellow{background:#FFFBEB;border:1px solid #FDE68A;}
 .alarm.green{background:#F0FDF4;border:1px solid #BBF7D0;}
+.alarm.blue{background:#EFF6FF;border:1px solid #BFDBFE;}
 .alarm .ico{font-size:16px;flex-shrink:0;}
 .alarm .body{flex:1;}
 .alarm .head{font-weight:700;color:#1E293B;margin-bottom:2px;}
@@ -148,8 +149,15 @@ async function loadDashboard() {
   const { data: products } = await sb.from('products').select('*');
   const { data: costs } = await sb.from('fixed_costs').select('*').eq('month', monthKey);
 
+  // Geçen ayın sabit giderleri (trend için)
+  const prevDate = new Date(now.getFullYear(), now.getMonth()-1, 1);
+  const prevKey = prevDate.getFullYear() + '-' + String(prevDate.getMonth()+1).padStart(2,'0');
+  const prevName = MONTHS[prevDate.getMonth()];
+  const { data: prevCosts } = await sb.from('fixed_costs').select('*').eq('month', prevKey);
+
   const prods = products || [];
   const fixedCosts = costs || [];
+  const prevFixedCosts = prevCosts || [];
 
   // --- Gelir & gider hesapla ---
   let monthlyRevenue = 0;     // geçen ay adet × satış fiyatı
@@ -246,6 +254,118 @@ async function loadDashboard() {
     });
   }
 
+  // ====== AKILLI ÖNERİLER ======
+  const sold = prods.filter(p => (p.last_month_qty||0) > 0 && (p.sale_price||0) > 0);
+
+  if (sold.length > 0) {
+    // Her ürün için birim kâr, marj, toplam katkı
+    const stats = sold.map(p => {
+      const sp = p.sale_price||0, c = p.ingredient_cost||0, q = p.last_month_qty||0;
+      const unitProfit = sp - c;
+      return {
+        name: p.name, sp, c, q,
+        unitProfit,
+        margin: sp>0 ? (unitProfit/sp*100) : 0,
+        totalProfit: unitProfit * q
+      };
+    });
+
+    // --- 1) YILDIZ ÜRÜN: en çok kâr getiren ---
+    const star = [...stats].sort((a,b)=>b.totalProfit-a.totalProfit)[0];
+    if (star && star.totalProfit > 0) {
+      const share = monthlyRevenue>0 ? (star.sp*star.q/monthlyRevenue*100) : 0;
+      alarms.push({
+        type:'blue', ico:'⭐', head:`"${star.name}" en çok kâr getiren ürünün`,
+        desc:`Bu ay ${star.q} adet sattın, toplam ${eur(star.totalProfit)} kâr bıraktı (marj %${star.margin.toFixed(0)}).`,
+        pill:`Cironun yaklaşık %${share.toFixed(0)} kadarı bu üründen — menüde daha görünür yap`
+      });
+    }
+
+    // --- 2) MENÜ MİX: çok satan düşük marjlı vs yüksek marjlı ---
+    const bestSeller = [...stats].sort((a,b)=>b.q-a.q)[0];
+    const bestMargin = [...stats].sort((a,b)=>b.unitProfit-a.unitProfit)[0];
+    if (bestSeller && bestMargin && bestSeller.name !== bestMargin.name
+        && bestMargin.unitProfit > bestSeller.unitProfit) {
+      const shift = Math.round(bestSeller.q * 0.10);          // %10'unu kaydır
+      const gain = shift * (bestMargin.unitProfit - bestSeller.unitProfit);
+      if (shift > 0 && gain > 0) {
+        alarms.push({
+          type:'blue', ico:'🔀', head:`Menü mix'in iyileştirilebilir`,
+          desc:`En çok satan "${bestSeller.name}" adet başına €${bestSeller.unitProfit.toFixed(2)} kâr bırakıyor; "${bestMargin.name}" ise €${bestMargin.unitProfit.toFixed(2)}.`,
+          pill:`Satışın %10 kadarı "${bestMargin.name}" olsa ayda +${eur(gain)} kâr`
+        });
+      }
+    }
+
+    // --- 3) BAŞABAŞ NOKTASI ---
+    const totalUnits = stats.reduce((s,x)=>s+x.q, 0);
+    const totalContribution = monthlyRevenue - variableCost;      // katkı payı
+    const cmRatio = monthlyRevenue>0 ? totalContribution/monthlyRevenue : 0;
+    const avgContribution = totalUnits>0 ? totalContribution/totalUnits : 0;
+
+    if (totalFixed > 0 && cmRatio > 0 && avgContribution > 0) {
+      const beRevenue = totalFixed / cmRatio;
+      const beUnits = Math.ceil(totalFixed / avgContribution);
+      const gap = beRevenue - monthlyRevenue;
+      alarms.push({
+        type: gap > 0 ? 'yellow' : 'blue',
+        ico:'⚖️',
+        head:`Başabaş noktan: ${eur(beRevenue)} ciro (≈ ${beUnits.toLocaleString('tr-TR')} tabak)`,
+        desc: gap > 0
+          ? `Şu an ${eur(monthlyRevenue)} cirodasın — giderleri karşılamak için ${eur(gap)} daha gerekiyor.`
+          : `${eur(monthlyRevenue)} cirodasın, başabaşı ${eur(-gap)} aştın. Bu noktadan sonrası kâr.`,
+        pill:`Her tabak ortalama €${avgContribution.toFixed(2)} katkı bırakıyor`
+      });
+    }
+
+    // --- 4) GİDER OPTİMİZASYONU ---
+    if (monthlyRevenue > 0) {
+      const foodRatio = variableCost/monthlyRevenue*100;
+      const fixedRatio = totalFixed/monthlyRevenue*100;
+
+      if (foodRatio > 35) {
+        alarms.push({
+          type:'yellow', ico:'🥩', head:`Hammadde maliyeti yüksek: ciroya oranı %${foodRatio.toFixed(0)}`,
+          desc:'Restoranlarda hammadde genelde cironun %28-35\'i arasındadır.',
+          pill:'Tedarikçi fiyatlarını ve porsiyon gramajlarını gözden geçir'
+        });
+      }
+
+      if (totalFixed > 0 && fixedRatio > 35) {
+        // en büyük gider kalemi
+        const byCat = {};
+        fixedCosts.forEach(c => {
+          byCat[c.category||'Diğer'] = (byCat[c.category||'Diğer']||0) + (c.monthly_equivalent||0);
+        });
+        const top = Object.entries(byCat).sort((a,b)=>b[1]-a[1])[0];
+        alarms.push({
+          type:'yellow', ico:'🏠', head:`Sabit giderler yüksek: ciroya oranı %${fixedRatio.toFixed(0)}`,
+          desc: top ? `En büyük kalem: ${top[0]} (${eur(top[1])}/ay, sabit giderin yaklaşık %${(top[1]/totalFixed*100).toFixed(0)} kadarı).` : 'Sabit gider oranı yüksek.',
+          pill:'Ciroyu artırmak ya da bu kalemi düşürmek en yüksek etkiyi yaratır'
+        });
+      }
+    }
+  }
+
+  // --- 5) TREND: sabit gider geçen aya göre ---
+  if (prevFixedCosts.length > 0 && fixedCosts.length > 0) {
+    const prevTotal = prevFixedCosts.reduce((s,c)=>s+(c.monthly_equivalent||0), 0);
+    if (prevTotal > 0) {
+      const diff = totalFixed - prevTotal;
+      const pct = diff/prevTotal*100;
+      if (Math.abs(pct) >= 5) {
+        const up = diff > 0;
+        alarms.push({
+          type: up ? 'yellow' : 'blue',
+          ico: up ? '📈' : '📉',
+          head:`Sabit giderlerin ${prevName} ayına göre %${Math.abs(pct).toFixed(0)} ${up?'arttı':'azaldı'}`,
+          desc:`${prevName}: ${eur(prevTotal)} → bu ay: ${eur(totalFixed)} (${up?'+':''}${eur(diff)}).`,
+          pill: up ? 'Artışın sebebini kontrol et — kâra doğrudan yansır' : 'Güzel — tasarruf doğrudan kâra yazıldı'
+        });
+      }
+    }
+  }
+
   // Pozitif
   if (prods.length > 0 && net > 0) {
     alarms.push({
@@ -265,8 +385,8 @@ async function loadDashboard() {
 
   const alarmsEl = document.getElementById('alarms');
   alarmsEl.innerHTML = '';
-  // sırala: kırmızı > sarı > yeşil
-  const order = {red:0, yellow:1, green:2};
+  // sırala: kırmızı > sarı > mavi (öneri) > yeşil
+  const order = {red:0, yellow:1, blue:2, green:3};
   alarms.sort((a,b)=>order[a.type]-order[b.type]);
   alarms.forEach(a => {
     alarmsEl.innerHTML += `<div class="alarm ${a.type}">
