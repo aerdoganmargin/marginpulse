@@ -281,20 +281,19 @@ async function loadDashboard() {
       });
     }
 
-    // --- 2) MENÜ MİX: çok satan düşük marjlı vs yüksek marjlı ---
+    // --- 2) MENÜ MİX: çok satan düşük kârlı vs yüksek kârlı ---
     const bestSeller = [...stats].sort((a,b)=>b.q-a.q)[0];
     const bestMargin = [...stats].sort((a,b)=>b.unitProfit-a.unitProfit)[0];
     if (bestSeller && bestMargin && bestSeller.name !== bestMargin.name
-        && bestMargin.unitProfit > bestSeller.unitProfit) {
-      const shift = Math.round(bestSeller.q * 0.10);          // %10'unu kaydır
-      const gain = shift * (bestMargin.unitProfit - bestSeller.unitProfit);
-      if (shift > 0 && gain > 0) {
-        alarms.push({
-          type:'blue', ico:'🔀', head:`Menü mix'in iyileştirilebilir`,
-          desc:`En çok satan "${bestSeller.name}" adet başına €${bestSeller.unitProfit.toFixed(2)} kâr bırakıyor; "${bestMargin.name}" ise €${bestMargin.unitProfit.toFixed(2)}.`,
-          pill:`Satışın %10 kadarı "${bestMargin.name}" olsa ayda +${eur(gain)} kâr`
-        });
-      }
+        && bestSeller.unitProfit > 0 && bestMargin.unitProfit > bestSeller.unitProfit * 1.5) {
+      const ratio = bestMargin.unitProfit / bestSeller.unitProfit;
+      const extra10 = 10 * bestMargin.unitProfit;
+      alarms.push({
+        type:'blue', ico:'🔀',
+        head:`1 adet "${bestMargin.name}" satmak ≈ ${ratio.toFixed(1).replace('.',',')} adet "${bestSeller.name}" satmak kadar kâr`,
+        desc:`En çok sattığın ürün "${bestSeller.name}" (${bestSeller.q} adet) ama adet başına sadece €${bestSeller.unitProfit.toFixed(2)} kâr bırakıyor. "${bestMargin.name}" ise €${bestMargin.unitProfit.toFixed(2)} bırakıyor.`,
+        pill:`Ayda 10 adet daha "${bestMargin.name}" satsan +${eur(extra10)} kâr — garsonlara önerttir`
+      });
     }
 
     // --- 3) BAŞABAŞ NOKTASI ---
@@ -310,11 +309,13 @@ async function loadDashboard() {
       alarms.push({
         type: gap > 0 ? 'yellow' : 'blue',
         ico:'⚖️',
-        head:`Başabaş noktan: ${eur(beRevenue)} ciro (≈ ${beUnits.toLocaleString('tr-TR')} tabak)`,
-        desc: gap > 0
-          ? `Şu an ${eur(monthlyRevenue)} cirodasın — giderleri karşılamak için ${eur(gap)} daha gerekiyor.`
-          : `${eur(monthlyRevenue)} cirodasın, başabaşı ${eur(-gap)} aştın. Bu noktadan sonrası kâr.`,
-        pill:`Her tabak ortalama €${avgContribution.toFixed(2)} katkı bırakıyor`
+        head:`Kâra geçmek için gereken ciro: ${eur(beRevenue)} (≈ ${beUnits.toLocaleString('tr-TR')} tabak)`,
+        desc: `Her tabak, hammadde gideri düştükten sonra ortalama €${avgContribution.toFixed(2)} bırakıyor. Bu, sabit giderlerini (${eur(totalFixed)}) karşılamaya gidiyor.<br>`
+          + `<strong>Hesap:</strong> ${eur(totalFixed)} sabit gider ÷ €${avgContribution.toFixed(2)} katkı = ${beUnits.toLocaleString('tr-TR')} tabak<br>`
+          + (gap > 0
+              ? `Şu an ${eur(monthlyRevenue)} cirodasın — kâra geçmek için ${eur(gap)} daha gerekiyor.`
+              : `Şu an ${eur(monthlyRevenue)} cirodasın, bu noktayı ${eur(-gap)} aştın. Fazlası kâr.`),
+        pill:`Toplam giderinden farklı, çünkü hammadde gideri satışla birlikte azalıp artıyor — sabit giderler ise değişmiyor`
       });
     }
 
