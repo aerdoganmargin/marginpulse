@@ -62,6 +62,7 @@ td input,td select{width:100%;padding:6px 8px;border:1px solid #E2E8F0;border-ra
 </div>
 
 <div class="main">
+  <div id="greeting" style="font-size:13px;color:#64748B;margin-bottom:4px;font-weight:500;"></div>
   <div class="title">Sabit Giderler</div>
 
   <!-- Ay navigasyonu -->
@@ -145,7 +146,16 @@ let currentUser = null;
   const { data } = await sb.auth.getSession();
   if (!data.session) { window.location.href = "login.html"; return; }
   currentUser = data.session.user;
+  showGreeting();
 })();
+function showGreeting() {
+  const el = document.getElementById("greeting");
+  if (!el || !currentUser) return;
+  const bizName = (currentUser.user_metadata && currentUser.user_metadata.business_name) || "";
+  const hour = new Date().getHours();
+  const selam = hour < 12 ? "Günaydın" : (hour < 18 ? "İyi günler" : "İyi akşamlar");
+  el.textContent = bizName ? (selam + ", " + bizName + " 👋") : (selam + " 👋");
+}
 async function requireUser() {
   if (currentUser) return currentUser;
   const { data } = await sb.auth.getSession();

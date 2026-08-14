@@ -83,11 +83,21 @@ td input,td select{width:100%;padding:5px 8px;border:1px solid #E2E8F0;border-ra
 </div>
 
 <div class="main">
+  <div id="greeting" style="font-size:13px;color:#64748B;margin-bottom:4px;font-weight:500;"></div>
   <div class="title">Ürün Karlılığı <button class="btn-ghost" onclick="resetForm()">+ Yeni ürün</button></div>
 
   <div class="edit-banner" id="editBanner">
     <span id="editText">Düzenleme modu</span>
     <button onclick="resetForm()">İptal et, yeni ürün başlat</button>
+  </div>
+
+  <div id="welcomeCard" style="display:none;background:linear-gradient(135deg,#0F1F3D,#1e3a6d);color:#fff;border-radius:14px;padding:22px 24px;margin-bottom:1.25rem;">
+    <div style="font-size:17px;font-weight:700;margin-bottom:8px;">MarginPulse'a hoş geldin! 🎉</div>
+    <div style="font-size:13.5px;color:#C7D5E8;line-height:1.6;">
+      Başlamak çok kolay: aşağıya ilk ürününün adını yaz (örn. <em>Adana kebap</em>), reçetesini ekle veya
+      <strong style="color:#fff;">✨ AI ile öner</strong> butonuna bas — malzemeler ve tahmini maliyet otomatik gelsin.
+      Ürünü kaydettiğinde kârını, marjını ve önerileri anında göreceksin.
+    </div>
   </div>
 
   <!-- Adım 1 -->
@@ -173,7 +183,16 @@ let currentUser = null;
   const { data } = await sb.auth.getSession();
   if (!data.session) { window.location.href = "login.html"; return; }
   currentUser = data.session.user;
+  showGreeting();
 })();
+function showGreeting() {
+  const el = document.getElementById("greeting");
+  if (!el || !currentUser) return;
+  const bizName = (currentUser.user_metadata && currentUser.user_metadata.business_name) || "";
+  const hour = new Date().getHours();
+  const selam = hour < 12 ? "Günaydın" : (hour < 18 ? "İyi günler" : "İyi akşamlar");
+  el.textContent = bizName ? (selam + ", " + bizName + " 👋") : (selam + " 👋");
+}
 async function requireUser() {
   if (currentUser) return currentUser;
   const { data } = await sb.auth.getSession();
@@ -442,9 +461,15 @@ async function deleteProduct(id, name, event) {
 async function loadProducts() {
   const { data, error } = await sb.from('products').select('*').order('created_at', {ascending:false});
   const list = document.getElementById('savedList');
+  const welcome = document.getElementById('welcomeCard');
 
   if (error) { list.innerHTML = '<div class="empty">Yüklenemedi: '+error.message+'</div>'; return; }
-  if (!data || data.length === 0) { list.innerHTML = '<div class="empty">Henüz ürün kaydedilmedi.</div>'; return; }
+  if (!data || data.length === 0) {
+    list.innerHTML = '<div class="empty">Henüz ürün kaydedilmedi.</div>';
+    if (welcome) welcome.style.display = 'block';
+    return;
+  }
+  if (welcome) welcome.style.display = 'none';
 
   list.innerHTML = '';
   data.forEach(p => {

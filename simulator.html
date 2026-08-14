@@ -95,8 +95,13 @@ input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:22px;heigh
 </div>
 
 <div class="main">
+  <div id="greeting" style="font-size:13px;color:#64748B;margin-bottom:4px;font-weight:500;"></div>
   <div class="title">Fiyat Simülatörü</div>
   <div class="subtitle">"Ne olur?" senaryolarını test et — fiyat veya maliyet değiştir, sonucu anında gör.</div>
+
+  <div id="noProductBanner" style="display:none;background:#EFF6FF;border:1px solid #BFDBFE;border-radius:12px;padding:18px 20px;margin-bottom:1rem;color:#1e40af;font-size:13.5px;line-height:1.6;">
+    👋 Simülatörü kullanmak için önce en az bir ürün eklemelisin. <strong>Ürün Karlılığı</strong> sekmesinden bir ürün ekle, sonra buraya dönüp fiyat/maliyet senaryolarını test et.
+  </div>
 
   <!-- Ürün seçimi -->
   <div class="card">
@@ -195,7 +200,16 @@ let currentUser = null;
   const { data } = await sb.auth.getSession();
   if (!data.session) { window.location.href = "login.html"; return; }
   currentUser = data.session.user;
+  showGreeting();
 })();
+function showGreeting() {
+  const el = document.getElementById("greeting");
+  if (!el || !currentUser) return;
+  const bizName = (currentUser.user_metadata && currentUser.user_metadata.business_name) || "";
+  const hour = new Date().getHours();
+  const selam = hour < 12 ? "Günaydın" : (hour < 18 ? "İyi günler" : "İyi akşamlar");
+  el.textContent = bizName ? (selam + ", " + bizName + " 👋") : (selam + " 👋");
+}
 async function requireUser() {
   if (currentUser) return currentUser;
   const { data } = await sb.auth.getSession();
@@ -220,10 +234,13 @@ async function loadProducts() {
   const { data } = await sb.from('products').select('*').order('name');
   allProducts = data || [];
   const sel = document.getElementById('productSelect');
+  const banner = document.getElementById('noProductBanner');
   if (allProducts.length === 0) {
     sel.innerHTML = '<option value="">Henüz ürün yok</option>';
+    if (banner) banner.style.display = 'block';
     return;
   }
+  if (banner) banner.style.display = 'none';
   sel.innerHTML = '<option value="">— Ürün seç —</option>';
   allProducts.forEach(p => {
     sel.innerHTML += `<option value="${p.id}">${p.name} (€${(p.sale_price||0).toFixed(2)})</option>`;
