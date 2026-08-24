@@ -146,13 +146,14 @@ footer{border-top:1px solid var(--line);background:var(--soft);}
   <div class="nav-inner">
     <div class="brand">Margin<span>Pulse</span></div>
     <div class="nav-links">
-      <a href="#nasil">Nasıl çalışır</a>
-      <a href="#moduller">Modüller</a>
-      <a href="#fiyatlar">Fiyatlar</a>
+      <a href="#nasil" data-i18n="nav_how">Nasıl çalışır</a>
+      <a href="#moduller" data-i18n="nav_modules">Modüller</a>
+      <a href="#fiyatlar" data-i18n="nav_pricing">Fiyatlar</a>
     </div>
     <div class="nav-cta">
-      <a href="login.html" class="btn btn-ghost">Giriş yap</a>
-      <a href="login.html" class="btn btn-primary">Ücretsiz dene</a>
+      <button onclick="toggleLang()" id="langBtn" style="background:transparent;border:1px solid var(--line);border-radius:8px;padding:8px 12px;font-size:13px;font-weight:600;cursor:pointer;color:var(--ink);">EN</button>
+      <a href="login.html" class="btn btn-ghost" data-i18n="nav_login">Giriş yap</a>
+      <a href="login.html" class="btn btn-primary" data-i18n="nav_try">Ücretsiz dene</a>
     </div>
   </div>
 </nav>
@@ -161,27 +162,27 @@ footer{border-top:1px solid var(--line);background:var(--soft);}
 <header class="hero">
   <div class="hero-inner">
     <div>
-      <div class="eyebrow"><span class="pulse-dot"></span> Restoran &amp; kafeler için kârlılık yönetimi</div>
-      <h1>Hangi ürün <span class="accent">kazandırıyor</span>, hangisi <span class="accent">kaybettiriyor</span>?</h1>
-      <p class="lead">MarginPulse her tabağın maliyetini, kârını ve marjını hesaplar. Sadece kayıt tutmaz — ne yapman gerektiğini söyler. Muhasebe yazılımı değil, kârlılık danışmanı.</p>
+      <div class="eyebrow"><span class="pulse-dot"></span> <span data-i18n="hero_eyebrow">Restoran &amp; kafeler için kârlılık yönetimi</span></div>
+      <h1 data-i18n="hero_title" data-i18n-html>Hangi ürün <span class="accent">kazandırıyor</span>, hangisi <span class="accent">kaybettiriyor</span>?</h1>
+      <p class="lead" data-i18n="hero_lead">MarginPulse her tabağın maliyetini, kârını ve marjını hesaplar. Sadece kayıt tutmaz — ne yapman gerektiğini söyler. Muhasebe yazılımı değil, kârlılık danışmanı.</p>
       <div class="hero-cta">
-        <a href="login.html" class="btn btn-primary btn-lg">Ücretsiz başla</a>
-        <a href="#nasil" class="btn btn-ghost btn-lg" style="color:#fff;border-color:rgba(255,255,255,0.2);">Nasıl çalışır?</a>
+        <a href="login.html" class="btn btn-primary btn-lg" data-i18n="hero_cta1">Ücretsiz başla</a>
+        <a href="#nasil" class="btn btn-ghost btn-lg" style="color:#fff;border-color:rgba(255,255,255,0.2);" data-i18n="hero_cta2">Nasıl çalışır?</a>
       </div>
-      <div class="hero-note">Kredi kartı gerekmez · Türkçe destek</div>
+      <div class="hero-note" data-i18n="hero_note">Kredi kartı gerekmez · Türkçe destek</div>
     </div>
 
     <!-- Mini P&L kart -->
     <div class="hero-card">
       <div class="hc-head">
-        <span class="hc-title">Bu ay — Kârlılık</span>
-        <span class="hc-tag">▲ %18 net marj</span>
+        <span class="hc-title" data-i18n="card_title">Bu ay — Kârlılık</span>
+        <span class="hc-tag" data-i18n="card_tag">▲ %18 net marj</span>
       </div>
-      <div class="hc-row"><span class="lbl">Bu ay geliri</span><span class="val">€24.500</span></div>
-      <div class="hc-row"><span class="lbl">Toplam gider</span><span class="val">€20.100</span></div>
-      <div class="hc-row"><span class="lbl">Net sonuç</span><span class="val pos">+€4.400</span></div>
+      <div class="hc-row"><span class="lbl" data-i18n="card_revenue">Bu ay geliri</span><span class="val">€24.500</span></div>
+      <div class="hc-row"><span class="lbl" data-i18n="card_cost">Toplam gider</span><span class="val">€20.100</span></div>
+      <div class="hc-row"><span class="lbl" data-i18n="card_net">Net sonuç</span><span class="val pos">+€4.400</span></div>
       <div class="hc-bar"><span style="width:72%"></span></div>
-      <div class="hc-alarm">🔴 <div><strong>"Mercimek çorbası" zarar ettiriyor.</strong> Önerilen fiyat: €5,90 (şu an €4,50).</div></div>
+      <div class="hc-alarm">🔴 <div data-i18n="card_alarm" data-i18n-html><strong>"Mercimek çorbası" zarar ettiriyor.</strong> Önerilen fiyat: €5,90 (şu an €4,50).</div></div>
     </div>
   </div>
 </header>
@@ -190,16 +191,16 @@ footer{border-top:1px solid var(--line);background:var(--soft);}
 <section class="section problem" id="nasil">
   <div class="problem-grid">
     <div>
-      <div class="sec-eyebrow">Sorun</div>
-      <h2 class="sec-title">Cironuz iyi ama kasada para yok mu?</h2>
-      <p class="sec-sub">Çoğu restoran ne kazandığını ay sonunda, muhasebeciden öğrenir. O zaman da çok geçtir. Sorun ciro değil — hangi ürünün ne kadar kâr bıraktığını bilmemektir.</p>
+      <div class="sec-eyebrow" data-i18n="problem_eyebrow">Sorun</div>
+      <h2 class="sec-title" data-i18n="problem_title">Cironuz iyi ama kasada para yok mu?</h2>
+      <p class="sec-sub" data-i18n="problem_sub">Çoğu restoran ne kazandığını ay sonunda, muhasebeciden öğrenir. O zaman da çok geçtir. Sorun ciro değil — hangi ürünün ne kadar kâr bıraktığını bilmemektir.</p>
     </div>
     <div>
       <ul class="problem-list">
-        <li><span class="x-mark">✕</span> Klasik muhasebe yazılımı sadece geçmişi kaydeder</li>
-        <li><span class="x-mark">✕</span> Hangi tabağın zarar ettirdiğini fark etmezsin</li>
-        <li><span class="x-mark">✕</span> Zam yapmadan önce etkisini göremezsin</li>
-        <li><span class="check">✓</span> MarginPulse ne yapman gerektiğini söyler</li>
+        <li><span class="x-mark">✕</span> <span data-i18n="problem_1">Klasik muhasebe yazılımı sadece geçmişi kaydeder</span></li>
+        <li><span class="x-mark">✕</span> <span data-i18n="problem_2">Hangi tabağın zarar ettirdiğini fark etmezsin</span></li>
+        <li><span class="x-mark">✕</span> <span data-i18n="problem_3">Zam yapmadan önce etkisini göremezsin</span></li>
+        <li><span class="check">✓</span> <span data-i18n="problem_4">MarginPulse ne yapman gerektiğini söyler</span></li>
       </ul>
     </div>
   </div>
@@ -207,29 +208,29 @@ footer{border-top:1px solid var(--line);background:var(--soft);}
 
 <!-- MODULES -->
 <section class="section" id="moduller">
-  <div class="sec-eyebrow">Ne yapar</div>
-  <h2 class="sec-title">Dört modül, tek tablo</h2>
-  <p class="sec-sub">Ürünlerini ve giderlerini bir kez gir; gerisini MarginPulse hesaplar.</p>
+  <div class="sec-eyebrow" data-i18n="mod_eyebrow">Ne yapar</div>
+  <h2 class="sec-title" data-i18n="mod_title">Dört modül, tek tablo</h2>
+  <p class="sec-sub" data-i18n="mod_sub">Ürünlerini ve giderlerini bir kez gir; gerisini MarginPulse hesaplar.</p>
   <div class="modules">
     <div class="mod">
-      <div class="mod-num">01 — Ürün Kârlılığı</div>
-      <h3>Her tabağın gerçek maliyeti</h3>
-      <p>Reçeteyi gir, hammadde maliyeti otomatik çıksın. Hangi üründe ne kadar kâr var, anında gör.</p>
+      <div class="mod-num" data-i18n="mod1_num">01 — Ürün Kârlılığı</div>
+      <h3 data-i18n="mod1_h">Her tabağın gerçek maliyeti</h3>
+      <p data-i18n="mod1_p">Reçeteyi gir, hammadde maliyeti otomatik çıksın. Hangi üründe ne kadar kâr var, anında gör.</p>
     </div>
     <div class="mod">
-      <div class="mod-num">02 — Sabit Giderler</div>
-      <h3>Kira, personel, fatura — hepsi</h3>
-      <p>Aylık, üç aylık, yıllık tüm giderleri ekle. Aylık karşılıkları otomatik hesaplansın. Vergi tahmini dahil.</p>
+      <div class="mod-num" data-i18n="mod2_num">02 — Sabit Giderler</div>
+      <h3 data-i18n="mod2_h">Kira, personel, fatura — hepsi</h3>
+      <p data-i18n="mod2_p">Aylık, üç aylık, yıllık tüm giderleri ekle. Aylık karşılıkları otomatik hesaplansın. Vergi tahmini dahil.</p>
     </div>
     <div class="mod">
-      <div class="mod-num">03 — Dashboard</div>
-      <h3>Tek bakışta kâr/zarar</h3>
-      <p>"Bu ay €4.400 kârdasın" ya da "Şu ürün zarar ettiriyor, fiyatı şu olmalı" — net uyarılar.</p>
+      <div class="mod-num" data-i18n="mod3_num">03 — Dashboard</div>
+      <h3 data-i18n="mod3_h">Tek bakışta kâr/zarar</h3>
+      <p data-i18n="mod3_p">"Bu ay €4.400 kârdasın" ya da "Şu ürün zarar ettiriyor, fiyatı şu olmalı" — net uyarılar.</p>
     </div>
     <div class="mod">
-      <div class="mod-num">04 — Fiyat Simülatörü</div>
-      <h3>Zam yapmadan önce dene</h3>
-      <p>"Ayrana %10 zam yaparsam ne olur?" Birden fazla üründe değişiklik yap, toplam etkiyi gör.</p>
+      <div class="mod-num" data-i18n="mod4_num">04 — Fiyat Simülatörü</div>
+      <h3 data-i18n="mod4_h">Zam yapmadan önce dene</h3>
+      <p data-i18n="mod4_p">"Ayrana %10 zam yaparsam ne olur?" Birden fazla üründe değişiklik yap, toplam etkiyi gör.</p>
     </div>
   </div>
 </section>
@@ -238,62 +239,62 @@ footer{border-top:1px solid var(--line);background:var(--soft);}
 <section class="pricing" id="fiyatlar">
   <div class="section" style="padding-top:80px;padding-bottom:80px;">
     <div style="text-align:center;">
-      <div class="sec-eyebrow">Fiyatlar</div>
-      <h2 class="sec-title">İşletmene göre seç</h2>
-      <p class="sec-sub" style="margin:0 auto;">Tüm paketlerde uygulamanın tamamı var. Fark, aldığın birebir destekte.</p>
+      <div class="sec-eyebrow" data-i18n="price_eyebrow">Fiyatlar</div>
+      <h2 class="sec-title" data-i18n="price_title">İşletmene göre seç</h2>
+      <p class="sec-sub" style="margin:0 auto;" data-i18n="price_sub">Tüm paketlerde uygulamanın tamamı var. Fark, aldığın birebir destekte.</p>
     </div>
 
     <div class="toggle-wrap">
-      <span class="toggle-label active" id="lblMonthly">Aylık</span>
+      <span class="toggle-label active" id="lblMonthly" data-i18n="price_monthly">Aylık</span>
       <div class="toggle" id="billingToggle" onclick="toggleBilling()"></div>
-      <span class="toggle-label" id="lblYearly">Yıllık <span style="color:var(--mint)">(2 ay bedava)</span></span>
+      <span class="toggle-label" id="lblYearly" data-i18n="price_yearly" data-i18n-html>Yıllık <span style="color:var(--mint)">(2 ay bedava)</span></span>
     </div>
 
     <div class="price-grid">
       <!-- Starter -->
       <div class="plan">
         <div class="plan-name">Starter</div>
-        <div class="plan-desc">İşletmesini kendi yöneten restoran ve kafeler için.</div>
-        <div class="plan-price">€<span data-m="29" data-y="24">29</span><span class="per">/ay</span></div>
-        <div class="plan-year" data-ytext="Yıllık €290 — 2 ay bedava">&nbsp;</div>
+        <div class="plan-desc" data-i18n="starter_desc">İşletmesini kendi yöneten restoran ve kafeler için.</div>
+        <div class="plan-price">€<span data-m="29" data-y="24">29</span><span class="per" data-i18n="per_month">/ay</span></div>
+        <div class="plan-year" data-ytext-tr="Yıllık €290 — 2 ay bedava" data-ytext-en="€290/year — 2 months free">&nbsp;</div>
         <ul class="plan-features">
-          <li><span class="tick">✓</span> Uygulamanın tamamına erişim</li>
-          <li><span class="tick">✓</span> 4 modül: ürün, gider, dashboard, simülatör</li>
-          <li><span class="tick">✓</span> AI reçete önerisi</li>
-          <li><span class="tick">✓</span> Sınırsız ürün ve senaryo</li>
-          <li><span class="tick">✓</span> E-posta desteği</li>
-          <li><span class="tick">✓</span> 30 gün ücretsiz deneme</li>
+          <li><span class="tick">✓</span> <span data-i18n="starter_f1">Uygulamanın tamamına erişim</span></li>
+          <li><span class="tick">✓</span> <span data-i18n="starter_f2">4 modül: ürün, gider, dashboard, simülatör</span></li>
+          <li><span class="tick">✓</span> <span data-i18n="starter_f3">AI reçete önerisi</span></li>
+          <li><span class="tick">✓</span> <span data-i18n="starter_f4">Sınırsız ürün ve senaryo</span></li>
+          <li><span class="tick">✓</span> <span data-i18n="starter_f5">E-posta desteği</span></li>
+          <li><span class="tick">✓</span> <span data-i18n="starter_f6">30 gün ücretsiz deneme</span></li>
         </ul>
-        <a href="login.html" class="btn btn-plan">Ücretsiz dene</a>
+        <a href="login.html" class="btn btn-plan" data-i18n="starter_btn">Ücretsiz dene</a>
       </div>
 
       <!-- Business -->
       <div class="plan featured">
-        <div class="plan-badge">DANIŞMANLIK DAHİL</div>
+        <div class="plan-badge" data-i18n="biz_badge">DANIŞMANLIK DAHİL</div>
         <div class="plan-name">Business</div>
-        <div class="plan-desc">Rakamlarını birlikte yorumlayacak bir uzman isteyenler için.</div>
-        <div class="plan-price">€<span data-m="189" data-y="157">189</span><span class="per">/ay</span></div>
-        <div class="plan-year" data-ytext="Yıllık €1.890 — 2 ay bedava">&nbsp;</div>
+        <div class="plan-desc" data-i18n="biz_desc">Rakamlarını birlikte yorumlayacak bir uzman isteyenler için.</div>
+        <div class="plan-price">€<span data-m="189" data-y="157">189</span><span class="per" data-i18n="per_month2">/ay</span></div>
+        <div class="plan-year" data-ytext-tr="Yıllık €1.890 — 2 ay bedava" data-ytext-en="€1,890/year — 2 months free">&nbsp;</div>
         <ul class="plan-features">
-          <li><span class="tick">✓</span> Starter'daki her şey</li>
-          <li><span class="tick">✓</span> <strong style="color:#fff;">Ayda 2 saat birebir danışmanlık</strong></li>
-          <li><span class="tick">✓</span> Kârlılığını bir finans uzmanıyla birlikte yorumla</li>
-          <li><span class="tick">✓</span> Sana özel kârlılık raporu (grafikli)</li>
-          <li><span class="tick">✓</span> Öncelikli destek</li>
+          <li><span class="tick">✓</span> <span data-i18n="biz_f1">Starter'daki her şey</span></li>
+          <li><span class="tick">✓</span> <strong style="color:#fff;" data-i18n="biz_f2">Ayda 2 saat birebir danışmanlık</strong></li>
+          <li><span class="tick">✓</span> <span data-i18n="biz_f3">Kârlılığını bir finans uzmanıyla birlikte yorumla</span></li>
+          <li><span class="tick">✓</span> <span data-i18n="biz_f4">Sana özel kârlılık raporu (grafikli)</span></li>
+          <li><span class="tick">✓</span> <span data-i18n="biz_f5">Öncelikli destek</span></li>
         </ul>
-        <a href="login.html" class="btn btn-plan-featured">Business ile başla</a>
+        <a href="login.html" class="btn btn-plan-featured" data-i18n="biz_btn">Business ile başla</a>
       </div>
     </div>
-    <p style="text-align:center;color:#7E92AD;font-size:13px;margin-top:28px;">Ek birebir eğitim/danışmanlık: €70/saat · İstediğin zaman iptal edebilirsin</p>
+    <p style="text-align:center;color:#7E92AD;font-size:13px;margin-top:28px;" data-i18n="price_extra">Ek birebir eğitim/danışmanlık: €70/saat · İstediğin zaman iptal edebilirsin</p>
   </div>
 </section>
 
 <!-- FINAL CTA -->
 <section class="section final">
-  <h2>Bu ay hangi ürünün zarar ettirdiğini öğren.</h2>
-  <p>Birkaç ürün gir, ilk kâr tablonu 10 dakikada gör.</p>
-  <a href="login.html" class="btn btn-primary btn-lg">Ücretsiz başla</a>
-  <p style="font-size:14px;color:var(--muted);margin-top:24px;margin-bottom:0;">Soruların mı var? <a href="mailto:info@marginpulse.nl" style="color:var(--blue);text-decoration:none;font-weight:600;">info@marginpulse.nl</a></p>
+  <h2 data-i18n="final_title">Bu ay hangi ürünün zarar ettirdiğini öğren.</h2>
+  <p data-i18n="final_sub">Birkaç ürün gir, ilk kâr tablonu 10 dakikada gör.</p>
+  <a href="login.html" class="btn btn-primary btn-lg" data-i18n="final_btn">Ücretsiz başla</a>
+  <p style="font-size:14px;color:var(--muted);margin-top:24px;margin-bottom:0;"><span data-i18n="final_contact">Soruların mı var?</span> <a href="mailto:info@marginpulse.nl" style="color:var(--blue);text-decoration:none;font-weight:600;">info@marginpulse.nl</a></p>
 </section>
 
 <!-- FOOTER -->
@@ -301,31 +302,130 @@ footer{border-top:1px solid var(--line);background:var(--soft);}
   <div class="foot-inner">
     <div class="foot-brand">Margin<span>Pulse</span></div>
     <div class="foot-links">
-      <a href="#nasil">Nasıl çalışır</a>
-      <a href="#moduller">Modüller</a>
-      <a href="#fiyatlar">Fiyatlar</a>
-      <a href="login.html">Giriş yap</a>
-      <a href="mailto:info@marginpulse.nl">İletişim</a>
+      <a href="#nasil" data-i18n="nav_how">Nasıl çalışır</a>
+      <a href="#moduller" data-i18n="nav_modules">Modüller</a>
+      <a href="#fiyatlar" data-i18n="nav_pricing">Fiyatlar</a>
+      <a href="login.html" data-i18n="nav_login">Giriş yap</a>
+      <a href="mailto:info@marginpulse.nl" data-i18n="footer_contact">İletişim</a>
     </div>
-    <div class="foot-copy">© 2026 MarginPulse · Restoran &amp; kafe kârlılık yönetimi · <a href="mailto:info@marginpulse.nl" style="color:var(--blue);text-decoration:none;">info@marginpulse.nl</a></div>
+    <div class="foot-copy">© 2026 MarginPulse · <span data-i18n="footer_tagline">Restoran &amp; kafe kârlılık yönetimi</span> · <a href="mailto:info@marginpulse.nl" style="color:var(--blue);text-decoration:none;">info@marginpulse.nl</a></div>
   </div>
 </footer>
 
 <script>
+// ====== DİL SÖZLÜĞÜ ======
+const I18N = {
+  tr: {
+    nav_how:"Nasıl çalışır", nav_modules:"Modüller", nav_pricing:"Fiyatlar", nav_login:"Giriş yap", nav_try:"Ücretsiz dene",
+    hero_eyebrow:"Restoran & kafeler için kârlılık yönetimi",
+    hero_title:'Hangi ürün <span class="accent">kazandırıyor</span>, hangisi <span class="accent">kaybettiriyor</span>?',
+    hero_lead:"MarginPulse her tabağın maliyetini, kârını ve marjını hesaplar. Sadece kayıt tutmaz — ne yapman gerektiğini söyler. Muhasebe yazılımı değil, kârlılık danışmanı.",
+    hero_cta1:"Ücretsiz başla", hero_cta2:"Nasıl çalışır?", hero_note:"Kredi kartı gerekmez · Türkçe destek",
+    card_title:"Bu ay — Kârlılık", card_tag:"▲ %18 net marj", card_revenue:"Bu ay geliri", card_cost:"Toplam gider", card_net:"Net sonuç",
+    card_alarm:'<strong>"Mercimek çorbası" zarar ettiriyor.</strong> Önerilen fiyat: €5,90 (şu an €4,50).',
+    problem_eyebrow:"Sorun", problem_title:"Cironuz iyi ama kasada para yok mu?",
+    problem_sub:"Çoğu restoran ne kazandığını ay sonunda, muhasebeciden öğrenir. O zaman da çok geçtir. Sorun ciro değil — hangi ürünün ne kadar kâr bıraktığını bilmemektir.",
+    problem_1:"Klasik muhasebe yazılımı sadece geçmişi kaydeder", problem_2:"Hangi tabağın zarar ettirdiğini fark etmezsin",
+    problem_3:"Zam yapmadan önce etkisini göremezsin", problem_4:"MarginPulse ne yapman gerektiğini söyler",
+    mod_eyebrow:"Ne yapar", mod_title:"Dört modül, tek tablo", mod_sub:"Ürünlerini ve giderlerini bir kez gir; gerisini MarginPulse hesaplar.",
+    mod1_num:"01 — Ürün Kârlılığı", mod1_h:"Her tabağın gerçek maliyeti", mod1_p:"Reçeteyi gir, hammadde maliyeti otomatik çıksın. Hangi üründe ne kadar kâr var, anında gör.",
+    mod2_num:"02 — Sabit Giderler", mod2_h:"Kira, personel, fatura — hepsi", mod2_p:"Aylık, üç aylık, yıllık tüm giderleri ekle. Aylık karşılıkları otomatik hesaplansın. Vergi tahmini dahil.",
+    mod3_num:"03 — Dashboard", mod3_h:"Tek bakışta kâr/zarar", mod3_p:'"Bu ay €4.400 kârdasın" ya da "Şu ürün zarar ettiriyor, fiyatı şu olmalı" — net uyarılar.',
+    mod4_num:"04 — Fiyat Simülatörü", mod4_h:"Zam yapmadan önce dene", mod4_p:'"Ayrana %10 zam yaparsam ne olur?" Birden fazla üründe değişiklik yap, toplam etkiyi gör.',
+    price_eyebrow:"Fiyatlar", price_title:"İşletmene göre seç", price_sub:"Tüm paketlerde uygulamanın tamamı var. Fark, aldığın birebir destekte.",
+    price_monthly:"Aylık", price_yearly:'Yıllık <span style="color:var(--mint)">(2 ay bedava)</span>',
+    starter_desc:"İşletmesini kendi yöneten restoran ve kafeler için.",
+    starter_f1:"Uygulamanın tamamına erişim", starter_f2:"4 modül: ürün, gider, dashboard, simülatör", starter_f3:"AI reçete önerisi",
+    starter_f4:"Sınırsız ürün ve senaryo", starter_f5:"E-posta desteği", starter_f6:"30 gün ücretsiz deneme", starter_btn:"Ücretsiz dene",
+    per_month:"/ay", per_month2:"/ay",
+    biz_badge:"DANIŞMANLIK DAHİL", biz_desc:"Rakamlarını birlikte yorumlayacak bir uzman isteyenler için.",
+    biz_f1:"Starter'daki her şey", biz_f2:"Ayda 2 saat birebir danışmanlık", biz_f3:"Kârlılığını bir finans uzmanıyla birlikte yorumla",
+    biz_f4:"Sana özel kârlılık raporu (grafikli)", biz_f5:"Öncelikli destek", biz_btn:"Business ile başla",
+    price_extra:"Ek birebir eğitim/danışmanlık: €70/saat · İstediğin zaman iptal edebilirsin",
+    final_title:"Bu ay hangi ürünün zarar ettirdiğini öğren.", final_sub:"Birkaç ürün gir, ilk kâr tablonu 10 dakikada gör.",
+    final_btn:"Ücretsiz başla", final_contact:"Soruların mı var?",
+    footer_contact:"İletişim", footer_tagline:"Restoran & kafe kârlılık yönetimi"
+  },
+  en: {
+    nav_how:"How it works", nav_modules:"Modules", nav_pricing:"Pricing", nav_login:"Log in", nav_try:"Try for free",
+    hero_eyebrow:"Profit management for restaurants & cafés",
+    hero_title:'Which dish <span class="accent">makes money</span>, and which <span class="accent">loses it</span>?',
+    hero_lead:"MarginPulse calculates the cost, profit and margin of every dish. It doesn't just keep records — it tells you what to do. Not accounting software, but a profitability advisor.",
+    hero_cta1:"Start free", hero_cta2:"How it works?", hero_note:"No credit card required · Support in English & Turkish",
+    card_title:"This month — Profitability", card_tag:"▲ 18% net margin", card_revenue:"This month's revenue", card_cost:"Total expenses", card_net:"Net result",
+    card_alarm:'<strong>"Lentil soup" is losing money.</strong> Suggested price: €5.90 (currently €4.50).',
+    problem_eyebrow:"The problem", problem_title:"Good revenue but no money in the till?",
+    problem_sub:"Most restaurants find out what they earned at month-end, from their accountant. By then it's too late. The problem isn't revenue — it's not knowing which dish leaves how much profit.",
+    problem_1:"Classic accounting software only records the past", problem_2:"You don't notice which dish is losing money",
+    problem_3:"You can't see the impact before raising a price", problem_4:"MarginPulse tells you what to do",
+    mod_eyebrow:"What it does", mod_title:"Four modules, one dashboard", mod_sub:"Enter your products and expenses once; MarginPulse handles the rest.",
+    mod1_num:"01 — Product Profitability", mod1_h:"The real cost of every dish", mod1_p:"Enter the recipe, get the ingredient cost automatically. See how much profit each product makes, instantly.",
+    mod2_num:"02 — Fixed Expenses", mod2_h:"Rent, staff, bills — all of it", mod2_p:"Add monthly, quarterly and yearly expenses. Monthly equivalents are calculated automatically. Tax estimate included.",
+    mod3_num:"03 — Dashboard", mod3_h:"Profit/loss at a glance", mod3_p:'"You\'re €4,400 in profit this month" or "This product is losing money, here\'s the right price" — clear alerts.',
+    mod4_num:"04 — Price Simulator", mod4_h:"Test before you raise prices", mod4_p:'"What if I raise ayran by 10%?" Change several products at once, see the total impact.',
+    price_eyebrow:"Pricing", price_title:"Choose what fits your business", price_sub:"Every plan includes the full app. The difference is the one-on-one support you get.",
+    price_monthly:"Monthly", price_yearly:'Yearly <span style="color:var(--mint)">(2 months free)</span>',
+    starter_desc:"For restaurants and cafés managing on their own.",
+    starter_f1:"Full access to the app", starter_f2:"4 modules: products, expenses, dashboard, simulator", starter_f3:"AI recipe suggestions",
+    starter_f4:"Unlimited products and scenarios", starter_f5:"Email support", starter_f6:"30-day free trial", starter_btn:"Try for free",
+    per_month:"/mo", per_month2:"/mo",
+    biz_badge:"CONSULTING INCLUDED", biz_desc:"For those who want an expert to interpret the numbers with them.",
+    biz_f1:"Everything in Starter", biz_f2:"2 hours of one-on-one consulting per month", biz_f3:"Interpret your profitability with a finance expert",
+    biz_f4:"Custom profitability report (with charts)", biz_f5:"Priority support", biz_btn:"Start with Business",
+    price_extra:"Extra one-on-one training/consulting: €70/hour · Cancel anytime",
+    final_title:"Find out which product lost you money this month.", final_sub:"Enter a few products, see your first profit table in 10 minutes.",
+    final_btn:"Start free", final_contact:"Questions?",
+    footer_contact:"Contact", footer_tagline:"Restaurant & café profit management"
+  }
+};
+
+let lang = localStorage.getItem('mp_lang');
+if (!lang) {
+  const nav = (navigator.language || 'tr').toLowerCase();
+  lang = nav.startsWith('tr') ? 'tr' : 'en';
+}
+
+function applyLang() {
+  const dict = I18N[lang];
+  document.querySelectorAll('[data-i18n]').forEach(el => {
+    const key = el.getAttribute('data-i18n');
+    if (dict[key] === undefined) return;
+    if (el.hasAttribute('data-i18n-html')) el.innerHTML = dict[key];
+    else el.textContent = dict[key];
+  });
+  document.documentElement.lang = lang;
+  document.getElementById('langBtn').textContent = (lang === 'tr') ? 'EN' : 'TR';
+  document.querySelectorAll('.plan-year').forEach(el => {
+    el.dataset.ytext = (lang === 'tr') ? el.dataset.ytextTr : el.dataset.ytextEn;
+  });
+  refreshYearText();
+}
+
+function toggleLang() {
+  lang = (lang === 'tr') ? 'en' : 'tr';
+  localStorage.setItem('mp_lang', lang);
+  applyLang();
+}
+
+// ====== FİYAT AYLIK/YILLIK ======
 let yearly = false;
+function refreshYearText() {
+  document.querySelectorAll('.plan-year').forEach(el => {
+    el.innerHTML = yearly ? el.dataset.ytext : '&nbsp;';
+  });
+}
 function toggleBilling() {
   yearly = !yearly;
   document.getElementById('billingToggle').classList.toggle('on', yearly);
   document.getElementById('lblMonthly').classList.toggle('active', !yearly);
   document.getElementById('lblYearly').classList.toggle('active', yearly);
-
   document.querySelectorAll('.plan-price span[data-m]').forEach(el => {
     el.textContent = yearly ? el.dataset.y : el.dataset.m;
   });
-  document.querySelectorAll('.plan-year').forEach(el => {
-    el.innerHTML = yearly ? el.dataset.ytext : '&nbsp;';
-  });
+  refreshYearText();
 }
+
+applyLang();
 </script>
 </body>
 </html>
