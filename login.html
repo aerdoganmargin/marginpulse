@@ -30,35 +30,38 @@ body{font-family:'Segoe UI',system-ui,sans-serif;background:#0F1F3D;display:flex
 </head>
 <body>
 <div class="box">
+  <div style="text-align:right;margin-bottom:8px;">
+    <button onclick="toggleLang()" id="langBtn" style="background:transparent;border:1px solid #E2E8F0;border-radius:8px;padding:5px 10px;font-size:12px;font-weight:600;cursor:pointer;color:#64748B;">EN</button>
+  </div>
   <div class="logo">Margin<span>Pulse</span></div>
-  <div class="tagline">Restoran &amp; kafe karlılık yönetimi</div>
+  <div class="tagline" data-i18n="tagline">Restoran &amp; kafe karlılık yönetimi</div>
 
   <div class="tabs">
-    <div class="tab active" id="tabLogin" onclick="switchTab('login')">Giriş Yap</div>
-    <div class="tab" id="tabSignup" onclick="switchTab('signup')">Kayıt Ol</div>
+    <div class="tab active" id="tabLogin" onclick="switchTab('login')" data-i18n="tab_login">Giriş Yap</div>
+    <div class="tab" id="tabSignup" onclick="switchTab('signup')" data-i18n="tab_signup">Kayıt Ol</div>
   </div>
 
   <div class="field" id="nameField" style="display:none;">
-    <label>Restoran / İşletme adı</label>
-    <input id="bizName" placeholder="Örn: Anadolu Restaurant" />
+    <label data-i18n="label_biz">Restoran / İşletme adı</label>
+    <input id="bizName" data-i18n-ph="ph_biz" placeholder="Örn: Anadolu Restaurant" />
   </div>
   <div class="field">
-    <label>E-posta</label>
+    <label data-i18n="label_email">E-posta</label>
     <input id="email" type="email" placeholder="ornek@email.com" />
   </div>
   <div class="field">
-    <label>Şifre</label>
+    <label data-i18n="label_pw">Şifre</label>
     <input id="password" type="password" placeholder="••••••••" />
   </div>
 
-  <button class="btn" id="submitBtn" onclick="submit()">Giriş Yap</button>
+  <button class="btn" id="submitBtn" onclick="submit()" data-i18n="btn_login">Giriş Yap</button>
   <div class="msg" id="msg"></div>
 
   <div id="forgotWrap" style="text-align:center;margin-top:14px;">
-    <a href="#" id="forgotLink" onclick="switchTab('forgot');return false;" style="font-size:12.5px;color:#64748B;text-decoration:none;">Şifremi unuttum</a>
+    <a href="#" id="forgotLink" onclick="switchTab('forgot');return false;" style="font-size:12.5px;color:#64748B;text-decoration:none;" data-i18n="forgot_link">Şifremi unuttum</a>
   </div>
   <div id="backWrap" style="text-align:center;margin-top:14px;display:none;">
-    <a href="#" onclick="switchTab('login');return false;" style="font-size:12.5px;color:#2563EB;text-decoration:none;">← Girişe dön</a>
+    <a href="#" onclick="switchTab('login');return false;" style="font-size:12.5px;color:#2563EB;text-decoration:none;" data-i18n="back_link">← Girişe dön</a>
   </div>
 </div>
 
@@ -67,12 +70,70 @@ const SUPABASE_URL = 'https://dmklhurvzahoiaklsnwo.supabase.co';
 const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImRta2xodXJ2emFob2lha2xzbndvIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODAxNjQxNjMsImV4cCI6MjA5NTc0MDE2M30.e-jJJ_Ru3pDKBnK_cw63pHhl_TN44LXAIC7P8w9mSns';
 const sb = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
+// ====== DİL ======
+const I18N = {
+  tr: {
+    tagline:"Restoran & kafe karlılık yönetimi",
+    tab_login:"Giriş Yap", tab_signup:"Kayıt Ol",
+    label_biz:"Restoran / İşletme adı", ph_biz:"Örn: Anadolu Restaurant",
+    label_email:"E-posta", label_pw:"Şifre",
+    btn_login:"Giriş Yap", btn_signup:"Kayıt Ol", btn_forgot:"Sıfırlama linki gönder",
+    forgot_link:"Şifremi unuttum", back_link:"← Girişe dön",
+    forgot_info:"E-posta adresini gir, sana şifre sıfırlama linki gönderelim.",
+    err_email:"E-posta adresini gir", sending:"Gönderiliyor…",
+    err_send:"Gönderilemedi: ", ok_reset:"✅ Sıfırlama linki e-postana gönderildi. Gelen kutunu (ve spam klasörünü) kontrol et.",
+    err_both:"E-posta ve şifre gerekli", err_pwlen:"Şifre en az 6 karakter olmalı",
+    wait:"Lütfen bekle…", err_login:"Giriş başarısız: ", err_invalid:"E-posta veya şifre hatalı",
+    err_signup:"Kayıt başarısız: ", ok_signup:"✅ Kayıt başarılı! E-postana gönderilen onay linkine tıkla, sonra giriş yap."
+  },
+  en: {
+    tagline:"Restaurant & café profit management",
+    tab_login:"Log in", tab_signup:"Sign up",
+    label_biz:"Restaurant / business name", ph_biz:"e.g. Anatolia Restaurant",
+    label_email:"Email", label_pw:"Password",
+    btn_login:"Log in", btn_signup:"Sign up", btn_forgot:"Send reset link",
+    forgot_link:"Forgot password", back_link:"← Back to login",
+    forgot_info:"Enter your email and we'll send you a password reset link.",
+    err_email:"Enter your email", sending:"Sending…",
+    err_send:"Couldn't send: ", ok_reset:"✅ Reset link sent to your email. Check your inbox (and spam folder).",
+    err_both:"Email and password required", err_pwlen:"Password must be at least 6 characters",
+    wait:"Please wait…", err_login:"Login failed: ", err_invalid:"Wrong email or password",
+    err_signup:"Sign-up failed: ", ok_signup:"✅ Sign-up successful! Click the confirmation link sent to your email, then log in."
+  }
+};
+let lang = localStorage.getItem('mp_lang');
+if (!lang) { const n=(navigator.language||'tr').toLowerCase(); lang = n.startsWith('tr')?'tr':'en'; }
+function t(k){ return (I18N[lang] && I18N[lang][k]) || k; }
+
+function applyLang() {
+  document.querySelectorAll('[data-i18n]').forEach(el => {
+    const k = el.getAttribute('data-i18n');
+    if (I18N[lang][k] !== undefined) el.textContent = I18N[lang][k];
+  });
+  document.querySelectorAll('[data-i18n-ph]').forEach(el => {
+    const k = el.getAttribute('data-i18n-ph');
+    if (I18N[lang][k] !== undefined) el.placeholder = I18N[lang][k];
+  });
+  document.documentElement.lang = lang;
+  document.getElementById('langBtn').textContent = (lang==='tr')?'EN':'TR';
+  // moda göre buton + varsa forgot bilgisini tazele
+  refreshModeTexts();
+}
+function toggleLang(){ lang=(lang==='tr')?'en':'tr'; localStorage.setItem('mp_lang',lang); applyLang(); }
+
 let mode = 'login';
 
 // Zaten giriş yapmışsa direkt uygulamaya yönlendir
 sb.auth.getSession().then(({data}) => {
   if (data.session) window.location.href = 'urunler.html';
 });
+
+function refreshModeTexts() {
+  const isForgot = (mode === 'forgot');
+  document.getElementById('submitBtn').textContent =
+    isForgot ? t('btn_forgot') : (mode==='login' ? t('btn_login') : t('btn_signup'));
+  if (isForgot) showMsg(t('forgot_info'), 'info');
+}
 
 function switchTab(m) {
   mode = m;
@@ -81,24 +142,15 @@ function switchTab(m) {
   document.getElementById('tabLogin').classList.toggle('active', m==='login');
   document.getElementById('tabSignup').classList.toggle('active', m==='signup');
   document.getElementById('nameField').style.display = m==='signup' ? 'block' : 'none';
-
-  // Şifre alanı: sıfırlama modunda gizli
   document.getElementById('password').parentElement.style.display = isForgot ? 'none' : 'block';
-
-  // Sekmeler sıfırlama modunda gizli
   document.querySelector('.tabs').style.display = isForgot ? 'none' : 'flex';
-
   document.getElementById('forgotWrap').style.display = (m === 'login') ? 'block' : 'none';
   document.getElementById('backWrap').style.display = isForgot ? 'block' : 'none';
 
   document.getElementById('submitBtn').textContent =
-    isForgot ? 'Sıfırlama linki gönder' : (m==='login' ? 'Giriş Yap' : 'Kayıt Ol');
+    isForgot ? t('btn_forgot') : (m==='login' ? t('btn_login') : t('btn_signup'));
 
-  if (isForgot) {
-    showMsg('E-posta adresini gir, sana şifre sıfırlama linki gönderelim.', 'info');
-  } else {
-    hideMsg();
-  }
+  if (isForgot) showMsg(t('forgot_info'), 'info'); else hideMsg();
 }
 
 function showMsg(text, type) {
@@ -115,36 +167,33 @@ async function submit() {
 
   // ŞİFRE SIFIRLAMA
   if (mode === 'forgot') {
-    if (!email) { showMsg('E-posta adresini gir', 'error'); return; }
+    if (!email) { showMsg(t('err_email'), 'error'); return; }
     btn.disabled = true;
-    btn.textContent = 'Gönderiliyor…';
+    btn.textContent = t('sending');
 
     const { error } = await sb.auth.resetPasswordForEmail(email, {
       redirectTo: window.location.origin + '/sifre-yenile.html'
     });
 
     btn.disabled = false;
-    btn.textContent = 'Sıfırlama linki gönder';
+    btn.textContent = t('btn_forgot');
 
-    if (error) {
-      showMsg('Gönderilemedi: ' + error.message, 'error');
-    } else {
-      showMsg('✅ Sıfırlama linki e-postana gönderildi. Gelen kutunu (ve spam klasörünü) kontrol et.', 'success');
-    }
+    if (error) showMsg(t('err_send') + error.message, 'error');
+    else showMsg(t('ok_reset'), 'success');
     return;
   }
 
-  if (!email || !password) { showMsg('E-posta ve şifre gerekli', 'error'); return; }
-  if (password.length < 6) { showMsg('Şifre en az 6 karakter olmalı', 'error'); return; }
+  if (!email || !password) { showMsg(t('err_both'), 'error'); return; }
+  if (password.length < 6) { showMsg(t('err_pwlen'), 'error'); return; }
 
   btn.disabled = true;
-  btn.textContent = 'Lütfen bekle…';
+  btn.textContent = t('wait');
 
   if (mode === 'login') {
     const { error } = await sb.auth.signInWithPassword({ email, password });
     if (error) {
-      showMsg('Giriş başarısız: ' + (error.message.includes('Invalid') ? 'E-posta veya şifre hatalı' : error.message), 'error');
-      btn.disabled = false; btn.textContent = 'Giriş Yap';
+      showMsg(t('err_login') + (error.message.includes('Invalid') ? t('err_invalid') : error.message), 'error');
+      btn.disabled = false; btn.textContent = t('btn_login');
     } else {
       window.location.href = 'urunler.html';
     }
@@ -155,22 +204,20 @@ async function submit() {
       options: { data: { business_name: bizName } }
     });
     if (error) {
-      showMsg('Kayıt başarısız: ' + error.message, 'error');
-      btn.disabled = false; btn.textContent = 'Kayıt Ol';
+      showMsg(t('err_signup') + error.message, 'error');
+      btn.disabled = false; btn.textContent = t('btn_signup');
     } else if (data.session) {
-      // Confirm email kapalıysa direkt giriş
       window.location.href = 'urunler.html';
     } else {
-      // Confirm email açıksa
-      showMsg('✅ Kayıt başarılı! E-postana gönderilen onay linkine tıkla, sonra giriş yap.', 'success');
-      btn.disabled = false; btn.textContent = 'Kayıt Ol';
+      showMsg(t('ok_signup'), 'success');
+      btn.disabled = false; btn.textContent = t('btn_signup');
       switchTab('login');
     }
   }
 }
 
-// Enter ile gönder
 document.addEventListener('keydown', e => { if(e.key==='Enter') submit(); });
+applyLang();
 </script>
 </body>
 </html>
