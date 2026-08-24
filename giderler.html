@@ -49,6 +49,26 @@ td input,td select{width:100%;padding:6px 8px;border:1px solid #E2E8F0;border-ra
 .tax-result{background:#FEF3C7;border-radius:8px;padding:12px 16px;margin-top:12px;font-size:13px;color:#92400E;}
 .tax-result strong{font-size:16px;}
 .empty{text-align:center;color:#94A3B8;font-size:13px;padding:1rem;}
+
+
+/* ===== TELEFON GÖRÜNÜMÜ ===== */
+@media (max-width: 760px) {
+  body { flex-direction: column; }
+  .sidebar {
+    width: 100%; flex-direction: row; flex-wrap: wrap;
+    padding: 10px 12px; gap: 6px; align-items: center;
+    position: sticky; top: 0; z-index: 100;
+  }
+  .sidebar .logo { margin-bottom: 0; margin-right: auto; font-size: 18px; }
+  .nav { font-size: 12px; padding: 6px 10px; }
+  .nav .dot { display: none; }
+  .sidebar > div[style*="margin-top:auto"] { margin-top: 0 !important; padding-top: 0 !important; }
+
+  .main { padding: 1rem; max-width: 100%; width: 100%; }
+  .title { font-size: 18px; flex-wrap: wrap; gap: 8px; }
+  table { display: block; overflow-x: auto; white-space: nowrap; }
+  .row { flex-wrap: wrap; }
+}
 </style>
 </head>
 <body>

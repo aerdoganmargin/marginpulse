@@ -83,6 +83,26 @@ input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:22px;heigh
 .dash-delta{text-align:center;font-size:13px;font-weight:700;padding:12px;border-radius:10px;margin-top:12px;}
 .dash-delta.pos{background:#F0FDF4;color:#059669;border:1px solid #BBF7D0;}
 .dash-delta.neg{background:#FEF2F2;color:#DC2626;border:1px solid #FECACA;}
+
+
+/* ===== TELEFON GÖRÜNÜMÜ ===== */
+@media (max-width: 760px) {
+  body { flex-direction: column; }
+  .sidebar {
+    width: 100%; flex-direction: row; flex-wrap: wrap;
+    padding: 10px 12px; gap: 6px; align-items: center;
+    position: sticky; top: 0; z-index: 100;
+  }
+  .sidebar .logo { margin-bottom: 0; margin-right: auto; font-size: 18px; }
+  .nav { font-size: 12px; padding: 6px 10px; }
+  .nav .dot { display: none; }
+  .sidebar > div[style*="margin-top:auto"] { margin-top: 0 !important; padding-top: 0 !important; }
+
+  .main { padding: 1rem; max-width: 100%; width: 100%; }
+  .title { font-size: 18px; flex-wrap: wrap; gap: 8px; }
+  table { display: block; overflow-x: auto; white-space: nowrap; }
+  .row { flex-wrap: wrap; }
+}
 </style>
 </head>
 <body>
@@ -92,6 +112,7 @@ input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:22px;heigh
   <a class="nav" href="giderler.html"><span class="dot"></span>Sabit giderler</a>
   <a class="nav" href="dashboard.html"><span class="dot"></span>Dashboard</a>
   <div class="nav active"><span class="dot"></span>Simülatör</div>
+  <div style="margin-top:auto;padding-top:1rem;"><div class="nav" onclick="logout()" style="cursor:pointer;color:#F87171;"><span class="dot"></span>Çıkış yap</div></div>
 </div>
 
 <div class="main">
