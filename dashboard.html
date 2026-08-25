@@ -82,11 +82,14 @@ td{padding:9px 8px 9px 0;border-bottom:1px solid #F1F5F9;color:#1E293B;}
 <body>
 <div class="sidebar">
   <div class="logo">Margin<span>Pulse</span></div>
-  <a class="nav" href="urunler.html"><span class="dot"></span>Ürün karlılığı</a>
-  <a class="nav" href="giderler.html"><span class="dot"></span>Sabit giderler</a>
-  <div class="nav active"><span class="dot"></span>Dashboard</div>
-  <a class="nav" href="simulator.html" style="text-decoration:none;"><span class="dot"></span>Simülatör</a>
-  <div style="margin-top:auto;padding-top:1rem;"><div class="nav" onclick="logout()" style="cursor:pointer;color:#F87171;"><span class="dot"></span>Çıkış yap</div></div>
+  <a class="nav" href="urunler.html"><span class="dot"></span><span data-i18n="nav_products">Ürün karlılığı</span></a>
+  <a class="nav" href="giderler.html"><span class="dot"></span><span data-i18n="nav_expenses">Sabit giderler</span></a>
+  <div class="nav active"><span class="dot"></span><span data-i18n="nav_dashboard">Dashboard</span></div>
+  <a class="nav" href="simulator.html" style="text-decoration:none;"><span class="dot"></span><span data-i18n="nav_simulator">Simülatör</span></a>
+  <div style="margin-top:auto;padding-top:1rem;">
+    <div class="nav" onclick="toggleLang()" style="cursor:pointer;"><span class="dot"></span><span id="langLabel">English</span></div>
+    <div class="nav" onclick="logout()" style="cursor:pointer;color:#F87171;"><span class="dot"></span><span data-i18n="nav_logout">Çıkış yap</span></div>
+  </div>
 </div>
 
 <div class="main">
@@ -96,29 +99,29 @@ td{padding:9px 8px 9px 0;border-bottom:1px solid #F1F5F9;color:#1E293B;}
 
   <!-- Alarmlar -->
   <div class="card">
-    <div class="card-title">🔔 Alarmlar &amp; Öneriler</div>
-    <div id="alarms"><div class="empty">Hesaplanıyor…</div></div>
+    <div class="card-title" data-i18n="alarms_title">🔔 Alarmlar &amp; Öneriler</div>
+    <div id="alarms"><div class="empty" data-i18n="calculating">Hesaplanıyor…</div></div>
   </div>
 
   <!-- P&L Özeti -->
   <div class="card">
-    <div class="card-title">💰 Bu Ay — Kâr / Zarar Özeti</div>
+    <div class="card-title" data-i18n="pnl_title">💰 Bu Ay — Kâr / Zarar Özeti</div>
     <div class="pnl-grid">
-      <div class="pnl-box pnl-rev"><div class="lbl">Tahmini Gelir</div><div class="val" id="revenue">—</div></div>
-      <div class="pnl-box pnl-cost"><div class="lbl">Toplam Gider</div><div class="val" id="costs">—</div></div>
-      <div class="pnl-box pnl-net" id="netBox"><div class="lbl">Net Sonuç (NOI)</div><div class="val" id="net">—</div></div>
+      <div class="pnl-box pnl-rev"><div class="lbl" data-i18n="pnl_rev">Tahmini Gelir</div><div class="val" id="revenue">—</div></div>
+      <div class="pnl-box pnl-cost"><div class="lbl" data-i18n="pnl_cost">Toplam Gider</div><div class="val" id="costs">—</div></div>
+      <div class="pnl-box pnl-net" id="netBox"><div class="lbl" data-i18n="pnl_net">Net Sonuç (NOI)</div><div class="val" id="net">—</div></div>
     </div>
     <div style="font-size:11px;color:#94A3B8;margin-top:10px;" id="pnlNote"></div>
   </div>
 
   <!-- Kategori karlılığı -->
   <div class="card">
-    <div class="card-title">📦 Ürün Karlılığı</div>
+    <div class="card-title" data-i18n="products_title">📦 Ürün Karlılığı</div>
     <table>
       <thead><tr>
-        <th>Ürün</th><th>Kategori</th>
-        <th class="r">Satış €</th><th class="r">Maliyet €</th>
-        <th class="r">Birim kâr</th><th class="r">Marj</th>
+        <th data-i18n="th_product">Ürün</th><th data-i18n="th_cat">Kategori</th>
+        <th class="r" data-i18n="th_sale">Satış €</th><th class="r" data-i18n="th_cost">Maliyet €</th>
+        <th class="r" data-i18n="th_profit">Birim kâr</th><th class="r" data-i18n="th_margin">Marj</th>
       </tr></thead>
       <tbody id="productRows"></tbody>
     </table>
@@ -126,11 +129,11 @@ td{padding:9px 8px 9px 0;border-bottom:1px solid #F1F5F9;color:#1E293B;}
 
   <!-- Gelecek ay tahmini -->
   <div class="card">
-    <div class="card-title">📈 Gelecek Ay Tahmini</div>
+    <div class="card-title" data-i18n="forecast_title">📈 Gelecek Ay Tahmini</div>
     <div class="forecast">
       <div>
         <div class="big" id="forecastRevenue">—</div>
-        <div class="lbl">tahmini gelir (ürünlerin gelecek ay adetlerine göre)</div>
+        <div class="lbl" data-i18n="forecast_note">tahmini gelir (ürünlerin gelecek ay adetlerine göre)</div>
       </div>
     </div>
   </div>
@@ -140,6 +143,101 @@ td{padding:9px 8px 9px 0;border-bottom:1px solid #F1F5F9;color:#1E293B;}
 const SUPABASE_URL = 'https://dmklhurvzahoiaklsnwo.supabase.co';
 const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImRta2xodXJ2emFob2lha2xzbndvIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODAxNjQxNjMsImV4cCI6MjA5NTc0MDE2M30.e-jJJ_Ru3pDKBnK_cw63pHhl_TN44LXAIC7P8w9mSns';
 const sb = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+
+// ====== DİL ======
+const I18N = {
+  tr: {
+    nav_products:"Ürün karlılığı", nav_expenses:"Sabit giderler", nav_dashboard:"Dashboard", nav_simulator:"Simülatör", nav_logout:"Çıkış yap",
+    alarms_title:"🔔 Alarmlar & Öneriler", calculating:"Hesaplanıyor…",
+    pnl_title:"💰 Bu Ay — Kâr / Zarar Özeti", pnl_rev:"Tahmini Gelir", pnl_cost:"Toplam Gider", pnl_net:"Net Sonuç (NOI)",
+    products_title:"📦 Ürün Karlılığı", th_product:"Ürün", th_cat:"Kategori", th_sale:"Satış €", th_cost:"Maliyet €", th_profit:"Birim kâr", th_margin:"Marj",
+    forecast_title:"📈 Gelecek Ay Tahmini", forecast_note:"tahmini gelir (ürünlerin gelecek ay adetlerine göre)",
+    greet_morning:"Günaydın", greet_day:"İyi günler", greet_evening:"İyi akşamlar",
+    subtitle:(m)=>`${m} · otomatik hesaplanır`,
+    months:["Ocak","Şubat","Mart","Nisan","Mayıs","Haziran","Temmuz","Ağustos","Eylül","Ekim","Kasım","Aralık"],
+    pnl_note:(v,f)=>`Gelir: geçen ay satış adetleri × fiyat · Gider: değişken (${v}) + sabit (${f})`,
+    no_products_row:"Henüz ürün yok. Ürün Karlılığı modülünden ekle.",
+    a_deficit_h:(n)=>`Bu ay ${n} açık veriyorsun`, a_deficit_d:"Gelirin giderlerini karşılamıyor.",
+    a_deficit_p:(n)=>`Açığı kapatmak için gelir ${n} artmalı ya da gider azalmalı`,
+    a_loss_h:(name)=>`"${name}" zarar ettiriyor`,
+    a_loss_d:(c,s)=>`Maliyet (€${c}) satış fiyatından (€${s}) yüksek.`,
+    a_loss_p:(p)=>`Önerilen min. fiyat: €${p} (%30 marj için)`,
+    a_lowmargin_h:(name,m)=>`"${name}" marjı düşük (%${m})`,
+    a_lowmargin_d:"Düşük kârlılık — fiyat veya maliyet gözden geçirilebilir.",
+    a_lowmargin_p:(p)=>`%30 marj için fiyat: €${p}`,
+    a_nofixed_h:"Bu ay sabit gider girilmemiş", a_nofixed_d:"Doğru kâr/zarar için kira, elektrik vb. giderleri ekle.", a_nofixed_p:"Sabit Giderler modülüne git",
+    a_star_h:(name)=>`"${name}" en çok kâr getiren ürünün`,
+    a_star_d:(q,tp,m)=>`Bu ay ${q} adet sattın, toplam ${tp} kâr bıraktı (marj %${m}).`,
+    a_star_p:(s)=>`Cironun yaklaşık %${s} kadarı bu üründen — menüde daha görünür yap`,
+    a_mix_h:(bm,r,bs)=>`1 adet "${bm}" satmak ≈ ${r} adet "${bs}" satmak kadar kâr`,
+    a_mix_d:(bs,q,bsp,bm,bmp)=>`En çok sattığın ürün "${bs}" (${q} adet) ama adet başına sadece €${bsp} kâr bırakıyor. "${bm}" ise €${bmp} bırakıyor.`,
+    a_mix_p:(bm,ex)=>`Ayda 10 adet daha "${bm}" satsan +${ex} kâr — garsonlara önerttir`,
+    a_food_h:(r)=>`Hammadde maliyeti yüksek: ciroya oranı %${r}`,
+    a_food_d:"Restoranlarda hammadde genelde cironun %28-35'i arasındadır.", a_food_p:"Tedarikçi fiyatlarını ve porsiyon gramajlarını gözden geçir",
+    a_fixed_h:(r)=>`Sabit giderler yüksek: ciroya oranı %${r}`,
+    a_fixed_d:(cat,amt,pc)=>`En büyük kalem: ${cat} (${amt}/ay, sabit giderin yaklaşık %${pc} kadarı).`,
+    a_fixed_d0:"Sabit gider oranı yüksek.", a_fixed_p:"Ciroyu artırmak ya da bu kalemi düşürmek en yüksek etkiyi yaratır",
+    a_trend_h:(m,pct,dir)=>`Sabit giderlerin ${m} ayına göre %${pct} ${dir}`,
+    trend_up:"arttı", trend_down:"azaldı",
+    a_trend_d:(m,pt,tf,sign,diff)=>`${m}: ${pt} → bu ay: ${tf} (${sign}${diff}).`,
+    a_trend_p_up:"Artışın sebebini kontrol et — kâra doğrudan yansır", a_trend_p_down:"Güzel — tasarruf doğrudan kâra yazıldı",
+    a_profit_h:(n)=>`Bu ay ${n} kârdasın`, a_profit_d:"Gelirin giderlerini karşılıyor ve kâr bırakıyor. 👏", a_profit_p:(m)=>`Net marj: %${m}`,
+    a_empty_h:"Dashboard verilerini bekliyor", a_empty_d:"Henüz ürün eklemedin. Ürün Karlılığı modülünden birkaç ürün ekleyince burada kârlılık analizin, alarmların ve akıllı önerilerin otomatik belirir.", a_empty_p:"Ürün Karlılığı sekmesinden başla"
+  },
+  en: {
+    nav_products:"Product profit", nav_expenses:"Fixed expenses", nav_dashboard:"Dashboard", nav_simulator:"Simulator", nav_logout:"Log out",
+    alarms_title:"🔔 Alerts & Recommendations", calculating:"Calculating…",
+    pnl_title:"💰 This Month — Profit / Loss Summary", pnl_rev:"Estimated Revenue", pnl_cost:"Total Expenses", pnl_net:"Net Result (NOI)",
+    products_title:"📦 Product Profitability", th_product:"Product", th_cat:"Category", th_sale:"Sale €", th_cost:"Cost €", th_profit:"Unit profit", th_margin:"Margin",
+    forecast_title:"📈 Next Month Forecast", forecast_note:"estimated revenue (based on products' next-month quantities)",
+    greet_morning:"Good morning", greet_day:"Good afternoon", greet_evening:"Good evening",
+    subtitle:(m)=>`${m} · calculated automatically`,
+    months:["January","February","March","April","May","June","July","August","September","October","November","December"],
+    pnl_note:(v,f)=>`Revenue: last month's sold quantities × price · Expenses: variable (${v}) + fixed (${f})`,
+    no_products_row:"No products yet. Add them from the Product Profitability module.",
+    a_deficit_h:(n)=>`You're running a ${n} deficit this month`, a_deficit_d:"Your revenue doesn't cover your expenses.",
+    a_deficit_p:(n)=>`To close the gap, revenue must rise by ${n} or expenses must fall`,
+    a_loss_h:(name)=>`"${name}" is losing money`,
+    a_loss_d:(c,s)=>`Cost (€${c}) is higher than the sale price (€${s}).`,
+    a_loss_p:(p)=>`Suggested min. price: €${p} (for a 30% margin)`,
+    a_lowmargin_h:(name,m)=>`"${name}" has a low margin (${m}%)`,
+    a_lowmargin_d:"Low profitability — review the price or cost.",
+    a_lowmargin_p:(p)=>`Price for a 30% margin: €${p}`,
+    a_nofixed_h:"No fixed expenses entered this month", a_nofixed_d:"For accurate profit/loss, add rent, electricity, etc.", a_nofixed_p:"Go to the Fixed Expenses module",
+    a_star_h:(name)=>`"${name}" is your most profitable product`,
+    a_star_d:(q,tp,m)=>`You sold ${q} this month, leaving ${tp} total profit (${m}% margin).`,
+    a_star_p:(s)=>`About ${s}% of your revenue comes from this product — make it more visible on the menu`,
+    a_mix_h:(bm,r,bs)=>`Selling 1 "${bm}" ≈ as much profit as ${r} "${bs}"`,
+    a_mix_d:(bs,q,bsp,bm,bmp)=>`Your best seller "${bs}" (${q} sold) leaves only €${bsp} profit each. "${bm}" leaves €${bmp}.`,
+    a_mix_p:(bm,ex)=>`Selling 10 more "${bm}" a month would add +${ex} profit — have your staff recommend it`,
+    a_food_h:(r)=>`Ingredient cost is high: ${r}% of revenue`,
+    a_food_d:"In restaurants, ingredients are usually 28-35% of revenue.", a_food_p:"Review supplier prices and portion sizes",
+    a_fixed_h:(r)=>`Fixed expenses are high: ${r}% of revenue`,
+    a_fixed_d:(cat,amt,pc)=>`Biggest item: ${cat} (${amt}/mo, about ${pc}% of fixed expenses).`,
+    a_fixed_d0:"Fixed-expense ratio is high.", a_fixed_p:"Raising revenue or cutting this item has the biggest impact",
+    a_trend_h:(m,pct,dir)=>`Fixed expenses ${dir} ${pct}% vs ${m}`,
+    trend_up:"rose", trend_down:"fell",
+    a_trend_d:(m,pt,tf,sign,diff)=>`${m}: ${pt} → this month: ${tf} (${sign}${diff}).`,
+    a_trend_p_up:"Check the reason for the increase — it hits profit directly", a_trend_p_down:"Nice — the saving goes straight to profit",
+    a_profit_h:(n)=>`You're ${n} in profit this month`, a_profit_d:"Your revenue covers expenses and leaves a profit. 👏", a_profit_p:(m)=>`Net margin: ${m}%`,
+    a_empty_h:"Dashboard is waiting for data", a_empty_d:"You haven't added products yet. Once you add a few in the Product Profitability module, your profitability analysis, alerts and smart recommendations appear here automatically.", a_empty_p:"Start from the Product Profitability tab"
+  }
+};
+let lang = localStorage.getItem('mp_lang');
+if (!lang) { const n=(navigator.language||'tr').toLowerCase(); lang = n.startsWith('tr')?'tr':'en'; }
+function t(k){ return (I18N[lang] && I18N[lang][k]!==undefined) ? I18N[lang][k] : k; }
+function applyLang() {
+  document.querySelectorAll('[data-i18n]').forEach(el => {
+    const k=el.getAttribute('data-i18n'); if(typeof I18N[lang][k]==='string') el.textContent = I18N[lang][k];
+  });
+  document.documentElement.lang = lang;
+  const ll=document.getElementById('langLabel'); if(ll) ll.textContent=(lang==='tr')?'English':'Türkçe';
+  if (typeof showGreeting==='function') showGreeting();
+  if (typeof loadDashboard==='function') loadDashboard(); // insight'ları yeniden üret
+}
+function toggleLang(){ lang=(lang==='tr')?'en':'tr'; localStorage.setItem('mp_lang',lang); applyLang(); }
+const CAT_LABELS={tr:{"Et yemeği":"Et yemeği","Yemek":"Yemek","İçecek":"İçecek","Tatlı":"Tatlı","Aperatif":"Aperatif"},en:{"Et yemeği":"Meat dish","Yemek":"Food","İçecek":"Drink","Tatlı":"Dessert","Aperatif":"Starter"}};
+function catLabel(v){ return (CAT_LABELS[lang] && CAT_LABELS[lang][v]) || v || '—'; }
 // ====== GİRİŞ KONTROLÜ ======
 let currentUser = null;
 (async () => {
@@ -153,7 +251,7 @@ function showGreeting() {
   if (!el || !currentUser) return;
   const bizName = (currentUser.user_metadata && currentUser.user_metadata.business_name) || "";
   const hour = new Date().getHours();
-  const selam = hour < 12 ? "Günaydın" : (hour < 18 ? "İyi günler" : "İyi akşamlar");
+  const selam = hour < 12 ? t('greet_morning') : (hour < 18 ? t('greet_day') : t('greet_evening'));
   el.textContent = bizName ? (selam + ", " + bizName + " 👋") : (selam + " 👋");
 }
 async function requireUser() {
@@ -168,15 +266,15 @@ async function logout() {
   window.location.href = "login.html";
 }
 
-const MONTHS = ['Ocak','Şubat','Mart','Nisan','Mayıs','Haziran','Temmuz','Ağustos','Eylül','Ekim','Kasım','Aralık'];
+function MONTHS_arr(){ return t('months'); }
 const now = new Date();
 const monthKey = now.getFullYear() + '-' + String(now.getMonth()+1).padStart(2,'0');
-const monthName = MONTHS[now.getMonth()] + ' ' + now.getFullYear();
+function monthNameFn(){ return MONTHS_arr()[now.getMonth()] + ' ' + now.getFullYear(); }
 
-function eur(n){ return '€' + Math.round(n).toLocaleString('tr-TR'); }
+function eur(n){ return '€' + Math.round(n).toLocaleString(lang==='tr'?'tr-TR':'en-US'); }
 
 async function loadDashboard() {
-  document.getElementById('subtitle').textContent = monthName + ' · otomatik hesaplanır';
+  document.getElementById('subtitle').textContent = t('subtitle')(monthNameFn());
 
   // Verileri çek
   const { data: products } = await sb.from('products').select('*');
@@ -185,7 +283,7 @@ async function loadDashboard() {
   // Geçen ayın sabit giderleri (trend için)
   const prevDate = new Date(now.getFullYear(), now.getMonth()-1, 1);
   const prevKey = prevDate.getFullYear() + '-' + String(prevDate.getMonth()+1).padStart(2,'0');
-  const prevName = MONTHS[prevDate.getMonth()];
+  const prevName = MONTHS_arr()[prevDate.getMonth()];
   const { data: prevCosts } = await sb.from('fixed_costs').select('*').eq('month', prevKey);
 
   const prods = products || [];
@@ -215,8 +313,7 @@ async function loadDashboard() {
   document.getElementById('revenue').textContent = eur(monthlyRevenue);
   document.getElementById('costs').textContent = eur(totalCost);
   document.getElementById('net').textContent = eur(net);
-  document.getElementById('pnlNote').textContent =
-    `Gelir: geçen ay satış adetleri × fiyat · Gider: değişken (${eur(variableCost)}) + sabit (${eur(totalFixed)})`;
+  document.getElementById('pnlNote').textContent = t('pnl_note')(eur(variableCost), eur(totalFixed));
 
   const netBox = document.getElementById('netBox');
   netBox.classList.toggle('loss', net < 0);
@@ -227,7 +324,7 @@ async function loadDashboard() {
   // --- Ürün tablosu ---
   const tbody = document.getElementById('productRows');
   if (prods.length === 0) {
-    tbody.innerHTML = '<tr><td colspan="6" class="empty">Henüz ürün yok. Ürün Karlılığı modülünden ekle.</td></tr>';
+    tbody.innerHTML = '<tr><td colspan="6" class="empty">'+t('no_products_row')+'</td></tr>';
   } else {
     tbody.innerHTML = '';
     prods.forEach(p => {
@@ -238,7 +335,7 @@ async function loadDashboard() {
       let tag = 'tag-green'; if (margin < 0) tag='tag-red'; else if (margin < 30) tag='tag-yellow';
       tbody.innerHTML += `<tr>
         <td><strong>${p.name}</strong></td>
-        <td style="color:#94A3B8">${p.category||'—'}</td>
+        <td style="color:#94A3B8">${catLabel(p.category)}</td>
         <td class="r">€${sp.toFixed(2)}</td>
         <td class="r">€${cost.toFixed(2)}</td>
         <td class="r">€${profit.toFixed(2)}</td>
@@ -253,9 +350,9 @@ async function loadDashboard() {
   // Kritik: net zarar
   if (prods.length > 0 && net < 0) {
     alarms.push({
-      type:'red', ico:'🔴', head:`Bu ay ${eur(Math.abs(net))} açık veriyorsun`,
-      desc:'Gelirin giderlerini karşılamıyor.',
-      pill:`Açığı kapatmak için gelir ${eur(Math.abs(net))} artmalı ya da gider azalmalı`
+      type:'red', ico:'🔴', head:t('a_deficit_h')(eur(Math.abs(net))),
+      desc:t('a_deficit_d'),
+      pill:t('a_deficit_p')(eur(Math.abs(net)))
     });
   }
 
@@ -265,15 +362,15 @@ async function loadDashboard() {
     const margin = sp>0 ? ((sp-cost)/sp*100) : 0;
     if (sp>0 && margin < 0) {
       alarms.push({
-        type:'red', ico:'🔴', head:`"${p.name}" zarar ettiriyor`,
-        desc:`Maliyet (€${cost.toFixed(2)}) satış fiyatından (€${sp.toFixed(2)}) yüksek.`,
-        pill:`Önerilen min. fiyat: €${(cost/0.7).toFixed(2)} (%30 marj için)`
+        type:'red', ico:'🔴', head:t('a_loss_h')(p.name),
+        desc:t('a_loss_d')(cost.toFixed(2), sp.toFixed(2)),
+        pill:t('a_loss_p')((cost/0.7).toFixed(2))
       });
     } else if (sp>0 && margin < 20) {
       alarms.push({
-        type:'yellow', ico:'🟡', head:`"${p.name}" marjı düşük (%${margin.toFixed(0)})`,
-        desc:'Düşük kârlılık — fiyat veya maliyet gözden geçirilebilir.',
-        pill:`%30 marj için fiyat: €${(cost/0.7).toFixed(2)}`
+        type:'yellow', ico:'🟡', head:t('a_lowmargin_h')(p.name, margin.toFixed(0)),
+        desc:t('a_lowmargin_d'),
+        pill:t('a_lowmargin_p')((cost/0.7).toFixed(2))
       });
     }
   });
@@ -281,9 +378,9 @@ async function loadDashboard() {
   // Sabit gider girilmemiş
   if (fixedCosts.length === 0) {
     alarms.push({
-      type:'yellow', ico:'🟡', head:'Bu ay sabit gider girilmemiş',
-      desc:'Doğru kâr/zarar için kira, elektrik vb. giderleri ekle.',
-      pill:'Sabit Giderler modülüne git'
+      type:'yellow', ico:'🟡', head:t('a_nofixed_h'),
+      desc:t('a_nofixed_d'),
+      pill:t('a_nofixed_p')
     });
   }
 
@@ -308,9 +405,9 @@ async function loadDashboard() {
     if (star && star.totalProfit > 0) {
       const share = monthlyRevenue>0 ? (star.sp*star.q/monthlyRevenue*100) : 0;
       alarms.push({
-        type:'blue', ico:'⭐', head:`"${star.name}" en çok kâr getiren ürünün`,
-        desc:`Bu ay ${star.q} adet sattın, toplam ${eur(star.totalProfit)} kâr bıraktı (marj %${star.margin.toFixed(0)}).`,
-        pill:`Cironun yaklaşık %${share.toFixed(0)} kadarı bu üründen — menüde daha görünür yap`
+        type:'blue', ico:'⭐', head:t('a_star_h')(star.name),
+        desc:t('a_star_d')(star.q, eur(star.totalProfit), star.margin.toFixed(0)),
+        pill:t('a_star_p')(share.toFixed(0))
       });
     }
 
@@ -323,9 +420,9 @@ async function loadDashboard() {
       const extra10 = 10 * bestMargin.unitProfit;
       alarms.push({
         type:'blue', ico:'🔀',
-        head:`1 adet "${bestMargin.name}" satmak ≈ ${ratio.toFixed(1).replace('.',',')} adet "${bestSeller.name}" satmak kadar kâr`,
-        desc:`En çok sattığın ürün "${bestSeller.name}" (${bestSeller.q} adet) ama adet başına sadece €${bestSeller.unitProfit.toFixed(2)} kâr bırakıyor. "${bestMargin.name}" ise €${bestMargin.unitProfit.toFixed(2)} bırakıyor.`,
-        pill:`Ayda 10 adet daha "${bestMargin.name}" satsan +${eur(extra10)} kâr — garsonlara önerttir`
+        head:t('a_mix_h')(bestMargin.name, ratio.toFixed(1).replace('.', lang==='tr'?',':'.'), bestSeller.name),
+        desc:t('a_mix_d')(bestSeller.name, bestSeller.q, bestSeller.unitProfit.toFixed(2), bestMargin.name, bestMargin.unitProfit.toFixed(2)),
+        pill:t('a_mix_p')(bestMargin.name, eur(extra10))
       });
     }
 
@@ -336,9 +433,9 @@ async function loadDashboard() {
 
       if (foodRatio > 35) {
         alarms.push({
-          type:'yellow', ico:'🥩', head:`Hammadde maliyeti yüksek: ciroya oranı %${foodRatio.toFixed(0)}`,
-          desc:'Restoranlarda hammadde genelde cironun %28-35\'i arasındadır.',
-          pill:'Tedarikçi fiyatlarını ve porsiyon gramajlarını gözden geçir'
+          type:'yellow', ico:'🥩', head:t('a_food_h')(foodRatio.toFixed(0)),
+          desc:t('a_food_d'),
+          pill:t('a_food_p')
         });
       }
 
@@ -350,9 +447,9 @@ async function loadDashboard() {
         });
         const top = Object.entries(byCat).sort((a,b)=>b[1]-a[1])[0];
         alarms.push({
-          type:'yellow', ico:'🏠', head:`Sabit giderler yüksek: ciroya oranı %${fixedRatio.toFixed(0)}`,
-          desc: top ? `En büyük kalem: ${top[0]} (${eur(top[1])}/ay, sabit giderin yaklaşık %${(top[1]/totalFixed*100).toFixed(0)} kadarı).` : 'Sabit gider oranı yüksek.',
-          pill:'Ciroyu artırmak ya da bu kalemi düşürmek en yüksek etkiyi yaratır'
+          type:'yellow', ico:'🏠', head:t('a_fixed_h')(fixedRatio.toFixed(0)),
+          desc: top ? t('a_fixed_d')(top[0], eur(top[1]), (top[1]/totalFixed*100).toFixed(0)) : t('a_fixed_d0'),
+          pill:t('a_fixed_p')
         });
       }
     }
@@ -369,9 +466,9 @@ async function loadDashboard() {
         alarms.push({
           type: up ? 'yellow' : 'blue',
           ico: up ? '📈' : '📉',
-          head:`Sabit giderlerin ${prevName} ayına göre %${Math.abs(pct).toFixed(0)} ${up?'arttı':'azaldı'}`,
-          desc:`${prevName}: ${eur(prevTotal)} → bu ay: ${eur(totalFixed)} (${up?'+':''}${eur(diff)}).`,
-          pill: up ? 'Artışın sebebini kontrol et — kâra doğrudan yansır' : 'Güzel — tasarruf doğrudan kâra yazıldı'
+          head:t('a_trend_h')(prevName, Math.abs(pct).toFixed(0), up?t('trend_up'):t('trend_down')),
+          desc:t('a_trend_d')(prevName, eur(prevTotal), eur(totalFixed), up?'+':'', eur(diff)),
+          pill: up ? t('a_trend_p_up') : t('a_trend_p_down')
         });
       }
     }
@@ -380,17 +477,17 @@ async function loadDashboard() {
   // Pozitif
   if (prods.length > 0 && net > 0) {
     alarms.push({
-      type:'green', ico:'🟢', head:`Bu ay ${eur(net)} kârdasın`,
-      desc:'Gelirin giderlerini karşılıyor ve kâr bırakıyor. 👏',
-      pill:`Net marj: %${monthlyRevenue>0?(net/monthlyRevenue*100).toFixed(0):0}`
+      type:'green', ico:'🟢', head:t('a_profit_h')(eur(net)),
+      desc:t('a_profit_d'),
+      pill:t('a_profit_p')(monthlyRevenue>0?(net/monthlyRevenue*100).toFixed(0):0)
     });
   }
 
   if (prods.length === 0) {
     alarms.push({
-      type:'blue', ico:'👋', head:'Dashboard verilerini bekliyor',
-      desc:'Henüz ürün eklemedin. Ürün Karlılığı modülünden birkaç ürün ekleyince burada kârlılık analizin, alarmların ve akıllı önerilerin otomatik belirir.',
-      pill:'Ürün Karlılığı sekmesinden başla'
+      type:'blue', ico:'👋', head:t('a_empty_h'),
+      desc:t('a_empty_d'),
+      pill:t('a_empty_p')
     });
   }
 
@@ -411,7 +508,7 @@ async function loadDashboard() {
   });
 }
 
-loadDashboard();
+applyLang();
 </script>
 </body>
 </html>
