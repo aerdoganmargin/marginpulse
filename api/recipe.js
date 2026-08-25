@@ -7,7 +7,8 @@ export default async function handler(req, res) {
     return res.status(405).json({ error: 'Method not allowed' });
   }
 
-  const { productName, category, portionSize, portionUnit } = req.body || {};
+  const { productName, category, portionSize, portionUnit, lang } = req.body || {};
+  const isEN = (lang === 'en');
 
   if (!productName || productName.trim().length === 0) {
     return res.status(400).json({ error: 'Ürün adı gerekli' });
@@ -23,17 +24,46 @@ export default async function handler(req, res) {
   const hasPortion = sizeNum > 0;
   let portionLine;
 
-  if (hasPortion && portionUnit === 'adet') {
-    portionLine = `ÇOK ÖNEMLİ — PORSİYON: Bu üründe 1 porsiyon = ${sizeNum} ADET "${productName}" demektir. Yani tabakta ${sizeNum} tane "${productName}" var. Malzeme miktarlarını TAM ${sizeNum} adet için hesapla.
-Örnek mantık: 1 adet için 50g kıyma gerekiyorsa, ${sizeNum} adet için ${sizeNum} × 50 = ${sizeNum*50}g kıyma yazmalısın. Tüm malzemeleri bu şekilde ${sizeNum} ile çarp.`;
-  } else if (hasPortion) {
-    portionLine = `ÇOK ÖNEMLİ — PORSİYON: Bu üründe 1 porsiyon = ${sizeNum} ${portionUnit} demektir. Yani bir tabak servis ${sizeNum} ${portionUnit} ağırlığında/hacmindedir. Tüm malzemelerin toplamı yaklaşık ${sizeNum} ${portionUnit} olacak şekilde reçeteyi hesapla.`;
+  if (isEN) {
+    if (hasPortion && portionUnit === 'adet') {
+      portionLine = `VERY IMPORTANT — SERVING: For this product, 1 serving = ${sizeNum} PIECES of "${productName}". So there are ${sizeNum} pieces on the plate. Calculate ingredient amounts for exactly ${sizeNum} pieces.\nExample: if 1 piece needs 50g of mince, then for ${sizeNum} pieces write ${sizeNum} × 50 = ${sizeNum*50}g of mince. Multiply every ingredient by ${sizeNum}.`;
+    } else if (hasPortion) {
+      portionLine = `VERY IMPORTANT — SERVING: For this product, 1 serving = ${sizeNum} ${portionUnit}. So one served portion weighs/measures ${sizeNum} ${portionUnit}. Calculate the recipe so the total of all ingredients is about ${sizeNum} ${portionUnit}.`;
+    } else {
+      portionLine = `SERVING: The user didn't specify a serving size. Assume the most typical single serving for this dish.`;
+    }
   } else {
-    portionLine = `PORSİYON: Kullanıcı porsiyon boyutu belirtmedi. Bu yemek için en tipik 1 porsiyonu sen varsay.`;
+    if (hasPortion && portionUnit === 'adet') {
+      portionLine = `ÇOK ÖNEMLİ — PORSİYON: Bu üründe 1 porsiyon = ${sizeNum} ADET "${productName}" demektir. Yani tabakta ${sizeNum} tane "${productName}" var. Malzeme miktarlarını TAM ${sizeNum} adet için hesapla.
+Örnek mantık: 1 adet için 50g kıyma gerekiyorsa, ${sizeNum} adet için ${sizeNum} × 50 = ${sizeNum*50}g kıyma yazmalısın. Tüm malzemeleri bu şekilde ${sizeNum} ile çarp.`;
+    } else if (hasPortion) {
+      portionLine = `ÇOK ÖNEMLİ — PORSİYON: Bu üründe 1 porsiyon = ${sizeNum} ${portionUnit} demektir. Yani bir tabak servis ${sizeNum} ${portionUnit} ağırlığında/hacmindedir. Tüm malzemelerin toplamı yaklaşık ${sizeNum} ${portionUnit} olacak şekilde reçeteyi hesapla.`;
+    } else {
+      portionLine = `PORSİYON: Kullanıcı porsiyon boyutu belirtmedi. Bu yemek için en tipik 1 porsiyonu sen varsay.`;
+    }
   }
 
   // Claude'a göndereceğimiz talimat
-  const prompt = `Sen bir restoran maliyet uzmanısın. Aşağıdaki yemek için reçete oluştur.
+  const prompt = isEN ? `You are a restaurant cost expert. Create a recipe for the dish below.
+
+Dish: "${productName}"${category ? ` (Category: ${category})` : ''}
+
+${portionLine}
+
+Respond in this JSON format:
+{
+  "assumption": "In one sentence, state exactly which serving/amount you calculated for (e.g. 'calculated for 3 pieces of stuffed meatballs')",
+  "ingredients": [
+    {"name":"ingredient name (English, short)","qty":amount (number),"unit":"g/ml/adet","price":estimated unit price}
+  ]
+}
+
+Quantity (qty) rule: it must be the total amount for the ENTIRE serving size stated above.
+Price rule: for g/ml use €/kg or €/l; for pieces use €/piece. Approximate for the European/Netherlands 2025 market.
+IMPORTANT:
+- For the "unit" field always use one of: "g", "ml", or "adet" (use "adet" for countable pieces).
+- Return only valid JSON, nothing else (NO markdown, NO backticks).
+- 4-8 main ingredients is enough.` : `Sen bir restoran maliyet uzmanısın. Aşağıdaki yemek için reçete oluştur.
 
 Yemek: "${productName}"${category ? ` (Kategori: ${category})` : ''}
 
