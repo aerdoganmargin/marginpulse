@@ -95,25 +95,28 @@ td input,td select{width:100%;padding:5px 8px;border:1px solid #E2E8F0;border-ra
 <body>
 <div class="sidebar">
   <div class="logo">Margin<span>Pulse</span></div>
-  <div class="nav active"><span class="dot"></span>Ürün karlılığı</div>
-  <a class="nav" href="giderler.html" style="text-decoration:none;"><span class="dot"></span>Sabit giderler</a>
-  <a class="nav" href="dashboard.html" style="text-decoration:none;"><span class="dot"></span>Dashboard</a>
-  <a class="nav" href="simulator.html" style="text-decoration:none;"><span class="dot"></span>Simülatör</a>
-  <div style="margin-top:auto;padding-top:1rem;"><div class="nav" onclick="logout()" style="cursor:pointer;color:#F87171;"><span class="dot"></span>Çıkış yap</div></div>
+  <div class="nav active"><span class="dot"></span><span data-i18n="nav_products">Ürün karlılığı</span></div>
+  <a class="nav" href="giderler.html" style="text-decoration:none;"><span class="dot"></span><span data-i18n="nav_expenses">Sabit giderler</span></a>
+  <a class="nav" href="dashboard.html" style="text-decoration:none;"><span class="dot"></span><span data-i18n="nav_dashboard">Dashboard</span></a>
+  <a class="nav" href="simulator.html" style="text-decoration:none;"><span class="dot"></span><span data-i18n="nav_simulator">Simülatör</span></a>
+  <div style="margin-top:auto;padding-top:1rem;">
+    <div class="nav" onclick="toggleLang()" style="cursor:pointer;"><span class="dot"></span><span id="langLabel">English</span></div>
+    <div class="nav" onclick="logout()" style="cursor:pointer;color:#F87171;"><span class="dot"></span><span data-i18n="nav_logout">Çıkış yap</span></div>
+  </div>
 </div>
 
 <div class="main">
   <div id="greeting" style="font-size:15px;color:#475569;margin-bottom:5px;font-weight:600;"></div>
-  <div class="title">Ürün Karlılığı <button class="btn-ghost" onclick="resetForm()">+ Yeni ürün</button></div>
+  <div class="title" data-i18n="page_title">Ürün Karlılığı <button class="btn-ghost" onclick="resetForm()" data-i18n="btn_new">+ Yeni ürün</button></div>
 
   <div class="edit-banner" id="editBanner">
-    <span id="editText">Düzenleme modu</span>
-    <button onclick="resetForm()">İptal et, yeni ürün başlat</button>
+    <span id="editText" data-i18n="edit_mode">Düzenleme modu</span>
+    <button onclick="resetForm()" data-i18n="edit_cancel">İptal et, yeni ürün başlat</button>
   </div>
 
   <div id="welcomeCard" style="display:none;background:linear-gradient(135deg,#0F1F3D,#1e3a6d);color:#fff;border-radius:14px;padding:22px 24px;margin-bottom:1.25rem;">
-    <div style="font-size:17px;font-weight:700;margin-bottom:8px;">MarginPulse'a hoş geldin! 🎉</div>
-    <div style="font-size:13.5px;color:#C7D5E8;line-height:1.6;">
+    <div style="font-size:17px;font-weight:700;margin-bottom:8px;" data-i18n="welcome_title">MarginPulse'a hoş geldin! 🎉</div>
+    <div style="font-size:13.5px;color:#C7D5E8;line-height:1.6;" data-i18n="welcome_body" data-i18n-html>
       Başlamak çok kolay: aşağıya ilk ürününün adını yaz (örn. <em>Adana kebap</em>), reçetesini ekle veya
       <strong style="color:#fff;">✨ AI ile öner</strong> butonuna bas — malzemeler ve tahmini maliyet otomatik gelsin.
       Ürünü kaydettiğinde kârını, marjını ve önerileri anında göreceksin.
@@ -122,74 +125,74 @@ td input,td select{width:100%;padding:5px 8px;border:1px solid #E2E8F0;border-ra
 
   <!-- Adım 1 -->
   <div class="card">
-    <div class="card-title"><span class="badge-num">1</span> Ürün adı ve kategori</div>
-    <div class="row"><input id="productName" placeholder="Örn: Saç kavurma" /></div>
+    <div class="card-title"><span class="badge-num">1</span> <span data-i18n="step1_title">Ürün adı ve kategori</span></div>
+    <div class="row"><input id="productName" data-i18n-ph="ph_product" placeholder="Örn: Saç kavurma" /></div>
     <div class="cats" id="categories">
-      <div class="cat active" data-cat="Et yemeği">Et yemeği</div>
-      <div class="cat" data-cat="Yemek">Yemek</div>
-      <div class="cat" data-cat="İçecek">İçecek</div>
-      <div class="cat" data-cat="Tatlı">Tatlı</div>
-      <div class="cat" data-cat="Aperatif">Aperatif</div>
+      <div class="cat active" data-cat="Et yemeği" data-i18n="cat_meat">Et yemeği</div>
+      <div class="cat" data-cat="Yemek" data-i18n="cat_food">Yemek</div>
+      <div class="cat" data-cat="İçecek" data-i18n="cat_drink">İçecek</div>
+      <div class="cat" data-cat="Tatlı" data-i18n="cat_dessert">Tatlı</div>
+      <div class="cat" data-cat="Aperatif" data-i18n="cat_starter">Aperatif</div>
     </div>
     <div class="porsiyon">
-      <label>1 porsiyon =</label>
+      <label data-i18n="portion_label">1 porsiyon =</label>
       <input id="portionSize" type="number" />
-      <select id="portionUnit"><option>g</option><option>ml</option><option>adet</option></select>
-      <span style="font-size:11px;color:#94A3B8;">Boş bırakırsan AI tipik porsiyonu kendi tahmin eder</span>
+      <select id="portionUnit"><option>g</option><option>ml</option><option value="adet" data-i18n="unit_piece">adet</option></select>
+      <span style="font-size:11px;color:#94A3B8;" data-i18n="portion_hint">Boş bırakırsan AI tipik porsiyonu kendi tahmin eder</span>
     </div>
   </div>
 
   <!-- Adım 2 -->
   <div class="card">
-    <div class="card-title"><span class="badge-num">2</span> Reçete &amp; maliyet
-      <button id="aiBtn" onclick="suggestRecipe()" style="margin-left:auto;background:linear-gradient(135deg,#2563EB,#3B82F6);color:#fff;border:none;border-radius:8px;padding:7px 14px;font-size:12px;font-weight:600;cursor:pointer;display:flex;align-items:center;gap:6px;">✨ AI ile öner</button>
+    <div class="card-title"><span class="badge-num">2</span> <span data-i18n="step2_title">Reçete &amp; maliyet</span>
+      <button id="aiBtn" onclick="suggestRecipe()" style="margin-left:auto;background:linear-gradient(135deg,#2563EB,#3B82F6);color:#fff;border:none;border-radius:8px;padding:7px 14px;font-size:12px;font-weight:600;cursor:pointer;display:flex;align-items:center;gap:6px;" data-i18n="ai_btn">✨ AI ile öner</button>
     </div>
     <div id="aiStatus" style="font-size:12px;color:#64748B;margin-bottom:10px;display:none;"></div>
     <table>
       <thead><tr>
-        <th>Malzeme</th>
-        <th style="width:75px">Miktar</th>
-        <th style="width:65px">Birim</th>
-        <th style="width:105px">Birim fiyat (€)</th>
-        <th style="width:80px">Maliyet</th>
+        <th data-i18n="th_ingredient">Malzeme</th>
+        <th style="width:75px" data-i18n="th_qty">Miktar</th>
+        <th style="width:65px" data-i18n="th_unit">Birim</th>
+        <th style="width:105px" data-i18n="th_price">Birim fiyat (€)</th>
+        <th style="width:80px" data-i18n="th_cost">Maliyet</th>
         <th style="width:30px"></th>
       </tr></thead>
       <tbody id="ingredients"></tbody>
     </table>
-    <button class="btn-add-row" onclick="addIngredient()">+ Malzeme ekle</button>
-    <div class="hint-row">💡 g/ml için fiyatı €/kg veya €/lt gir · adet için €/adet gir</div>
-    <div class="total">Toplam hammadde maliyeti: <strong id="totalCost">€0.00</strong> / porsiyon</div>
+    <button class="btn-add-row" onclick="addIngredient()" data-i18n="add_ingredient">+ Malzeme ekle</button>
+    <div class="hint-row" data-i18n="price_hint">💡 g/ml için fiyatı €/kg veya €/lt gir · adet için €/adet gir</div>
+    <div class="total" data-i18n="total_cost" data-i18n-html>Toplam hammadde maliyeti: <strong id="totalCost">€0.00</strong> / porsiyon</div>
   </div>
 
   <!-- Adım 3 -->
   <div class="card">
-    <div class="card-title"><span class="badge-num">3</span> Satış fiyatı &amp; adet</div>
+    <div class="card-title"><span class="badge-num">3</span> <span data-i18n="step3_title">Satış fiyatı &amp; adet</span></div>
     <div class="sales">
-      <div class="sf"><label>Satış fiyatı (porsiyon)</label><input id="salePrice" type="number" placeholder="18.50" oninput="calculate()" /></div>
-      <div class="sf"><label>Geçen ay - gerçek adet</label><input id="lastMonthQty" type="number" placeholder="120" oninput="calculate()" /></div>
-      <div class="sf"><label>Gelecek ay - tahmini adet</label><input id="nextMonthQty" type="number" placeholder="140" oninput="calculate()" /></div>
+      <div class="sf"><label data-i18n="sale_price">Satış fiyatı (porsiyon)</label><input id="salePrice" type="number" placeholder="18.50" oninput="calculate()" /></div>
+      <div class="sf"><label data-i18n="last_qty">Geçen ay - gerçek adet</label><input id="lastMonthQty" type="number" placeholder="120" oninput="calculate()" /></div>
+      <div class="sf"><label data-i18n="next_qty">Gelecek ay - tahmini adet</label><input id="nextMonthQty" type="number" placeholder="140" oninput="calculate()" /></div>
     </div>
   </div>
 
   <!-- Adım 4: Sonuç -->
   <div class="card">
-    <div class="card-title" style="color:#059669">✓ Karlılık özeti</div>
+    <div class="card-title" style="color:#059669">✓ <span data-i18n="summary_title">Karlılık özeti</span></div>
     <div class="result">
-      <div class="metric"><div class="lbl">Brüt marj</div><div class="val" id="grossMargin">—</div></div>
-      <div class="metric"><div class="lbl">Birim kar</div><div class="val" id="unitProfit">—</div></div>
-      <div class="metric"><div class="lbl">Geçen ay gelir</div><div class="val dark" id="lastRevenue">—</div></div>
-      <div class="metric"><div class="lbl">Tahmini gelir</div><div class="val blue" id="nextRevenue">—</div></div>
+      <div class="metric"><div class="lbl" data-i18n="m_margin">Brüt marj</div><div class="val" id="grossMargin">—</div></div>
+      <div class="metric"><div class="lbl" data-i18n="m_unit">Birim kar</div><div class="val" id="unitProfit">—</div></div>
+      <div class="metric"><div class="lbl" data-i18n="m_last">Geçen ay gelir</div><div class="val dark" id="lastRevenue">—</div></div>
+      <div class="metric"><div class="lbl" data-i18n="m_next">Tahmini gelir</div><div class="val blue" id="nextRevenue">—</div></div>
     </div>
     <div class="save-bar">
-      <button class="btn-save" id="saveBtn" onclick="saveProduct()">Ürünü Kaydet</button>
+      <button class="btn-save" id="saveBtn" onclick="saveProduct()" data-i18n="btn_save">Ürünü Kaydet</button>
       <span class="status" id="saveStatus"></span>
     </div>
   </div>
 
   <!-- Kayıtlı ürünler -->
   <div class="card">
-    <div class="card-title">Kayıtlı Ürünler <span style="margin-left:auto;font-size:11px;color:#94A3B8;">Düzenlemek için tıkla</span></div>
-    <div class="saved-list" id="savedList"><div class="empty">Henüz ürün kaydedilmedi.</div></div>
+    <div class="card-title" data-i18n="saved_title" data-i18n-html>Kayıtlı Ürünler <span style="margin-left:auto;font-size:11px;color:#94A3B8;">Düzenlemek için tıkla</span></div>
+    <div class="saved-list" id="savedList"><div class="empty" data-i18n="no_products">Henüz ürün kaydedilmedi.</div></div>
   </div>
 </div>
 
@@ -197,6 +200,89 @@ td input,td select{width:100%;padding:5px 8px;border:1px solid #E2E8F0;border-ra
 const SUPABASE_URL = 'https://dmklhurvzahoiaklsnwo.supabase.co';
 const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImRta2xodXJ2emFob2lha2xzbndvIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODAxNjQxNjMsImV4cCI6MjA5NTc0MDE2M30.e-jJJ_Ru3pDKBnK_cw63pHhl_TN44LXAIC7P8w9mSns';
 const sb = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+
+// ====== DİL ======
+const I18N = {
+  tr: {
+    nav_products:"Ürün karlılığı", nav_expenses:"Sabit giderler", nav_dashboard:"Dashboard", nav_simulator:"Simülatör", nav_logout:"Çıkış yap",
+    page_title:"Ürün Karlılığı", btn_new:"+ Yeni ürün", edit_mode:"Düzenleme modu", edit_cancel:"İptal et, yeni ürün başlat",
+    welcome_title:"MarginPulse'a hoş geldin! 🎉",
+    welcome_body:'Başlamak çok kolay: aşağıya ilk ürününün adını yaz (örn. <em>Adana kebap</em>), reçetesini ekle veya <strong style="color:#fff;">✨ AI ile öner</strong> butonuna bas — malzemeler ve tahmini maliyet otomatik gelsin. Ürünü kaydettiğinde kârını, marjını ve önerileri anında göreceksin.',
+    step1_title:"Ürün adı ve kategori", ph_product:"Örn: Saç kavurma",
+    cat_meat:"Et yemeği", cat_food:"Yemek", cat_drink:"İçecek", cat_dessert:"Tatlı", cat_starter:"Aperatif",
+    portion_label:"1 porsiyon =", unit_piece:"adet", portion_hint:"Boş bırakırsan AI tipik porsiyonu kendi tahmin eder",
+    step2_title:"Reçete & maliyet", ai_btn:"✨ AI ile öner",
+    th_ingredient:"Malzeme", th_qty:"Miktar", th_unit:"Birim", th_price:"Birim fiyat (€)", th_cost:"Maliyet",
+    add_ingredient:"+ Malzeme ekle", price_hint:"💡 g/ml için fiyatı €/kg veya €/lt gir · adet için €/adet gir",
+    total_cost:'Toplam hammadde maliyeti: <strong id="totalCost">€0.00</strong> / porsiyon',
+    step3_title:"Satış fiyatı & adet", sale_price:"Satış fiyatı (porsiyon)", last_qty:"Geçen ay - gerçek adet", next_qty:"Gelecek ay - tahmini adet",
+    summary_title:"Karlılık özeti", m_margin:"Brüt marj", m_unit:"Birim kar", m_last:"Geçen ay gelir", m_next:"Tahmini gelir",
+    btn_save:"Ürünü Kaydet", btn_save_edit:"Değişiklikleri Kaydet",
+    saved_title:'Kayıtlı Ürünler <span style="margin-left:auto;font-size:11px;color:#94A3B8;">Düzenlemek için tıkla</span>',
+    no_products:"Henüz ürün kaydedilmedi.",
+    greet_morning:"Günaydın", greet_day:"İyi günler", greet_evening:"İyi akşamlar",
+    confirm_replace:"Mevcut malzemeler silinip AI önerisiyle değiştirilecek. Devam edilsin mi?",
+    ai_thinking:"⏳ Düşünüyor…", ai_preparing:"AI reçeteyi hazırlıyor, birkaç saniye sürebilir…",
+    ai_added_1:"✅ AI ", ai_added_2:" malzeme ekledi.", ai_warn:"<br>⚠️ Fiyatlar tahminidir — kendi tedarikçi fiyatınla güncelle.",
+    ai_error:"❌ ", ai_generic:"Bir hata oluştu, tekrar dene", ai_norecipe:"Reçete alınamadı",
+    saving:"Kaydediliyor...", saved:"✅ Kaydedildi!", updated:"✅ Güncellendi!", need_name:"⚠️ Ürün adı gir",
+    editing:" düzenleniyor", del_fail:"Silinemedi: ", ai_ph_empty:"⚠️ Önce ürün adını gir (örn. Adana kebap)"
+  },
+  en: {
+    nav_products:"Product profit", nav_expenses:"Fixed expenses", nav_dashboard:"Dashboard", nav_simulator:"Simulator", nav_logout:"Log out",
+    page_title:"Product Profitability", btn_new:"+ New product", edit_mode:"Edit mode", edit_cancel:"Cancel, start a new product",
+    welcome_title:"Welcome to MarginPulse! 🎉",
+    welcome_body:'Getting started is easy: type your first product name below (e.g. <em>Adana kebab</em>), add its recipe or press <strong style="color:#fff;">✨ Suggest with AI</strong> — ingredients and estimated cost appear automatically. When you save the product, you\'ll instantly see its profit, margin and recommendations.',
+    step1_title:"Product name and category", ph_product:"e.g. Lamb sauté",
+    cat_meat:"Meat dish", cat_food:"Food", cat_drink:"Drink", cat_dessert:"Dessert", cat_starter:"Starter",
+    portion_label:"1 serving =", unit_piece:"pcs", portion_hint:"Leave empty and AI will estimate a typical serving",
+    step2_title:"Recipe & cost", ai_btn:"✨ Suggest with AI",
+    th_ingredient:"Ingredient", th_qty:"Amount", th_unit:"Unit", th_price:"Unit price (€)", th_cost:"Cost",
+    add_ingredient:"+ Add ingredient", price_hint:"💡 For g/ml enter price as €/kg or €/l · for pcs enter €/piece",
+    total_cost:'Total ingredient cost: <strong id="totalCost">€0.00</strong> / serving',
+    step3_title:"Sale price & quantity", sale_price:"Sale price (serving)", last_qty:"Last month - actual qty", next_qty:"Next month - estimated qty",
+    summary_title:"Profitability summary", m_margin:"Gross margin", m_unit:"Unit profit", m_last:"Last month revenue", m_next:"Estimated revenue",
+    btn_save:"Save Product", btn_save_edit:"Save Changes",
+    saved_title:'Saved Products <span style="margin-left:auto;font-size:11px;color:#94A3B8;">Click to edit</span>',
+    no_products:"No products saved yet.",
+    greet_morning:"Good morning", greet_day:"Good afternoon", greet_evening:"Good evening",
+    confirm_replace:"Current ingredients will be replaced with the AI suggestion. Continue?",
+    ai_thinking:"⏳ Thinking…", ai_preparing:"AI is preparing the recipe, this may take a few seconds…",
+    ai_added_1:"✅ AI added ", ai_added_2:" ingredients.", ai_warn:"<br>⚠️ Prices are estimates — update with your own supplier prices.",
+    ai_error:"❌ ", ai_generic:"Something went wrong, try again", ai_norecipe:"Couldn't get recipe",
+    saving:"Saving...", saved:"✅ Saved!", updated:"✅ Updated!", need_name:"⚠️ Enter a product name",
+    editing:" — editing", del_fail:"Couldn't delete: ", ai_ph_empty:"⚠️ Enter a product name first (e.g. Adana kebab)"
+  }
+};
+let lang = localStorage.getItem('mp_lang');
+if (!lang) { const n=(navigator.language||'tr').toLowerCase(); lang = n.startsWith('tr')?'tr':'en'; }
+function t(k){ return (I18N[lang] && I18N[lang][k]!==undefined) ? I18N[lang][k] : k; }
+function applyLang() {
+  document.querySelectorAll('[data-i18n]').forEach(el => {
+    const k=el.getAttribute('data-i18n');
+    if(I18N[lang][k]===undefined) return;
+    if(el.hasAttribute('data-i18n-html')) el.innerHTML = I18N[lang][k]; else el.textContent = I18N[lang][k];
+  });
+  document.querySelectorAll('[data-i18n-ph]').forEach(el => {
+    const k=el.getAttribute('data-i18n-ph'); if(I18N[lang][k]!==undefined) el.placeholder=I18N[lang][k];
+  });
+  document.documentElement.lang = lang;
+  const ll = document.getElementById('langLabel'); if(ll) ll.textContent = (lang==='tr')?'English':'Türkçe';
+  if (typeof showGreeting === 'function') showGreeting();
+  // kaydet butonu moda göre
+  const sb2 = document.getElementById('saveBtn');
+  if (sb2) sb2.textContent = editingId ? t('btn_save_edit') : t('btn_save');
+  // kayıtlı ürün listesini yeniden çiz (kategori etiketleri), malzeme placeholder'ları
+  if (typeof loadProducts === 'function' && document.getElementById('savedList')) loadProducts();
+  document.querySelectorAll('#ingredients .ing-name').forEach(el => el.placeholder = t('th_ingredient'));
+  document.querySelectorAll('#ingredients .unit option[value="adet"]').forEach(el => el.textContent = t('unit_piece'));
+}
+function toggleLang(){ lang=(lang==='tr')?'en':'tr'; localStorage.setItem('mp_lang',lang); applyLang(); }
+
+// Kayıtlı kategori değeri (TR, DB'de sabit) -> görünen etiket
+const CAT_KEYS = {"Et yemeği":"cat_meat","Yemek":"cat_food","İçecek":"cat_drink","Tatlı":"cat_dessert","Aperatif":"cat_starter"};
+function catLabel(dbVal){ const k=CAT_KEYS[dbVal]; return k ? t(k) : (dbVal||'—'); }
+function unitLabel(u){ return u==='adet' ? t('unit_piece') : u; }
 // ====== GİRİŞ KONTROLÜ ======
 let currentUser = null;
 (async () => {
@@ -210,7 +296,7 @@ function showGreeting() {
   if (!el || !currentUser) return;
   const bizName = (currentUser.user_metadata && currentUser.user_metadata.business_name) || "";
   const hour = new Date().getHours();
-  const selam = hour < 12 ? "Günaydın" : (hour < 18 ? "İyi günler" : "İyi akşamlar");
+  const selam = hour < 12 ? t('greet_morning') : (hour < 18 ? t('greet_day') : t('greet_evening'));
   el.textContent = bizName ? (selam + ", " + bizName + " 👋") : (selam + " 👋");
 }
 async function requireUser() {
@@ -248,12 +334,12 @@ function addIngredient(name='', qty='', unit='g', price='') {
   const tbody = document.getElementById('ingredients');
   const tr = document.createElement('tr');
   tr.innerHTML = `
-    <td><input class="ing-name" placeholder="Malzeme adı" value="${name}" /></td>
+    <td><input class="ing-name" placeholder="${t('th_ingredient')}" value="${name}" /></td>
     <td><input type="number" class="qty" placeholder="200" value="${qty}" oninput="calcRow(this)" /></td>
     <td><select class="unit" onchange="calcRow(this)">
       <option ${unit==='g'?'selected':''}>g</option>
       <option ${unit==='ml'?'selected':''}>ml</option>
-      <option ${unit==='adet'?'selected':''}>adet</option>
+      <option value="adet" ${unit==='adet'?'selected':''}>${t('unit_piece')}</option>
     </select></td>
     <td><input type="number" class="price" placeholder="24" value="${price}" oninput="calcRow(this)" /></td>
     <td class="col-cost">€0.00</td>
@@ -304,23 +390,23 @@ async function suggestRecipe() {
   if (!name) {
     status.style.display = 'block';
     status.style.color = '#DC2626';
-    status.textContent = '⚠️ Önce ürün adını gir (örn. Adana kebap)';
+    status.textContent = t('ai_ph_empty');
     return;
   }
 
   // Mevcut malzeme var mı kontrol et — varsa onay sor
   const existing = getRecipe();
   if (existing.length > 0) {
-    const ok = confirm('Mevcut malzemeler silinip AI önerisiyle değiştirilecek. Devam edilsin mi?');
+    const ok = confirm(t('confirm_replace'));
     if (!ok) return;
   }
 
   btn.disabled = true;
   btn.style.opacity = '0.6';
-  btn.innerHTML = '⏳ Düşünüyor…';
+  btn.innerHTML = t('ai_thinking');
   status.style.display = 'block';
   status.style.color = '#64748B';
-  status.textContent = 'AI reçeteyi hazırlıyor, birkaç saniye sürebilir…';
+  status.textContent = t('ai_preparing');
 
   try {
     const resp = await fetch('/api/recipe', {
@@ -330,14 +416,15 @@ async function suggestRecipe() {
         productName: name,
         category: selectedCategory,
         portionSize: document.getElementById('portionSize').value,
-        portionUnit: document.getElementById('portionUnit').value
+        portionUnit: document.getElementById('portionUnit').value,
+        lang: lang
       })
     });
 
     const data = await resp.json();
 
     if (!resp.ok || !data.recipe) {
-      throw new Error(data.error || 'Reçete alınamadı');
+      throw new Error(data.error || t('ai_norecipe'));
     }
 
     // Mevcut malzemeleri temizle, AI önerisiyle doldur
@@ -347,14 +434,14 @@ async function suggestRecipe() {
 
     status.style.color = '#059669';
     const assumptionText = data.assumption ? '<br>📌 ' + data.assumption : '';
-    status.innerHTML = '✅ AI ' + data.recipe.length + ' malzeme ekledi.' + assumptionText + '<br>⚠️ Fiyatlar tahminidir — kendi tedarikçi fiyatınla güncelle.';
+    status.innerHTML = t('ai_added_1') + data.recipe.length + t('ai_added_2') + assumptionText + t('ai_warn');
   } catch (err) {
     status.style.color = '#DC2626';
-    status.textContent = '❌ ' + (err.message || 'Bir hata oluştu, tekrar dene');
+    status.textContent = t('ai_error') + (err.message || t('ai_generic'));
   } finally {
     btn.disabled = false;
     btn.style.opacity = '1';
-    btn.innerHTML = '✨ AI ile öner';
+    btn.innerHTML = t('ai_btn');
   }
 }
 
@@ -389,7 +476,7 @@ function calculate() {
 // ====== KAYDET / GÜNCELLE ======
 async function saveProduct() {
   const name = document.getElementById('productName').value.trim();
-  if (!name) { setStatus('⚠️ Ürün adı gir', '#DC2626'); return; }
+  if (!name) { setStatus(t('need_name'), '#DC2626'); return; }
 
   const payload = {
     name: name,
@@ -401,7 +488,7 @@ async function saveProduct() {
     recipe: getRecipe()
   };
 
-  setStatus('Kaydediliyor...', '#64748B');
+  setStatus(t('saving'), '#64748B');
 
   const user = await requireUser();
   if (!user) return;
@@ -418,7 +505,7 @@ async function saveProduct() {
     setStatus('❌ Hata: ' + error.message, '#DC2626');
     console.error(error);
   } else {
-    setStatus(editingId ? '✅ Güncellendi!' : '✅ Kaydedildi!', '#059669');
+    setStatus(editingId ? t('updated') : t('saved'), '#059669');
     resetForm();
     loadProducts();
   }
@@ -443,7 +530,7 @@ function resetForm() {
   addIngredient(); addIngredient();
   selectCategory('Et yemeği');
   document.getElementById('editBanner').classList.remove('show');
-  document.getElementById('saveBtn').textContent = 'Ürünü Kaydet';
+  document.getElementById('saveBtn').textContent = t('btn_save');
   calculate();
 }
 
@@ -462,8 +549,8 @@ function editProduct(p) {
   else recipe.forEach(r => addIngredient(r.name, r.qty, r.unit, r.price));
 
   document.getElementById('editBanner').classList.add('show');
-  document.getElementById('editText').textContent = `"${p.name}" düzenleniyor`;
-  document.getElementById('saveBtn').textContent = 'Değişiklikleri Kaydet';
+  document.getElementById('editText').textContent = '"' + p.name + '"' + t('editing');
+  document.getElementById('saveBtn').textContent = t('btn_save_edit');
   calculate();
   window.scrollTo({top:0, behavior:'smooth'});
 }
@@ -473,7 +560,7 @@ async function deleteProduct(id, name, event) {
   event.stopPropagation();
   if (!confirm(`"${name}" silinsin mi?`)) return;
   const { error } = await sb.from('products').delete().eq('id', id);
-  if (error) { alert('Silinemedi: ' + error.message); }
+  if (error) { alert(t('del_fail') + error.message); }
   else { loadProducts(); if(editingId===id) resetForm(); }
 }
 
@@ -504,7 +591,7 @@ async function loadProducts() {
     item.className = 'saved-item';
     item.onclick = () => editProduct(p);
     item.innerHTML = `
-      <div class="info"><strong>${p.name}</strong> <span style="color:#94A3B8">· ${p.category||'—'} · €${sp.toFixed(2)}</span></div>
+      <div class="info"><strong>${p.name}</strong> <span style="color:#94A3B8">· ${catLabel(p.category)} · €${sp.toFixed(2)}</span></div>
       <div class="right">
         <span class="margin-tag ${tagClass}">%${margin.toFixed(1)} marj</span>
         <button class="item-del" title="Sil">🗑</button>
@@ -516,6 +603,7 @@ async function loadProducts() {
 }
 
 // ====== BAŞLANGIÇ ======
+applyLang();
 resetForm();
 loadProducts();
 </script>

@@ -74,16 +74,19 @@ td input,td select{width:100%;padding:6px 8px;border:1px solid #E2E8F0;border-ra
 <body>
 <div class="sidebar">
   <div class="logo">Margin<span>Pulse</span></div>
-  <a class="nav" href="urunler.html"><span class="dot"></span>Ürün karlılığı</a>
-  <div class="nav active"><span class="dot"></span>Sabit giderler</div>
-  <a class="nav" href="dashboard.html" style="text-decoration:none;"><span class="dot"></span>Dashboard</a>
-  <a class="nav" href="simulator.html" style="text-decoration:none;"><span class="dot"></span>Simülatör</a>
-  <div style="margin-top:auto;padding-top:1rem;"><div class="nav" onclick="logout()" style="cursor:pointer;color:#F87171;"><span class="dot"></span>Çıkış yap</div></div>
+  <a class="nav" href="urunler.html"><span class="dot"></span><span data-i18n="nav_products">Ürün karlılığı</span></a>
+  <div class="nav active"><span class="dot"></span><span data-i18n="nav_expenses">Sabit giderler</span></div>
+  <a class="nav" href="dashboard.html" style="text-decoration:none;"><span class="dot"></span><span data-i18n="nav_dashboard">Dashboard</span></a>
+  <a class="nav" href="simulator.html" style="text-decoration:none;"><span class="dot"></span><span data-i18n="nav_simulator">Simülatör</span></a>
+  <div style="margin-top:auto;padding-top:1rem;">
+    <div class="nav" onclick="toggleLang()" style="cursor:pointer;"><span class="dot"></span><span id="langLabel">English</span></div>
+    <div class="nav" onclick="logout()" style="cursor:pointer;color:#F87171;"><span class="dot"></span><span data-i18n="nav_logout">Çıkış yap</span></div>
+  </div>
 </div>
 
 <div class="main">
   <div id="greeting" style="font-size:15px;color:#475569;margin-bottom:5px;font-weight:600;"></div>
-  <div class="title">Sabit Giderler</div>
+  <div class="title" data-i18n="page_title">Sabit Giderler</div>
 
   <!-- Ay navigasyonu -->
   <div class="month-nav">
@@ -93,62 +96,62 @@ td input,td select{width:100%;padding:6px 8px;border:1px solid #E2E8F0;border-ra
   </div>
 
   <div class="copy-notice" id="copyNotice">
-    <span id="copyText">Bu ay boş. Önceki aydan giderleri kopyalayabilirsin.</span>
-    <button onclick="copyFromPrevMonth()">Önceki aydan kopyala</button>
+    <span id="copyText" data-i18n="copy_text">Bu ay boş. Önceki aydan giderleri kopyalayabilirsin.</span>
+    <button onclick="copyFromPrevMonth()" data-i18n="copy_btn">Önceki aydan kopyala</button>
   </div>
 
   <!-- Gider tablosu -->
   <div class="card">
-    <div class="card-title">Gider Kalemleri
-      <span style="margin-left:auto;font-size:11px;color:#94A3B8;">Aylık karşılık otomatik hesaplanır</span>
+    <div class="card-title"><span data-i18n="expense_items">Gider Kalemleri</span>
+      <span style="margin-left:auto;font-size:11px;color:#94A3B8;" data-i18n="auto_calc">Aylık karşılık otomatik hesaplanır</span>
     </div>
     <table>
       <thead><tr>
-        <th>Kategori</th>
-        <th style="width:110px">Tutar (€)</th>
-        <th style="width:110px">Periyot</th>
-        <th style="width:110px">Aylık karşılık</th>
+        <th data-i18n="th_category">Kategori</th>
+        <th style="width:110px" data-i18n="th_amount">Tutar (€)</th>
+        <th style="width:110px" data-i18n="th_period">Periyot</th>
+        <th style="width:110px" data-i18n="th_monthly">Aylık karşılık</th>
         <th style="width:30px"></th>
       </tr></thead>
       <tbody id="costRows"></tbody>
     </table>
-    <button class="btn-add-row" onclick="addCostRow()">+ Gider ekle</button>
+    <button class="btn-add-row" onclick="addCostRow()" data-i18n="add_expense">+ Gider ekle</button>
     <div class="preset-cats" id="presets">
-      <div class="preset" onclick="addCostRow('Kira')">+ Kira</div>
-      <div class="preset" onclick="addCostRow('Elektrik')">+ Elektrik</div>
-      <div class="preset" onclick="addCostRow('Su')">+ Su</div>
-      <div class="preset" onclick="addCostRow('Gaz')">+ Gaz</div>
-      <div class="preset" onclick="addCostRow('Personel maaşı')">+ Personel</div>
-      <div class="preset" onclick="addCostRow('İnternet & telefon')">+ İnternet</div>
-      <div class="preset" onclick="addCostRow('Sigorta')">+ Sigorta</div>
-      <div class="preset" onclick="addCostRow('Muhasebe')">+ Muhasebe</div>
-      <div class="preset" onclick="addCostRow('Temizlik')">+ Temizlik</div>
+      <div class="preset" onclick="addCostRow('Kira')" data-i18n="preset_rent">+ Kira</div>
+      <div class="preset" onclick="addCostRow('Elektrik')" data-i18n="preset_elec">+ Elektrik</div>
+      <div class="preset" onclick="addCostRow('Su')" data-i18n="preset_water">+ Su</div>
+      <div class="preset" onclick="addCostRow('Gaz')" data-i18n="preset_gas">+ Gaz</div>
+      <div class="preset" onclick="addCostRow('Personel maaşı')" data-i18n="preset_staff">+ Personel</div>
+      <div class="preset" onclick="addCostRow('İnternet & telefon')" data-i18n="preset_net">+ İnternet</div>
+      <div class="preset" onclick="addCostRow('Sigorta')" data-i18n="preset_ins">+ Sigorta</div>
+      <div class="preset" onclick="addCostRow('Muhasebe')" data-i18n="preset_acc">+ Muhasebe</div>
+      <div class="preset" onclick="addCostRow('Temizlik')" data-i18n="preset_clean">+ Temizlik</div>
     </div>
     <div class="total-box">
-      <span class="lbl">Toplam aylık sabit gider</span>
+      <span class="lbl" data-i18n="total_label">Toplam aylık sabit gider</span>
       <span class="val" id="totalMonthly">€0</span>
     </div>
     <div class="save-bar">
-      <button class="btn-save" onclick="saveCosts()">Bu Ayı Kaydet</button>
+      <button class="btn-save" onclick="saveCosts()" data-i18n="save_month">Bu Ayı Kaydet</button>
       <span class="status" id="saveStatus"></span>
     </div>
   </div>
 
   <!-- Vergi modülü -->
   <div class="card">
-    <div class="card-title">📊 Vergi Tahmini</div>
+    <div class="card-title" data-i18n="tax_title">📊 Vergi Tahmini</div>
     <div class="tax-grid">
       <div class="tax-field">
-        <label>Ülke & şirket tipi</label>
+        <label data-i18n="tax_country">Ülke & şirket tipi</label>
         <select id="taxType" onchange="calcTax()">
-          <option value="nl_zzp">Hollanda — ZZP (şahıs)</option>
-          <option value="nl_bv">Hollanda — BV (limited)</option>
-          <option value="tr_sahis">Türkiye — Şahıs</option>
-          <option value="tr_limited">Türkiye — Limited</option>
+          <option value="nl_zzp" data-i18n="tax_nl_zzp">Hollanda — ZZP (şahıs)</option>
+          <option value="nl_bv" data-i18n="tax_nl_bv">Hollanda — BV (limited)</option>
+          <option value="tr_sahis" data-i18n="tax_tr_s">Türkiye — Şahıs</option>
+          <option value="tr_limited" data-i18n="tax_tr_l">Türkiye — Limited</option>
         </select>
       </div>
       <div class="tax-field">
-        <label>Aylık net kâr tahmini (€)</label>
+        <label data-i18n="tax_profit">Aylık net kâr tahmini (€)</label>
         <input id="taxProfit" type="number" placeholder="3000" oninput="calcTax()" />
       </div>
     </div>
@@ -160,6 +163,75 @@ td input,td select{width:100%;padding:6px 8px;border:1px solid #E2E8F0;border-ra
 const SUPABASE_URL = 'https://dmklhurvzahoiaklsnwo.supabase.co';
 const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImRta2xodXJ2emFob2lha2xzbndvIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODAxNjQxNjMsImV4cCI6MjA5NTc0MDE2M30.e-jJJ_Ru3pDKBnK_cw63pHhl_TN44LXAIC7P8w9mSns';
 const sb = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+
+// ====== DİL ======
+const I18N = {
+  tr: {
+    nav_products:"Ürün karlılığı", nav_expenses:"Sabit giderler", nav_dashboard:"Dashboard", nav_simulator:"Simülatör", nav_logout:"Çıkış yap",
+    page_title:"Sabit Giderler", copy_text:"Bu ay boş. Önceki aydan giderleri kopyalayabilirsin.", copy_btn:"Önceki aydan kopyala",
+    expense_items:"Gider Kalemleri", auto_calc:"Aylık karşılık otomatik hesaplanır",
+    th_category:"Kategori", th_amount:"Tutar (€)", th_period:"Periyot", th_monthly:"Aylık karşılık",
+    add_expense:"+ Gider ekle", total_label:"Toplam aylık sabit gider", save_month:"Bu Ayı Kaydet",
+    tax_title:"📊 Vergi Tahmini", tax_country:"Ülke & şirket tipi", tax_profit:"Aylık net kâr tahmini (€)",
+    tax_nl_zzp:"Hollanda — ZZP (şahıs)", tax_nl_bv:"Hollanda — BV (limited)", tax_tr_s:"Türkiye — Şahıs", tax_tr_l:"Türkiye — Limited",
+    preset_rent:"+ Kira", preset_elec:"+ Elektrik", preset_water:"+ Su", preset_gas:"+ Gaz", preset_staff:"+ Personel",
+    preset_net:"+ İnternet", preset_ins:"+ Sigorta", preset_acc:"+ Muhasebe", preset_clean:"+ Temizlik",
+    greet_morning:"Günaydın", greet_day:"İyi günler", greet_evening:"İyi akşamlar",
+    p_monthly:"Aylık", p_quarterly:"3 Aylık", p_semiannual:"6 Aylık", p_annual:"Yıllık",
+    exp_name_ph:"Gider adı", saving:"Kaydediliyor...", saved:"✅ Kaydedildi!",
+    copy_dyn:"{m1} boş. {m2} ayından {n} gider kopyalanabilir.",
+    tax_line:"Aylık tahmini vergi karşılığı:", tax_approx:"yaklaşık", tax_disclaimer:"Bu bir tahmindir, kesin hesap için mali müşavirine danış.",
+    note_nl_zzp:"Hollanda gelir vergisi (box 1). ZZP indirimleri hariç kaba tahmin.",
+    note_nl_bv:"Hollanda kurumlar vergisi (vennootschapsbelasting). Maaş/temettü hariç.",
+    note_tr_s:"Türkiye gelir vergisi — kademeli sistemde yaklaşık ortalama oran.",
+    note_tr_l:"Türkiye kurumlar vergisi (%25).",
+    months:["Ocak","Şubat","Mart","Nisan","Mayıs","Haziran","Temmuz","Ağustos","Eylül","Ekim","Kasım","Aralık"]
+  },
+  en: {
+    nav_products:"Product profit", nav_expenses:"Fixed expenses", nav_dashboard:"Dashboard", nav_simulator:"Simulator", nav_logout:"Log out",
+    page_title:"Fixed Expenses", copy_text:"This month is empty. You can copy expenses from the previous month.", copy_btn:"Copy from previous month",
+    expense_items:"Expense Items", auto_calc:"Monthly equivalent calculated automatically",
+    th_category:"Category", th_amount:"Amount (€)", th_period:"Period", th_monthly:"Monthly equivalent",
+    add_expense:"+ Add expense", total_label:"Total monthly fixed expenses", save_month:"Save This Month",
+    tax_title:"📊 Tax Estimate", tax_country:"Country & company type", tax_profit:"Estimated monthly net profit (€)",
+    tax_nl_zzp:"Netherlands — ZZP (sole trader)", tax_nl_bv:"Netherlands — BV (private ltd)", tax_tr_s:"Turkey — Sole trader", tax_tr_l:"Turkey — Limited",
+    preset_rent:"+ Rent", preset_elec:"+ Electricity", preset_water:"+ Water", preset_gas:"+ Gas", preset_staff:"+ Staff",
+    preset_net:"+ Internet", preset_ins:"+ Insurance", preset_acc:"+ Accounting", preset_clean:"+ Cleaning",
+    greet_morning:"Good morning", greet_day:"Good afternoon", greet_evening:"Good evening",
+    p_monthly:"Monthly", p_quarterly:"Quarterly", p_semiannual:"Every 6 months", p_annual:"Yearly",
+    exp_name_ph:"Expense name", saving:"Saving...", saved:"✅ Saved!",
+    copy_dyn:"{m1} is empty. {n} expenses can be copied from {m2}.",
+    tax_line:"Estimated monthly tax reserve:", tax_approx:"approx.", tax_disclaimer:"This is an estimate; consult your accountant for exact figures.",
+    note_nl_zzp:"Dutch income tax (box 1). Rough estimate excluding ZZP deductions.",
+    note_nl_bv:"Dutch corporate tax (vennootschapsbelasting). Excluding salary/dividends.",
+    note_tr_s:"Turkish income tax — approximate average rate in the bracketed system.",
+    note_tr_l:"Turkish corporate tax (25%).",
+    months:["January","February","March","April","May","June","July","August","September","October","November","December"]
+  }
+};
+let lang = localStorage.getItem('mp_lang');
+if (!lang) { const n=(navigator.language||'tr').toLowerCase(); lang = n.startsWith('tr')?'tr':'en'; }
+function t(k){ return (I18N[lang] && I18N[lang][k]!==undefined) ? I18N[lang][k] : k; }
+function applyLang() {
+  document.querySelectorAll('[data-i18n]').forEach(el => {
+    const k=el.getAttribute('data-i18n'); if(I18N[lang][k]===undefined) return;
+    el.textContent = I18N[lang][k];
+  });
+  document.documentElement.lang = lang;
+  const ll=document.getElementById('langLabel'); if(ll) ll.textContent=(lang==='tr')?'English':'Türkçe';
+  if (typeof showGreeting==='function') showGreeting();
+  // ay etiketi + periyot option'ları + gider adı placeholder + tax yeniden
+  const ml=document.getElementById('monthLabel'); if(ml && typeof currentDate!=='undefined') ml.textContent=monthLabel(currentDate);
+  document.querySelectorAll('#costRows .cat').forEach(el=>el.placeholder=t('exp_name_ph'));
+  document.querySelectorAll('#costRows .period').forEach(sel=>{
+    const opts=sel.querySelectorAll('option');
+    if(opts[0])opts[0].textContent=t('p_monthly'); if(opts[1])opts[1].textContent=t('p_quarterly');
+    if(opts[2])opts[2].textContent=t('p_semiannual'); if(opts[3])opts[3].textContent=t('p_annual');
+  });
+  if (typeof calcTax==='function') calcTax();
+  if (typeof updateCopyNotice==='function') updateCopyNotice();
+}
+function toggleLang(){ lang=(lang==='tr')?'en':'tr'; localStorage.setItem('mp_lang',lang); applyLang(); }
 // ====== GİRİŞ KONTROLÜ ======
 let currentUser = null;
 (async () => {
@@ -173,7 +245,7 @@ function showGreeting() {
   if (!el || !currentUser) return;
   const bizName = (currentUser.user_metadata && currentUser.user_metadata.business_name) || "";
   const hour = new Date().getHours();
-  const selam = hour < 12 ? "Günaydın" : (hour < 18 ? "İyi günler" : "İyi akşamlar");
+  const selam = hour < 12 ? t('greet_morning') : (hour < 18 ? t('greet_day') : t('greet_evening'));
   el.textContent = bizName ? (selam + ", " + bizName + " 👋") : (selam + " 👋");
 }
 async function requireUser() {
@@ -188,15 +260,15 @@ async function logout() {
   window.location.href = "login.html";
 }
 
-const MONTHS = ['Ocak','Şubat','Mart','Nisan','Mayıs','Haziran','Temmuz','Ağustos','Eylül','Ekim','Kasım','Aralık'];
+function MONTHS_arr(){ return t('months'); }
 let currentDate = new Date();
 currentDate.setDate(1);
 
 function monthKey(d) { return d.getFullYear() + '-' + String(d.getMonth()+1).padStart(2,'0'); }
-function monthLabel(d) { return MONTHS[d.getMonth()] + ' ' + d.getFullYear(); }
+function monthLabel(d) { return MONTHS_arr()[d.getMonth()] + ' ' + d.getFullYear(); }
 
 const PERIOD_DIVISORS = { monthly:1, quarterly:3, semiannual:6, annual:12 };
-const PERIOD_LABELS = { monthly:'Aylık', quarterly:'3 Aylık', semiannual:'6 Aylık', annual:'Yıllık' };
+function PERIOD_LABEL(k){ return t('p_'+k); }
 
 function changeMonth(delta) {
   currentDate.setMonth(currentDate.getMonth() + delta);
@@ -208,13 +280,13 @@ function addCostRow(category='', amount='', period='monthly') {
   const tbody = document.getElementById('costRows');
   const tr = document.createElement('tr');
   tr.innerHTML = `
-    <td><input class="cat" placeholder="Gider adı" value="${category}" /></td>
+    <td><input class="cat" placeholder="${t('exp_name_ph')}" value="${category}" /></td>
     <td><input type="number" class="amount" placeholder="0" value="${amount}" oninput="recalc()" /></td>
     <td><select class="period" onchange="recalc()">
-      <option value="monthly" ${period==='monthly'?'selected':''}>Aylık</option>
-      <option value="quarterly" ${period==='quarterly'?'selected':''}>3 Aylık</option>
-      <option value="semiannual" ${period==='semiannual'?'selected':''}>6 Aylık</option>
-      <option value="annual" ${period==='annual'?'selected':''}>Yıllık</option>
+      <option value="monthly" ${period==='monthly'?'selected':''}>${t('p_monthly')}</option>
+      <option value="quarterly" ${period==='quarterly'?'selected':''}>${t('p_quarterly')}</option>
+      <option value="semiannual" ${period==='semiannual'?'selected':''}>${t('p_semiannual')}</option>
+      <option value="annual" ${period==='annual'?'selected':''}>${t('p_annual')}</option>
     </select></td>
     <td class="col-eq">€0</td>
     <td><button class="btn-del" onclick="this.closest('tr').remove();recalc();">×</button></td>
@@ -237,7 +309,7 @@ function recalc() {
 
 async function saveCosts() {
   const mk = monthKey(currentDate);
-  setStatus('Kaydediliyor...', '#64748B');
+  setStatus(t('saving'), '#64748B');
 
   const user = await requireUser();
   if (!user) return;
@@ -265,7 +337,7 @@ async function saveCosts() {
 
   const { error } = await sb.from('fixed_costs').insert(rows);
   if (error) { setStatus('❌ ' + error.message, '#DC2626'); console.error(error); }
-  else { setStatus('✅ Kaydedildi!', '#059669'); }
+  else { setStatus(t('saved'), '#059669'); }
 }
 
 async function loadCosts() {
@@ -276,7 +348,7 @@ async function loadCosts() {
   tbody.innerHTML = '';
   document.getElementById('copyNotice').classList.remove('show');
 
-  if (error) { setStatus('Yüklenemedi: '+error.message, '#DC2626'); return; }
+  if (error) { setStatus((lang==='tr'?'Yüklenemedi: ':'Load failed: ')+error.message, '#DC2626'); return; }
 
   if (!data || data.length === 0) {
     // Bu ay boş — önceki ayda veri var mı kontrol et
@@ -284,7 +356,7 @@ async function loadCosts() {
     const { data: prevData } = await sb.from('fixed_costs').select('*').eq('month', monthKey(prev));
     if (prevData && prevData.length > 0) {
       document.getElementById('copyText').textContent =
-        `${monthLabel(currentDate)} boş. ${monthLabel(prev)} ayından ${prevData.length} gider kopyalanabilir.`;
+        t('copy_dyn').replace('{m1}', monthLabel(currentDate)).replace('{m2}', monthLabel(prev)).replace('{n}', prevData.length);
       document.getElementById('copyNotice').classList.add('show');
     }
     addCostRow();
@@ -326,28 +398,29 @@ function calcTax() {
   // Basitleştirilmiş tahmini oranlar — kullanıcıya yaklaşık fikir vermek için
   if (type === 'nl_zzp') {
     rate = annualProfit < 75000 ? 0.3693 : 0.495;
-    note = 'Hollanda gelir vergisi (box 1). ZZP indirimleri hariç kaba tahmin.';
+    note = t('note_nl_zzp');
   } else if (type === 'nl_bv') {
     rate = annualProfit < 200000 ? 0.19 : 0.258;
-    note = 'Hollanda kurumlar vergisi (vennootschapsbelasting). Maaş/temettü hariç.';
+    note = t('note_nl_bv');
   } else if (type === 'tr_sahis') {
     rate = 0.20;
-    note = 'Türkiye gelir vergisi — kademeli sistemde yaklaşık ortalama oran.';
+    note = t('note_tr_s');
   } else if (type === 'tr_limited') {
     rate = 0.25;
-    note = 'Türkiye kurumlar vergisi (%25).';
+    note = t('note_tr_l');
   }
 
   taxAmount = profit * rate;
   resultEl.style.display = 'block';
   resultEl.innerHTML = `
-    Aylık tahmini vergi karşılığı: <strong>€${taxAmount.toFixed(0)}</strong>
-    (yaklaşık %${(rate*100).toFixed(1)})<br>
-    <span style="font-size:11px;opacity:0.8;">${note} Bu bir tahmindir, kesin hesap için mali müşavirine danış.</span>
+    ${t('tax_line')} <strong>€${taxAmount.toFixed(0)}</strong>
+    (${t('tax_approx')} %${(rate*100).toFixed(1)})<br>
+    <span style="font-size:11px;opacity:0.8;">${note} ${t('tax_disclaimer')}</span>
   `;
 }
 
 // ====== BAŞLANGIÇ ======
+applyLang();
 document.getElementById('monthLabel').textContent = monthLabel(currentDate);
 loadCosts();
 </script>
