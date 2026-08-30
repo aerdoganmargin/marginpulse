@@ -108,25 +108,28 @@ input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:22px;heigh
 <body>
 <div class="sidebar">
   <div class="logo">Margin<span>Pulse</span></div>
-  <a class="nav" href="urunler.html"><span class="dot"></span>Ürün karlılığı</a>
-  <a class="nav" href="giderler.html"><span class="dot"></span>Sabit giderler</a>
-  <a class="nav" href="dashboard.html"><span class="dot"></span>Dashboard</a>
-  <div class="nav active"><span class="dot"></span>Simülatör</div>
-  <div style="margin-top:auto;padding-top:1rem;"><div class="nav" onclick="logout()" style="cursor:pointer;color:#F87171;"><span class="dot"></span>Çıkış yap</div></div>
+  <a class="nav" href="urunler.html"><span class="dot"></span><span data-i18n="nav_products">Ürün karlılığı</span></a>
+  <a class="nav" href="giderler.html"><span class="dot"></span><span data-i18n="nav_expenses">Sabit giderler</span></a>
+  <a class="nav" href="dashboard.html"><span class="dot"></span><span data-i18n="nav_dashboard">Dashboard</span></a>
+  <div class="nav active"><span class="dot"></span><span data-i18n="nav_simulator">Simülatör</span></div>
+  <div style="margin-top:auto;padding-top:1rem;">
+    <div class="nav" onclick="toggleLang()" style="cursor:pointer;"><span class="dot"></span><span id="langLabel">English</span></div>
+    <div class="nav" onclick="logout()" style="cursor:pointer;color:#F87171;"><span class="dot"></span><span data-i18n="nav_logout">Çıkış yap</span></div>
+  </div>
 </div>
 
 <div class="main">
   <div id="greeting" style="font-size:15px;color:#475569;margin-bottom:5px;font-weight:600;"></div>
-  <div class="title">Fiyat Simülatörü</div>
-  <div class="subtitle">"Ne olur?" senaryolarını test et — fiyat veya maliyet değiştir, sonucu anında gör.</div>
+  <div class="title" data-i18n="page_title">Fiyat Simülatörü</div>
+  <div class="subtitle" data-i18n="subtitle">"Ne olur?" senaryolarını test et — fiyat veya maliyet değiştir, sonucu anında gör.</div>
 
   <div id="noProductBanner" style="display:none;background:#EFF6FF;border:1px solid #BFDBFE;border-radius:12px;padding:18px 20px;margin-bottom:1rem;color:#1e40af;font-size:13.5px;line-height:1.6;">
-    👋 Simülatörü kullanmak için önce en az bir ürün eklemelisin. <strong>Ürün Karlılığı</strong> sekmesinden bir ürün ekle, sonra buraya dönüp fiyat/maliyet senaryolarını test et.
+    <span data-i18n="no_product" data-i18n-html>👋 Simülatörü kullanmak için önce en az bir ürün eklemelisin. <strong>Ürün Karlılığı</strong> sekmesinden bir ürün ekle, sonra buraya dönüp fiyat/maliyet senaryolarını test et.</span>
   </div>
 
   <!-- Ürün seçimi -->
   <div class="card">
-    <div class="card-title">Ürün seç</div>
+    <div class="card-title" data-i18n="select_product">Ürün seç</div>
     <div class="select-row">
       <select id="productSelect" onchange="onProductChange()"><option value="">Yükleniyor…</option></select>
     </div>
@@ -136,8 +139,8 @@ input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:22px;heigh
   <div id="simArea" style="display:none;">
     <div class="card">
       <div class="tabs">
-        <div class="tab active" data-scenario="price" onclick="switchScenario('price')">📈 Satış fiyatı değiştir</div>
-        <div class="tab" data-scenario="cost" onclick="switchScenario('cost')">📦 Hammadde maliyeti değiştir</div>
+        <div class="tab active" data-scenario="price" onclick="switchScenario('price')" data-i18n="tab_price">📈 Satış fiyatı değiştir</div>
+        <div class="tab" data-scenario="cost" onclick="switchScenario('cost')" data-i18n="tab_cost">📦 Hammadde maliyeti değiştir</div>
       </div>
 
       <div class="slider-box">
@@ -153,61 +156,61 @@ input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:22px;heigh
 
       <div class="compare">
         <div class="col before">
-          <h4>Şu an</h4>
-          <div class="metric"><span class="lbl">Satış fiyatı</span><span class="val" id="b_price">—</span></div>
-          <div class="metric"><span class="lbl">Birim maliyet</span><span class="val" id="b_cost">—</span></div>
-          <div class="metric"><span class="lbl">Birim kâr</span><span class="val" id="b_profit">—</span></div>
-          <div class="metric"><span class="lbl">Brüt marj</span><span class="val" id="b_margin">—</span></div>
-          <div class="metric"><span class="lbl">Aylık kâr (tahmini)</span><span class="val" id="b_monthly">—</span></div>
+          <h4 data-i18n="now">Şu an</h4>
+          <div class="metric"><span class="lbl" data-i18n="m_price">Satış fiyatı</span><span class="val" id="b_price">—</span></div>
+          <div class="metric"><span class="lbl" data-i18n="m_cost">Birim maliyet</span><span class="val" id="b_cost">—</span></div>
+          <div class="metric"><span class="lbl" data-i18n="m_profit">Birim kâr</span><span class="val" id="b_profit">—</span></div>
+          <div class="metric"><span class="lbl" data-i18n="m_margin">Brüt marj</span><span class="val" id="b_margin">—</span></div>
+          <div class="metric"><span class="lbl" data-i18n="m_monthly">Aylık kâr (tahmini)</span><span class="val" id="b_monthly">—</span></div>
         </div>
         <div class="col after">
-          <h4>Senaryo sonrası</h4>
-          <div class="metric"><span class="lbl">Satış fiyatı</span><span class="val" id="a_price">—</span></div>
-          <div class="metric"><span class="lbl">Birim maliyet</span><span class="val" id="a_cost">—</span></div>
-          <div class="metric"><span class="lbl">Birim kâr</span><span class="val" id="a_profit">—</span></div>
-          <div class="metric"><span class="lbl">Brüt marj</span><span class="val" id="a_margin">—</span></div>
-          <div class="metric"><span class="lbl">Aylık kâr (tahmini)</span><span class="val" id="a_monthly">—</span></div>
+          <h4 data-i18n="after_scenario">Senaryo sonrası</h4>
+          <div class="metric"><span class="lbl" data-i18n="m_price">Satış fiyatı</span><span class="val" id="a_price">—</span></div>
+          <div class="metric"><span class="lbl" data-i18n="m_cost">Birim maliyet</span><span class="val" id="a_cost">—</span></div>
+          <div class="metric"><span class="lbl" data-i18n="m_profit">Birim kâr</span><span class="val" id="a_profit">—</span></div>
+          <div class="metric"><span class="lbl" data-i18n="m_margin">Brüt marj</span><span class="val" id="a_margin">—</span></div>
+          <div class="metric"><span class="lbl" data-i18n="m_monthly">Aylık kâr (tahmini)</span><span class="val" id="a_monthly">—</span></div>
         </div>
       </div>
 
       <div class="insight" id="insight"></div>
 
-      <button class="btn-add-scenario" id="addScenarioBtn" onclick="addScenario()">+ Bu değişikliği senaryoya ekle</button>
-      <button class="btn-add-scenario" id="editCancelBtn" onclick="cancelEdit()" style="display:none;background:#E2E8F0;color:#475569;margin-top:8px;">İptal et</button>
+      <button class="btn-add-scenario" id="addScenarioBtn" onclick="addScenario()" data-i18n="add_scenario">+ Bu değişikliği senaryoya ekle</button>
+      <button class="btn-add-scenario" id="editCancelBtn" onclick="cancelEdit()" style="display:none;background:#E2E8F0;color:#475569;margin-top:8px;" data-i18n="cancel">İptal et</button>
     </div>
   </div>
 
   <!-- Biriken senaryolar (her zaman görünür) -->
   <div class="card">
-    <div class="card-title">🧪 Senaryo Planı <span style="font-weight:400;color:#94A3B8;font-size:11px;">— gerçek fiyatların değişmez, sadece "ya şöyle olsaydı?" planı</span></div>
+    <div class="card-title" data-i18n="plan_title" data-i18n-html>🧪 Senaryo Planı <span style="font-weight:400;color:#94A3B8;font-size:11px;">— gerçek fiyatların değişmez, sadece "ya şöyle olsaydı?" planı</span></div>
     <div id="scenarioList"><div class="empty">Henüz senaryo eklenmedi. Yukarıdan ürün seçip değişiklik ekle.</div></div>
     <div class="total-impact" id="totalImpact" style="display:none;">
-      <span class="lbl">Tüm senaryoların toplam aylık etkisi</span>
+      <span class="lbl" data-i18n="total_impact_lbl">Tüm senaryoların toplam aylık etkisi</span>
       <span class="val" id="totalImpactVal">€0</span>
     </div>
   </div>
 
   <!-- Mini Dashboard (her zaman görünür) -->
   <div class="card" id="miniDashCard" style="display:none;">
-    <div class="card-title">📊 Gelecek Ay Tahmini — Bu Değişikliklerle</div>
+    <div class="card-title" data-i18n="mini_title">📊 Gelecek Ay Tahmini — Bu Değişikliklerle</div>
     <div class="mini-dash">
       <div class="mini-col now">
-        <h4>Değişiklik yokken</h4>
-        <div class="mini-row"><span class="lbl">Tahmini gelir</span><span class="val" id="md_rev_now">—</span></div>
-        <div class="mini-row"><span class="lbl">Değişken gider</span><span class="val" id="md_var_now">—</span></div>
-        <div class="mini-row"><span class="lbl">Sabit gider</span><span class="val" id="md_fix_now">—</span></div>
-        <div class="mini-row net"><span class="lbl">Net sonuç</span><span class="val" id="md_net_now">—</span></div>
+        <h4 data-i18n="mini_now">Değişiklik yokken</h4>
+        <div class="mini-row"><span class="lbl" data-i18n="mr_rev">Tahmini gelir</span><span class="val" id="md_rev_now">—</span></div>
+        <div class="mini-row"><span class="lbl" data-i18n="mr_var">Değişken gider</span><span class="val" id="md_var_now">—</span></div>
+        <div class="mini-row"><span class="lbl" data-i18n="mr_fix">Sabit gider</span><span class="val" id="md_fix_now">—</span></div>
+        <div class="mini-row net"><span class="lbl" data-i18n="mr_net">Net sonuç</span><span class="val" id="md_net_now">—</span></div>
       </div>
       <div class="mini-col after">
-        <h4>Senaryolar uygulanırsa</h4>
-        <div class="mini-row"><span class="lbl">Tahmini gelir</span><span class="val" id="md_rev_after">—</span></div>
-        <div class="mini-row"><span class="lbl">Değişken gider</span><span class="val" id="md_var_after">—</span></div>
-        <div class="mini-row"><span class="lbl">Sabit gider</span><span class="val" id="md_fix_after">—</span></div>
-        <div class="mini-row net"><span class="lbl">Net sonuç</span><span class="val" id="md_net_after">—</span></div>
+        <h4 data-i18n="mini_after">Senaryolar uygulanırsa</h4>
+        <div class="mini-row"><span class="lbl" data-i18n="mr_rev">Tahmini gelir</span><span class="val" id="md_rev_after">—</span></div>
+        <div class="mini-row"><span class="lbl" data-i18n="mr_var">Değişken gider</span><span class="val" id="md_var_after">—</span></div>
+        <div class="mini-row"><span class="lbl" data-i18n="mr_fix">Sabit gider</span><span class="val" id="md_fix_after">—</span></div>
+        <div class="mini-row net"><span class="lbl" data-i18n="mr_net">Net sonuç</span><span class="val" id="md_net_after">—</span></div>
       </div>
     </div>
     <div class="dash-delta" id="dashDelta"></div>
-    <div style="font-size:11px;color:#94A3B8;margin-top:10px;">Gelir: ürünlerin gelecek ay tahmini adetleri × fiyat · Sabit gider: bu ayki sabit giderler</div>
+    <div style="font-size:11px;color:#94A3B8;margin-top:10px;" data-i18n="mini_note">Gelir: ürünlerin gelecek ay tahmini adetleri × fiyat · Sabit gider: bu ayki sabit giderler</div>
   </div>
 </div>
 
@@ -215,6 +218,93 @@ input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:22px;heigh
 const SUPABASE_URL = 'https://dmklhurvzahoiaklsnwo.supabase.co';
 const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImRta2xodXJ2emFob2lha2xzbndvIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODAxNjQxNjMsImV4cCI6MjA5NTc0MDE2M30.e-jJJ_Ru3pDKBnK_cw63pHhl_TN44LXAIC7P8w9mSns';
 const sb = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+
+// ====== DİL ======
+const I18N = {
+  tr: {
+    nav_products:"Ürün karlılığı", nav_expenses:"Sabit giderler", nav_dashboard:"Dashboard", nav_simulator:"Simülatör", nav_logout:"Çıkış yap",
+    page_title:"Fiyat Simülatörü", subtitle:'"Ne olur?" senaryolarını test et — fiyat veya maliyet değiştir, sonucu anında gör.',
+    no_product:'👋 Simülatörü kullanmak için önce en az bir ürün eklemelisin. <strong>Ürün Karlılığı</strong> sekmesinden bir ürün ekle, sonra buraya dönüp fiyat/maliyet senaryolarını test et.',
+    select_product:"Ürün seç", loading:"Yükleniyor…", no_products_opt:"Henüz ürün yok", pick_product:"— Ürün seç —",
+    tab_price:"📈 Satış fiyatı değiştir", tab_cost:"📦 Hammadde maliyeti değiştir",
+    slider_price:"Satış fiyatı değişimi", slider_cost:"Hammadde maliyeti değişimi",
+    after_scenario:"Senaryo sonrası", now:"Şu an", per_month_short:"/ay",
+    dash_better:(v)=>`✓ Bu değişikliklerle net sonucun aylık ${v} iyileşir`, dash_worse:(v)=>`⚠ Bu değişikliklerle net sonucun aylık ${v} kötüleşir`,
+    m_price:"Satış fiyatı", m_cost:"Birim maliyet", m_profit:"Birim kâr", m_margin:"Brüt marj", m_monthly:"Aylık kâr (tahmini)",
+    add_scenario:"+ Bu değişikliği senaryoya ekle", update_scenario:"✓ Senaryoyu güncelle", cancel:"İptal et",
+    plan_title:'🧪 Senaryo Planı <span style="font-weight:400;color:#94A3B8;font-size:11px;">— gerçek fiyatların değişmez, sadece "ya şöyle olsaydı?" planı</span>',
+    no_scenarios:"Henüz senaryo eklenmedi. Yukarıdan ürün seçip değişiklik ekle.",
+    total_impact_lbl:"Tüm senaryoların toplam aylık etkisi",
+    mini_title:"📊 Gelecek Ay Tahmini — Bu Değişikliklerle", mini_now:"Değişiklik yokken", mini_after:"Senaryolar uygulanırsa",
+    mr_rev:"Tahmini gelir", mr_var:"Değişken gider", mr_fix:"Sabit gider", mr_net:"Net sonuç",
+    mini_note:"Gelir: ürünlerin gelecek ay tahmini adetleri × fiyat · Sabit gider: bu ayki sabit giderler",
+    greet_morning:"Günaydın", greet_day:"İyi günler", greet_evening:"İyi akşamlar",
+    type_price:"Fiyat", type_cost:"Maliyet",
+    sc_loss_h:"Bu senaryoda zarar ediyorsun",
+    sc_loss_d:(z)=>`Birim başına ${z} zarar. Bu fiyat/maliyet sürdürülebilir değil.`,
+    sc_risky_h:(m)=>`Marj %${m}'a düşüyor — riskli bölge`,
+    sc_risky_d:(d)=>`Aylık kâr ${d} değişir. Marj %20 altında dalgalanmalara açık.`,
+    sc_up_h:(a)=>`Aylık kârın ${a} artıyor`,
+    sc_up_d:(m)=>`Yeni marj %${m}. Sağlıklı bölgede.`,
+    sc_down_h:(a)=>`Aylık kârın ${a} azalıyor ama hâlâ kârdasın`,
+    sc_down_d:(m,cause)=>`Yeni marj %${m}. ${cause} satışları artırırsa telafi edilebilir.`,
+    cause_price:"Fiyat düşüşü", cause_cost:"Maliyet artışı",
+    be_note:(p)=>` Maliyet en fazla %${p} artarsa başabaş noktasına gelirsin.`, be_note_price:(p)=>` Fiyatı %${p} düşürürsen başabaş noktasına inersin.`,
+    saving:"Kaydediliyor...", del_confirm:"Bu senaryoyu silmek istediğine emin misin?", need_change:"Önce bir değişiklik yap (kaydırıcıyı oynat).", cost_detail:(o,n)=>` (maliyet €${o}→€${n})`
+  },
+  en: {
+    nav_products:"Product profit", nav_expenses:"Fixed expenses", nav_dashboard:"Dashboard", nav_simulator:"Simulator", nav_logout:"Log out",
+    page_title:"Price Simulator", subtitle:'Test "what if?" scenarios — change price or cost, see the result instantly.',
+    no_product:'👋 To use the simulator, add at least one product first. Add one from the <strong>Product Profitability</strong> tab, then come back here to test price/cost scenarios.',
+    select_product:"Select product", loading:"Loading…", no_products_opt:"No products yet", pick_product:"— Select product —",
+    tab_price:"📈 Change sale price", tab_cost:"📦 Change ingredient cost",
+    slider_price:"Sale price change", slider_cost:"Ingredient cost change",
+    after_scenario:"After scenario", now:"Now", per_month_short:"/mo",
+    dash_better:(v)=>`✓ With these changes, your net result improves by ${v}/month`, dash_worse:(v)=>`⚠ With these changes, your net result worsens by ${v}/month`,
+    m_price:"Sale price", m_cost:"Unit cost", m_profit:"Unit profit", m_margin:"Gross margin", m_monthly:"Monthly profit (est.)",
+    add_scenario:"+ Add this change to the plan", update_scenario:"✓ Update scenario", cancel:"Cancel",
+    plan_title:'🧪 Scenario Plan <span style="font-weight:400;color:#94A3B8;font-size:11px;">— your real prices don\'t change, this is just a "what if?" plan</span>',
+    no_scenarios:"No scenarios yet. Select a product above and add a change.",
+    total_impact_lbl:"Total monthly impact of all scenarios",
+    mini_title:"📊 Next Month Forecast — With These Changes", mini_now:"Without changes", mini_after:"If scenarios applied",
+    mr_rev:"Estimated revenue", mr_var:"Variable cost", mr_fix:"Fixed cost", mr_net:"Net result",
+    mini_note:"Revenue: products' next-month estimated quantities × price · Fixed cost: this month's fixed expenses",
+    greet_morning:"Good morning", greet_day:"Good afternoon", greet_evening:"Good evening",
+    type_price:"Price", type_cost:"Cost",
+    sc_loss_h:"You're losing money in this scenario",
+    sc_loss_d:(z)=>`${z} loss per unit. This price/cost isn't sustainable.`,
+    sc_risky_h:(m)=>`Margin drops to ${m}% — risky zone`,
+    sc_risky_d:(d)=>`Monthly profit changes by ${d}. Below 20% margin is exposed to fluctuations.`,
+    sc_up_h:(a)=>`Your monthly profit rises by ${a}`,
+    sc_up_d:(m)=>`New margin ${m}%. In a healthy zone.`,
+    sc_down_h:(a)=>`Your monthly profit drops by ${a} but you're still profitable`,
+    sc_down_d:(m,cause)=>`New margin ${m}%. Can be offset if ${cause} boosts sales.`,
+    cause_price:"the price cut", cause_cost:"the cost increase",
+    be_note:(p)=>` If cost rises by at most ${p}%, you reach break-even.`, be_note_price:(p)=>` If you cut the price by ${p}%, you hit break-even.`,
+    saving:"Saving...", del_confirm:"Are you sure you want to delete this scenario?", need_change:"Make a change first (move the slider).", cost_detail:(o,n)=>` (cost €${o}→€${n})`
+  }
+};
+let lang = localStorage.getItem('mp_lang');
+if (!lang) { const n=(navigator.language||'tr').toLowerCase(); lang = n.startsWith('tr')?'tr':'en'; }
+function t(k){ return (I18N[lang] && I18N[lang][k]!==undefined) ? I18N[lang][k] : k; }
+function applyLang() {
+  document.querySelectorAll('[data-i18n]').forEach(el => {
+    const k=el.getAttribute('data-i18n'); if(typeof I18N[lang][k]!=='string') return;
+    if(el.hasAttribute('data-i18n-html')) el.innerHTML=I18N[lang][k]; else el.textContent=I18N[lang][k];
+  });
+  document.documentElement.lang = lang;
+  const ll=document.getElementById('langLabel'); if(ll) ll.textContent=(lang==='tr')?'English':'Türkçe';
+  if (typeof showGreeting==='function') showGreeting();
+  // slider başlığı
+  const st=document.getElementById('sliderTitle'); if(st) st.textContent=(scenario==='price')?t('slider_price'):t('slider_cost');
+  // ürün listesi + senaryolar yeniden
+  if (typeof loadProducts==='function') loadProducts();
+  if (typeof loadScenarios==='function') loadScenarios();
+  if (currentProduct && typeof simulate==='function') simulate();
+  // ekle butonu (düzenleme modunda değilse)
+  const ab=document.getElementById('addScenarioBtn'); if(ab && !editingScenarioId) ab.textContent=t('add_scenario');
+}
+function toggleLang(){ lang=(lang==='tr')?'en':'tr'; localStorage.setItem('mp_lang',lang); applyLang(); }
 // ====== GİRİŞ KONTROLÜ ======
 let currentUser = null;
 (async () => {
@@ -228,7 +318,7 @@ function showGreeting() {
   if (!el || !currentUser) return;
   const bizName = (currentUser.user_metadata && currentUser.user_metadata.business_name) || "";
   const hour = new Date().getHours();
-  const selam = hour < 12 ? "Günaydın" : (hour < 18 ? "İyi günler" : "İyi akşamlar");
+  const selam = hour < 12 ? t('greet_morning') : (hour < 18 ? t('greet_day') : t('greet_evening'));
   el.textContent = bizName ? (selam + ", " + bizName + " 👋") : (selam + " 👋");
 }
 async function requireUser() {
@@ -248,8 +338,8 @@ let currentProduct = null;
 let scenario = 'price';
 let editingScenarioId = null;
 
-function eur(n){ return '€' + n.toLocaleString('tr-TR',{minimumFractionDigits:2,maximumFractionDigits:2}); }
-function eur0(n){ return '€' + Math.round(n).toLocaleString('tr-TR'); }
+function eur(n){ return '€' + n.toLocaleString(lang==='tr'?'tr-TR':'en-US',{minimumFractionDigits:2,maximumFractionDigits:2}); }
+function eur0(n){ return '€' + Math.round(n).toLocaleString(lang==='tr'?'tr-TR':'en-US'); }
 
 async function loadProducts() {
   const { data } = await sb.from('products').select('*').order('name');
@@ -257,12 +347,12 @@ async function loadProducts() {
   const sel = document.getElementById('productSelect');
   const banner = document.getElementById('noProductBanner');
   if (allProducts.length === 0) {
-    sel.innerHTML = '<option value="">Henüz ürün yok</option>';
+    sel.innerHTML = '<option value="">'+t('no_products_opt')+'</option>';
     if (banner) banner.style.display = 'block';
     return;
   }
   if (banner) banner.style.display = 'none';
-  sel.innerHTML = '<option value="">— Ürün seç —</option>';
+  sel.innerHTML = '<option value="">'+t('pick_product')+'</option>';
   allProducts.forEach(p => {
     sel.innerHTML += `<option value="${p.id}">${p.name} (€${(p.sale_price||0).toFixed(2)})</option>`;
   });
@@ -284,7 +374,7 @@ function switchScenario(s) {
   scenario = s;
   document.querySelectorAll('.tab').forEach(t => t.classList.toggle('active', t.dataset.scenario===s));
   document.getElementById('sliderTitle').textContent =
-    s==='price' ? 'Satış fiyatı değişimi' : 'Hammadde maliyeti değişimi';
+    s==='price' ? t('slider_price') : t('slider_cost');
   document.getElementById('slider').value = 0;
   simulate();
 }
@@ -297,7 +387,7 @@ function simulate() {
   const qty = p.last_month_qty || 0;
   const pct = parseInt(document.getElementById('slider').value);
 
-  document.getElementById('sliderValue').textContent = (pct>=0?'+':'') + '%' + pct;
+  document.getElementById('sliderValue').textContent = (pct>=0?'+':'') + (lang==='tr'?('%'+pct):(pct+'%'));
 
   // Senaryoya göre yeni değerler
   let newPrice = basePrice, newCost = baseCost;
@@ -312,7 +402,7 @@ function simulate() {
   document.getElementById('b_price').textContent = eur(basePrice);
   document.getElementById('b_cost').textContent = eur(baseCost);
   document.getElementById('b_profit').textContent = eur(baseProfit);
-  document.getElementById('b_margin').textContent = '%' + baseMargin.toFixed(1);
+  document.getElementById('b_margin').textContent = lang==='tr'?('%'+baseMargin.toFixed(1)):(baseMargin.toFixed(1)+'%');
   document.getElementById('b_monthly').textContent = eur0(baseMonthly);
 
   // SENARYO SONRASI
@@ -323,7 +413,7 @@ function simulate() {
   document.getElementById('a_price').innerHTML = eur(newPrice) + deltaTag(newPrice, basePrice);
   document.getElementById('a_cost').innerHTML = eur(newCost) + deltaTag(newCost, baseCost, true);
   document.getElementById('a_profit').innerHTML = eur(newProfit) + deltaTag(newProfit, baseProfit);
-  document.getElementById('a_margin').textContent = '%' + newMargin.toFixed(1);
+  document.getElementById('a_margin').textContent = lang==='tr'?('%'+newMargin.toFixed(1)):(newMargin.toFixed(1)+'%');
   document.getElementById('a_monthly').innerHTML = eur0(newMonthly) + deltaTag(newMonthly, baseMonthly);
 
   // INSIGHT
@@ -333,20 +423,20 @@ function simulate() {
 
   if (newProfit < 0) {
     cls='red'; ico='🔴';
-    head='Bu senaryoda zarar ediyorsun';
-    desc=`Birim başına ${eur(Math.abs(newProfit))} zarar. Bu fiyat/maliyet sürdürülebilir değil.`;
+    head=t('sc_loss_h');
+    desc=t('sc_loss_d')(eur(Math.abs(newProfit)));
   } else if (newMargin < 20) {
     cls='yellow'; ico='🟡';
-    head=`Marj %${newMargin.toFixed(0)}'a düşüyor — riskli bölge`;
-    desc=`Aylık kâr ${monthlyDiff>=0?'+':''}${eur0(monthlyDiff)} değişir. Marj %20 altında dalgalanmalara açık.`;
+    head=t('sc_risky_h')(newMargin.toFixed(0));
+    desc=t('sc_risky_d')((monthlyDiff>=0?'+':'')+eur0(monthlyDiff));
   } else {
     cls='green'; ico='🟢';
     if (monthlyDiff >= 0) {
-      head=`Aylık kârın ${eur0(monthlyDiff)} artıyor`;
-      desc=`Yeni marj %${newMargin.toFixed(0)}. Sağlıklı bölgede.`;
+      head=t('sc_up_h')(eur0(monthlyDiff));
+      desc=t('sc_up_d')(newMargin.toFixed(0));
     } else {
-      head=`Aylık kârın ${eur0(Math.abs(monthlyDiff))} azalıyor ama hâlâ kârdasın`;
-      desc=`Yeni marj %${newMargin.toFixed(0)}. ${scenario==='price'?'Fiyat düşüşü':'Maliyet artışı'} satışları artırırsa telafi edilebilir.`;
+      head=t('sc_down_h')(eur0(Math.abs(monthlyDiff)));
+      desc=t('sc_down_d')(newMargin.toFixed(0), scenario==='price'?t('cause_price'):t('cause_cost'));
     }
   }
 
@@ -355,11 +445,11 @@ function simulate() {
   if (scenario === 'cost' && baseProfit > 0) {
     const maxCost = basePrice; // fiyata eşit olunca kâr sıfır
     const maxCostPct = ((maxCost - baseCost)/baseCost*100);
-    beNote = ` Maliyet en fazla %${maxCostPct.toFixed(0)} artarsa başabaş noktasına gelirsin.`;
+    beNote = t('be_note')(maxCostPct.toFixed(0));
   } else if (scenario === 'price' && baseCost > 0) {
     const minPrice = baseCost;
     const minPricePct = ((minPrice - basePrice)/basePrice*100);
-    beNote = ` Fiyatı %${Math.abs(minPricePct).toFixed(0)} düşürürsen başabaş noktasına inersin.`;
+    beNote = t('be_note_price')(Math.abs(minPricePct).toFixed(0));
   }
 
   insight.className = 'insight ' + cls;
@@ -379,7 +469,7 @@ async function addScenario() {
   if (!currentProduct) return;
   const p = currentProduct;
   const pct = parseInt(document.getElementById('slider').value);
-  if (pct === 0) { alert('Önce bir değişiklik yap (kaydırıcıyı oynat).'); return; }
+  if (pct === 0) { alert(t('need_change')); return; }
 
   const basePrice = p.sale_price || 0;
   const baseCost = p.ingredient_cost || 0;
@@ -434,12 +524,12 @@ function editScenario(id) {
     scenario = s.scenario_type;
     document.querySelectorAll('.tab').forEach(t => t.classList.toggle('active', t.dataset.scenario===scenario));
     document.getElementById('sliderTitle').textContent =
-      scenario==='price' ? 'Satış fiyatı değişimi' : 'Hammadde maliyeti değişimi';
+      scenario==='price' ? t('slider_price') : t('slider_cost');
     // Yüzdeyi ayarla
     document.getElementById('slider').value = s.change_pct;
     // Düzenleme moduna geç
     editingScenarioId = id2;
-    document.getElementById('addScenarioBtn').textContent = '✓ Senaryoyu güncelle';
+    document.getElementById('addScenarioBtn').textContent = t('update_scenario');
     document.getElementById('editCancelBtn').style.display = 'inline-block';
     simulate();
     window.scrollTo({top:0, behavior:'smooth'});
@@ -448,7 +538,7 @@ function editScenario(id) {
 
 function cancelEdit() {
   editingScenarioId = null;
-  document.getElementById('addScenarioBtn').textContent = '+ Bu değişikliği senaryoya ekle';
+  document.getElementById('addScenarioBtn').textContent = t('add_scenario');
   document.getElementById('editCancelBtn').style.display = 'none';
 }
 
@@ -469,7 +559,7 @@ async function loadScenarios() {
   let total = 0;
   data.forEach(s => {
     total += parseFloat(s.monthly_impact) || 0;
-    const typeLabel = s.scenario_type === 'price' ? 'Fiyat' : 'Maliyet';
+    const typeLabel = s.scenario_type === 'price' ? t('type_price') : t('type_cost');
     const sign = s.change_pct >= 0 ? '+' : '';
     const impact = parseFloat(s.monthly_impact) || 0;
     const impactCls = impact >= 0 ? 'pos' : 'neg';
@@ -478,9 +568,9 @@ async function loadScenarios() {
     list.innerHTML += `<div class="scenario-item">
       <div class="info">
         <div class="name">${s.product_name}</div>
-        <div class="detail">${typeLabel} ${sign}%${s.change_pct} · €${(s.old_price||0).toFixed(2)}→€${(s.new_price||0).toFixed(2)}${s.scenario_type==='cost'?' (maliyet €'+(s.old_cost||0).toFixed(2)+'→€'+(s.new_cost||0).toFixed(2)+')':''}</div>
+        <div class="detail">${typeLabel} ${sign}${lang==='tr'?('%'+s.change_pct):(s.change_pct+'%')} · €${(s.old_price||0).toFixed(2)}→€${(s.new_price||0).toFixed(2)}${s.scenario_type==='cost'?t('cost_detail')((s.old_cost||0).toFixed(2),(s.new_cost||0).toFixed(2)):''}</div>
       </div>
-      <span class="impact ${impactCls}">${impactSign}€${Math.round(impact)}/ay</span>
+      <span class="impact ${impactCls}">${impactSign}€${Math.round(impact)}${t('per_month_short')}</span>
       <button class="del edit-btn" onclick="editScenario('${s.id}')" title="Düzenle">✎</button>
       <button class="del" onclick="deleteScenario('${s.id}')" title="Sil">×</button>
     </div>`;
@@ -557,10 +647,10 @@ async function updateMiniDash(scenarios) {
   const deltaEl = document.getElementById('dashDelta');
   if (diff >= 0) {
     deltaEl.className = 'dash-delta pos';
-    deltaEl.textContent = `✓ Bu değişikliklerle net sonucun aylık ${f0(diff)} iyileşir`;
+    deltaEl.textContent = t('dash_better')(f0(diff));
   } else {
     deltaEl.className = 'dash-delta neg';
-    deltaEl.textContent = `⚠ Bu değişikliklerle net sonucun aylık ${f0(Math.abs(diff))} kötüleşir`;
+    deltaEl.textContent = t('dash_worse')(f0(Math.abs(diff)));
   }
 }
 
@@ -569,8 +659,7 @@ async function deleteScenario(id) {
   loadScenarios();
 }
 
-loadProducts();
-loadScenarios();
+applyLang();
 </script>
 </body>
 </html>
