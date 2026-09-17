@@ -142,11 +142,15 @@ td input,td select{width:100%;padding:5px 8px;border:1px solid #E2E8F0;border-ra
     </div>
   </div>
 
+  <!-- AI öner butonu (belirgin) -->
+  <div style="text-align:center;margin:-0.5rem 0 1.25rem;">
+    <button id="aiBtn" onclick="suggestRecipe()" style="background:linear-gradient(135deg,#2563EB,#3B82F6);color:#fff;border:none;border-radius:10px;padding:13px 28px;font-size:14px;font-weight:600;cursor:pointer;display:inline-flex;align-items:center;gap:8px;box-shadow:0 4px 14px rgba(37,99,235,0.3);" data-i18n="ai_btn">✨ AI ile öner</button>
+    <div style="font-size:11.5px;color:#94A3B8;margin-top:8px;" data-i18n="ai_hint">Ürün adını yaz, reçeteyi AI otomatik doldursun</div>
+  </div>
+
   <!-- Adım 2 -->
   <div class="card">
-    <div class="card-title"><span class="badge-num">2</span> <span data-i18n="step2_title">Reçete &amp; maliyet</span>
-      <button id="aiBtn" onclick="suggestRecipe()" style="margin-left:auto;background:linear-gradient(135deg,#2563EB,#3B82F6);color:#fff;border:none;border-radius:8px;padding:7px 14px;font-size:12px;font-weight:600;cursor:pointer;display:flex;align-items:center;gap:6px;" data-i18n="ai_btn">✨ AI ile öner</button>
-    </div>
+    <div class="card-title"><span class="badge-num">2</span> <span data-i18n="step2_title">Reçete &amp; maliyet</span></div>
     <div id="aiStatus" style="font-size:12px;color:#64748B;margin-bottom:10px;display:none;"></div>
     <table>
       <thead><tr>
@@ -211,7 +215,7 @@ const I18N = {
     step1_title:"Ürün adı ve kategori", ph_product:"Örn: Saç kavurma",
     cat_meat:"Et yemeği", cat_food:"Yemek", cat_drink:"İçecek", cat_dessert:"Tatlı", cat_starter:"Aperatif",
     portion_label:"1 porsiyon =", unit_piece:"adet", portion_hint:"Boş bırakırsan AI tipik porsiyonu kendi tahmin eder",
-    step2_title:"Reçete & maliyet", ai_btn:"✨ AI ile öner",
+    step2_title:"Reçete & maliyet", ai_btn:"✨ AI ile öner", ai_hint:"Ürün adını yaz, reçeteyi AI otomatik doldursun",
     th_ingredient:"Malzeme", th_qty:"Miktar", th_unit:"Birim", th_price:"Birim fiyat (€)", th_cost:"Maliyet",
     add_ingredient:"+ Malzeme ekle", price_hint:"💡 g/ml için fiyatı €/kg veya €/lt gir · adet için €/adet gir",
     total_cost:'Toplam hammadde maliyeti: <strong id="totalCost">€0.00</strong> / porsiyon',
@@ -236,7 +240,7 @@ const I18N = {
     step1_title:"Product name and category", ph_product:"e.g. Lamb sauté",
     cat_meat:"Meat dish", cat_food:"Food", cat_drink:"Drink", cat_dessert:"Dessert", cat_starter:"Starter",
     portion_label:"1 serving =", unit_piece:"pcs", portion_hint:"Leave empty and AI will estimate a typical serving",
-    step2_title:"Recipe & cost", ai_btn:"✨ Suggest with AI",
+    step2_title:"Recipe & cost", ai_btn:"✨ Suggest with AI", ai_hint:"Enter the product name and AI fills in the recipe automatically",
     th_ingredient:"Ingredient", th_qty:"Amount", th_unit:"Unit", th_price:"Unit price (€)", th_cost:"Cost",
     add_ingredient:"+ Add ingredient", price_hint:"💡 For g/ml enter price as €/kg or €/l · for pcs enter €/piece",
     total_cost:'Total ingredient cost: <strong id="totalCost">€0.00</strong> / serving',
