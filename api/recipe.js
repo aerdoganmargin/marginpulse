@@ -52,7 +52,7 @@ ${portionLine}
 
 Respond in this JSON format:
 {
-  "assumption": "In one sentence, state exactly which serving/amount you calculated for (e.g. 'calculated for 3 pieces of stuffed meatballs')",
+  "assumption": "In one sentence, state exactly which serving/amount you calculated for (e.g. 'calculated for 1 bowl of soup')",
   "ingredients": [
     {"name":"ingredient name (English, short)","qty":amount (number),"unit":"g/ml/adet","price":estimated unit price}
   ]
