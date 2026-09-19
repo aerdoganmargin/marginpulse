@@ -59,7 +59,7 @@ Respond in this JSON format:
 }
 
 Quantity (qty) rule: it must be the total amount for the ENTIRE serving size stated above.
-Price rule: for g/ml use €/kg or €/l; for pieces use €/piece. Approximate for the European/Netherlands 2025 market.
+Price rule: for g/ml use €/kg or €/l; for pieces use €/piece. Prices must be EXCLUDING VAT (net wholesale/supplier prices, not consumer shelf prices). Approximate for the Netherlands 2025 wholesale market.
 IMPORTANT:
 - For the "unit" field always use one of: "g", "ml", or "adet" (use "adet" for countable pieces).
 - Return only valid JSON, nothing else (NO markdown, NO backticks).
@@ -79,7 +79,7 @@ Cevabını şu JSON formatında ver:
 
 Malzeme miktarı (qty) kuralı: yukarıda belirtilen porsiyon büyüklüğünün TAMAMI için toplam miktar olmalı. Porsiyon kaç adetse o kadar adedin toplam malzemesini ver.
 
-Fiyat (price) kuralı: g/ml için €/kg veya €/lt cinsinden, adet için €/adet cinsinden. Avrupa/Hollanda 2025 piyasasına göre yaklaşık.
+Fiyat (price) kuralı: g/ml için €/kg veya €/lt cinsinden, adet için €/adet cinsinden. Fiyatlar KDV HARİÇ olmalı (toptancı/tedarikçi net fiyatı, market raf fiyatı değil). Hollanda 2025 toptan piyasasına göre yaklaşık.
 
 ÖNEMLİ:
 - Sadece geçerli JSON döndür, başka hiçbir şey yazma (markdown, backtick YOK).
