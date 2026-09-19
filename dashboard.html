@@ -43,7 +43,8 @@ body{font-family:'Segoe UI',system-ui,sans-serif;background:#F0F4F8;display:flex
 .pnl-net.profit .val{color:#6EE7B7;}
 .tax-field label{font-size:11px;color:#64748B;display:block;margin-bottom:4px;}
 .tax-field select{width:100%;max-width:340px;padding:9px 12px;border:1px solid #E2E8F0;border-radius:8px;font-size:13px;}
-.tax-result{background:#FEF3C7;border-radius:8px;padding:12px 16px;margin-top:12px;font-size:13px;color:#92400E;}
+.tax-result{background:#0F1F3D;color:#fff;border-radius:10px;padding:16px 18px;margin-top:12px;font-size:13px;}
+.tax-result .big{color:#6EE7B7;}
 .tax-result strong{font-size:16px;}
 /* Tablo */
 table{width:100%;border-collapse:collapse;font-size:12px;}
@@ -176,7 +177,7 @@ const I18N = {
     tax_nl_zzp:"Hollanda — ZZP (şahıs)", tax_nl_bv:"Hollanda — BV (limited)", tax_tr_s:"Türkiye — Şahıs", tax_tr_l:"Türkiye — Limited",
     tax_line:"Net kârından aylık tahmini vergi:", tax_approx:"yaklaşık", tax_disclaimer:"Bu bir tahmindir, kesin hesap için mali müşavirine danış.",
     tax_empty:"Vergi tahmini için önce kâra geçmen gerekiyor. Şu an net sonucun sıfır veya negatif.",
-    tax_after:(a)=>`Vergi sonrası net: ${a}`,
+    tax_after_lbl:"💰 Vergi sonrası cebine kalan",
     note_nl_zzp:"Hollanda gelir vergisi (box 1). ZZP indirimleri hariç kaba tahmin.",
     note_nl_bv:"Hollanda kurumlar vergisi (vennootschapsbelasting). Maaş/temettü hariç.",
     note_tr_s:"Türkiye gelir vergisi — kademeli sistemde yaklaşık ortalama oran.",
@@ -223,7 +224,7 @@ const I18N = {
     tax_nl_zzp:"Netherlands — ZZP (sole trader)", tax_nl_bv:"Netherlands — BV (private ltd)", tax_tr_s:"Turkey — Sole trader", tax_tr_l:"Turkey — Limited",
     tax_line:"Estimated monthly tax on your net profit:", tax_approx:"approx.", tax_disclaimer:"This is an estimate; consult your accountant for exact figures.",
     tax_empty:"You need to be profitable first for a tax estimate. Your net result is currently zero or negative.",
-    tax_after:(a)=>`Net after tax: ${a}`,
+    tax_after_lbl:"💰 Your take-home after tax",
     note_nl_zzp:"Dutch income tax (box 1). Rough estimate excluding ZZP deductions.",
     note_nl_bv:"Dutch corporate tax (vennootschapsbelasting). Excluding salary/dividends.",
     note_tr_s:"Turkish income tax — approximate average rate in the bracketed system.",
@@ -580,10 +581,14 @@ function calcTax() {
 
   resultEl.style.display = 'block';
   resultEl.innerHTML = `
-    ${t('tax_line')} <strong>${eur(taxAmount)}</strong>
-    (${t('tax_approx')} ${lang==='tr'?('%'+(rate*100).toFixed(1)):((rate*100).toFixed(1)+'%')})<br>
-    <span style="font-weight:600;">${t('tax_after')(eur(afterTax))}</span><br>
-    <span style="font-size:11px;opacity:0.8;">${note} ${t('tax_disclaimer')}</span>
+    <div style="display:flex;justify-content:space-between;align-items:flex-end;flex-wrap:wrap;gap:12px;">
+      <div style="flex:1;min-width:180px;">
+        <div style="font-size:12px;opacity:0.85;margin-bottom:2px;">${t('tax_after_lbl')}</div>
+        <div style="font-size:30px;font-weight:800;line-height:1;" class="big">${eur(afterTax)}</div>
+        <div style="font-size:12px;opacity:0.85;margin-top:6px;">${t('tax_line')} <strong>${eur(taxAmount)}</strong> (${t('tax_approx')} ${lang==='tr'?('%'+(rate*100).toFixed(1)):((rate*100).toFixed(1)+'%')})</div>
+      </div>
+    </div>
+    <div style="font-size:11px;opacity:0.75;margin-top:10px;">${note} ${t('tax_disclaimer')}</div>
   `;
 }
 
