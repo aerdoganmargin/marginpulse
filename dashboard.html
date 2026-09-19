@@ -41,6 +41,10 @@ body{font-family:'Segoe UI',system-ui,sans-serif;background:#F0F4F8;display:flex
 .pnl-net{background:#0F1F3D;color:#fff;}
 .pnl-net.loss .val{color:#FCA5A5;}
 .pnl-net.profit .val{color:#6EE7B7;}
+.tax-field label{font-size:11px;color:#64748B;display:block;margin-bottom:4px;}
+.tax-field select{width:100%;max-width:340px;padding:9px 12px;border:1px solid #E2E8F0;border-radius:8px;font-size:13px;}
+.tax-result{background:#FEF3C7;border-radius:8px;padding:12px 16px;margin-top:12px;font-size:13px;color:#92400E;}
+.tax-result strong{font-size:16px;}
 /* Tablo */
 table{width:100%;border-collapse:collapse;font-size:12px;}
 th{text-align:left;color:#64748B;font-weight:500;font-size:11px;padding:0 8px 8px 0;border-bottom:1px solid #E2E8F0;}
@@ -114,6 +118,22 @@ td{padding:9px 8px 9px 0;border-bottom:1px solid #F1F5F9;color:#1E293B;}
     <div style="font-size:11px;color:#94A3B8;margin-top:10px;" id="pnlNote"></div>
   </div>
 
+  <!-- Vergi Tahmini (net kâr üstünden) -->
+  <div class="card">
+    <div class="card-title" data-i18n="tax_title">🧾 Vergi Tahmini</div>
+    <div class="tax-field">
+      <label data-i18n="tax_country">Ülke & şirket tipi</label>
+      <select id="taxType" onchange="calcTax()">
+        <option value="nl_zzp" data-i18n="tax_nl_zzp">Hollanda — ZZP (şahıs)</option>
+        <option value="nl_bv" data-i18n="tax_nl_bv">Hollanda — BV (limited)</option>
+        <option value="tr_sahis" data-i18n="tax_tr_s">Türkiye — Şahıs</option>
+        <option value="tr_limited" data-i18n="tax_tr_l">Türkiye — Limited</option>
+      </select>
+    </div>
+    <div class="tax-result" id="taxResult" style="display:none;"></div>
+    <div class="tax-empty" id="taxEmpty" style="display:none;font-size:12.5px;color:#94A3B8;margin-top:10px;" data-i18n="tax_empty">Vergi tahmini için önce kâra geçmen gerekiyor. Şu an net sonucun sıfır veya negatif.</div>
+  </div>
+
   <!-- Kategori karlılığı -->
   <div class="card">
     <div class="card-title" data-i18n="products_title">📦 Ürün Karlılığı</div>
@@ -152,6 +172,15 @@ const I18N = {
     pnl_title:"💰 Bu Ay — Kâr / Zarar Özeti", pnl_rev:"Tahmini Gelir", pnl_cost:"Toplam Gider", pnl_net:"Net Sonuç (NOI)",
     products_title:"📦 Ürün Karlılığı", th_product:"Ürün", th_cat:"Kategori", th_sale:"Satış €", th_cost:"Maliyet €", th_profit:"Birim kâr", th_margin:"Marj",
     forecast_title:"📈 Gelecek Ay Tahmini", forecast_note:"tahmini gelir (ürünlerin gelecek ay adetlerine göre)",
+    tax_title:"🧾 Vergi Tahmini", tax_country:"Ülke & şirket tipi",
+    tax_nl_zzp:"Hollanda — ZZP (şahıs)", tax_nl_bv:"Hollanda — BV (limited)", tax_tr_s:"Türkiye — Şahıs", tax_tr_l:"Türkiye — Limited",
+    tax_line:"Net kârından aylık tahmini vergi:", tax_approx:"yaklaşık", tax_disclaimer:"Bu bir tahmindir, kesin hesap için mali müşavirine danış.",
+    tax_empty:"Vergi tahmini için önce kâra geçmen gerekiyor. Şu an net sonucun sıfır veya negatif.",
+    tax_after:(a)=>`Vergi sonrası net: ${a}`,
+    note_nl_zzp:"Hollanda gelir vergisi (box 1). ZZP indirimleri hariç kaba tahmin.",
+    note_nl_bv:"Hollanda kurumlar vergisi (vennootschapsbelasting). Maaş/temettü hariç.",
+    note_tr_s:"Türkiye gelir vergisi — kademeli sistemde yaklaşık ortalama oran.",
+    note_tr_l:"Türkiye kurumlar vergisi (%25).",
     greet_morning:"Günaydın", greet_day:"İyi günler", greet_evening:"İyi akşamlar",
     subtitle:(m)=>`${m} · otomatik hesaplanır`,
     months:["Ocak","Şubat","Mart","Nisan","Mayıs","Haziran","Temmuz","Ağustos","Eylül","Ekim","Kasım","Aralık"],
@@ -190,6 +219,15 @@ const I18N = {
     pnl_title:"💰 This Month — Profit / Loss Summary", pnl_rev:"Estimated Revenue", pnl_cost:"Total Expenses", pnl_net:"Net Result (NOI)",
     products_title:"📦 Product Profitability", th_product:"Product", th_cat:"Category", th_sale:"Sale €", th_cost:"Cost €", th_profit:"Unit profit", th_margin:"Margin",
     forecast_title:"📈 Next Month Forecast", forecast_note:"estimated revenue (based on products' next-month quantities)",
+    tax_title:"🧾 Tax Estimate", tax_country:"Country & company type",
+    tax_nl_zzp:"Netherlands — ZZP (sole trader)", tax_nl_bv:"Netherlands — BV (private ltd)", tax_tr_s:"Turkey — Sole trader", tax_tr_l:"Turkey — Limited",
+    tax_line:"Estimated monthly tax on your net profit:", tax_approx:"approx.", tax_disclaimer:"This is an estimate; consult your accountant for exact figures.",
+    tax_empty:"You need to be profitable first for a tax estimate. Your net result is currently zero or negative.",
+    tax_after:(a)=>`Net after tax: ${a}`,
+    note_nl_zzp:"Dutch income tax (box 1). Rough estimate excluding ZZP deductions.",
+    note_nl_bv:"Dutch corporate tax (vennootschapsbelasting). Excluding salary/dividends.",
+    note_tr_s:"Turkish income tax — approximate average rate in the bracketed system.",
+    note_tr_l:"Turkish corporate tax (25%).",
     greet_morning:"Good morning", greet_day:"Good afternoon", greet_evening:"Good evening",
     subtitle:(m)=>`${m} · calculated automatically`,
     months:["January","February","March","April","May","June","July","August","September","October","November","December"],
@@ -318,6 +356,10 @@ async function loadDashboard() {
   const netBox = document.getElementById('netBox');
   netBox.classList.toggle('loss', net < 0);
   netBox.classList.toggle('profit', net >= 0);
+
+  // Vergi tahmini için net kârı sakla
+  window.currentNet = net;
+  calcTax();
 
   document.getElementById('forecastRevenue').textContent = eur(forecastRevenue);
 
@@ -506,6 +548,43 @@ async function loadDashboard() {
       </div>
     </div>`;
   });
+}
+
+// ====== VERGİ TAHMİNİ (gerçek net kâr üstünden) ======
+function calcTax() {
+  const sel = document.getElementById('taxType');
+  const resultEl = document.getElementById('taxResult');
+  const emptyEl = document.getElementById('taxEmpty');
+  if (!sel || !resultEl) return;
+
+  const monthlyProfit = window.currentNet || 0;
+
+  if (monthlyProfit <= 0) {
+    resultEl.style.display = 'none';
+    if (emptyEl) emptyEl.style.display = 'block';
+    return;
+  }
+  if (emptyEl) emptyEl.style.display = 'none';
+
+  const type = sel.value;
+  const annualProfit = monthlyProfit * 12;
+  let rate, note;
+
+  if (type === 'nl_zzp') { rate = annualProfit < 75000 ? 0.3693 : 0.495; note = t('note_nl_zzp'); }
+  else if (type === 'nl_bv') { rate = annualProfit < 200000 ? 0.19 : 0.258; note = t('note_nl_bv'); }
+  else if (type === 'tr_sahis') { rate = 0.20; note = t('note_tr_s'); }
+  else if (type === 'tr_limited') { rate = 0.25; note = t('note_tr_l'); }
+
+  const taxAmount = monthlyProfit * rate;
+  const afterTax = monthlyProfit - taxAmount;
+
+  resultEl.style.display = 'block';
+  resultEl.innerHTML = `
+    ${t('tax_line')} <strong>${eur(taxAmount)}</strong>
+    (${t('tax_approx')} ${lang==='tr'?('%'+(rate*100).toFixed(1)):((rate*100).toFixed(1)+'%')})<br>
+    <span style="font-weight:600;">${t('tax_after')(eur(afterTax))}</span><br>
+    <span style="font-size:11px;opacity:0.8;">${note} ${t('tax_disclaimer')}</span>
+  `;
 }
 
 applyLang();

@@ -137,26 +137,6 @@ td input,td select{width:100%;padding:6px 8px;border:1px solid #E2E8F0;border-ra
     </div>
   </div>
 
-  <!-- Vergi modülü -->
-  <div class="card">
-    <div class="card-title" data-i18n="tax_title">📊 Vergi Tahmini</div>
-    <div class="tax-grid">
-      <div class="tax-field">
-        <label data-i18n="tax_country">Ülke & şirket tipi</label>
-        <select id="taxType" onchange="calcTax()">
-          <option value="nl_zzp" data-i18n="tax_nl_zzp">Hollanda — ZZP (şahıs)</option>
-          <option value="nl_bv" data-i18n="tax_nl_bv">Hollanda — BV (limited)</option>
-          <option value="tr_sahis" data-i18n="tax_tr_s">Türkiye — Şahıs</option>
-          <option value="tr_limited" data-i18n="tax_tr_l">Türkiye — Limited</option>
-        </select>
-      </div>
-      <div class="tax-field">
-        <label data-i18n="tax_profit">Aylık net kâr tahmini (€)</label>
-        <input id="taxProfit" type="number" placeholder="3000" oninput="calcTax()" />
-      </div>
-    </div>
-    <div class="tax-result" id="taxResult" style="display:none;"></div>
-  </div>
 </div>
 
 <script>
@@ -228,7 +208,6 @@ function applyLang() {
     if(opts[0])opts[0].textContent=t('p_monthly'); if(opts[1])opts[1].textContent=t('p_quarterly');
     if(opts[2])opts[2].textContent=t('p_semiannual'); if(opts[3])opts[3].textContent=t('p_annual');
   });
-  if (typeof calcTax==='function') calcTax();
   if (typeof updateCopyNotice==='function') updateCopyNotice();
 }
 function toggleLang(){ lang=(lang==='tr')?'en':'tr'; localStorage.setItem('mp_lang',lang); applyLang(); }
@@ -385,39 +364,6 @@ function setStatus(msg, color) {
 }
 
 // ====== VERGİ TAHMİNİ ======
-function calcTax() {
-  const type = document.getElementById('taxType').value;
-  const profit = parseFloat(document.getElementById('taxProfit').value) || 0;
-  const resultEl = document.getElementById('taxResult');
-
-  if (profit <= 0) { resultEl.style.display='none'; return; }
-
-  const annualProfit = profit * 12;
-  let rate, note, taxAmount;
-
-  // Basitleştirilmiş tahmini oranlar — kullanıcıya yaklaşık fikir vermek için
-  if (type === 'nl_zzp') {
-    rate = annualProfit < 75000 ? 0.3693 : 0.495;
-    note = t('note_nl_zzp');
-  } else if (type === 'nl_bv') {
-    rate = annualProfit < 200000 ? 0.19 : 0.258;
-    note = t('note_nl_bv');
-  } else if (type === 'tr_sahis') {
-    rate = 0.20;
-    note = t('note_tr_s');
-  } else if (type === 'tr_limited') {
-    rate = 0.25;
-    note = t('note_tr_l');
-  }
-
-  taxAmount = profit * rate;
-  resultEl.style.display = 'block';
-  resultEl.innerHTML = `
-    ${t('tax_line')} <strong>€${taxAmount.toFixed(0)}</strong>
-    (${t('tax_approx')} %${(rate*100).toFixed(1)})<br>
-    <span style="font-size:11px;opacity:0.8;">${note} ${t('tax_disclaimer')}</span>
-  `;
-}
 
 // ====== BAŞLANGIÇ ======
 applyLang();
