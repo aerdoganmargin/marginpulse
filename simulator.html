@@ -111,6 +111,7 @@ input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:22px;heigh
   <a class="nav" href="urunler.html"><span class="dot"></span><span data-i18n="nav_products">Ürün karlılığı</span></a>
   <a class="nav" href="giderler.html"><span class="dot"></span><span data-i18n="nav_expenses">Sabit giderler</span></a>
   <a class="nav" href="dashboard.html"><span class="dot"></span><span data-i18n="nav_dashboard">Dashboard</span></a>
+  <a class="nav" href="pnl.html"><span class="dot"></span><span data-i18n="nav_pnl">Gelir Tablosu</span></a>
   <div class="nav active"><span class="dot"></span><span data-i18n="nav_simulator">Simülatör</span></div>
   <div style="margin-top:auto;padding-top:1rem;">
     <div class="nav" onclick="toggleLang()" style="cursor:pointer;"><span class="dot"></span><span id="langLabel">English</span></div>
@@ -222,7 +223,7 @@ const sb = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 // ====== DİL ======
 const I18N = {
   tr: {
-    nav_products:"Ürün karlılığı", nav_expenses:"Sabit giderler", nav_dashboard:"Dashboard", nav_simulator:"Simülatör", nav_logout:"Çıkış yap",
+    nav_products:"Ürün karlılığı", nav_expenses:"Sabit giderler", nav_dashboard:"Dashboard", nav_simulator:"Simülatör", nav_pnl:"Gelir Tablosu", nav_logout:"Çıkış yap",
     page_title:"Fiyat Simülatörü", subtitle:'"Ne olur?" senaryolarını test et — fiyat veya maliyet değiştir, sonucu anında gör.',
     no_product:'👋 Simülatörü kullanmak için önce en az bir ürün eklemelisin. <strong>Ürün Karlılığı</strong> sekmesinden bir ürün ekle, sonra buraya dönüp fiyat/maliyet senaryolarını test et.',
     select_product:"Ürün seç", loading:"Yükleniyor…", no_products_opt:"Henüz ürün yok", pick_product:"— Ürün seç —",
@@ -253,7 +254,7 @@ const I18N = {
     saving:"Kaydediliyor...", del_confirm:"Bu senaryoyu silmek istediğine emin misin?", need_change:"Önce bir değişiklik yap (kaydırıcıyı oynat).", cost_detail:(o,n)=>` (maliyet €${o}→€${n})`
   },
   en: {
-    nav_products:"Product profit", nav_expenses:"Fixed expenses", nav_dashboard:"Dashboard", nav_simulator:"Simulator", nav_logout:"Log out",
+    nav_products:"Product profit", nav_expenses:"Fixed expenses", nav_dashboard:"Dashboard", nav_simulator:"Simulator", nav_pnl:"Income Statement", nav_logout:"Log out",
     page_title:"Price Simulator", subtitle:'Test "what if?" scenarios — change price or cost, see the result instantly.',
     no_product:'👋 To use the simulator, add at least one product first. Add one from the <strong>Product Profitability</strong> tab, then come back here to test price/cost scenarios.',
     select_product:"Select product", loading:"Loading…", no_products_opt:"No products yet", pick_product:"— Select product —",

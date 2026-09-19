@@ -90,6 +90,7 @@ td{padding:9px 8px 9px 0;border-bottom:1px solid #F1F5F9;color:#1E293B;}
   <a class="nav" href="urunler.html"><span class="dot"></span><span data-i18n="nav_products">Ürün karlılığı</span></a>
   <a class="nav" href="giderler.html"><span class="dot"></span><span data-i18n="nav_expenses">Sabit giderler</span></a>
   <div class="nav active"><span class="dot"></span><span data-i18n="nav_dashboard">Dashboard</span></div>
+  <a class="nav" href="pnl.html"><span class="dot"></span><span data-i18n="nav_pnl">Gelir Tablosu</span></a>
   <a class="nav" href="simulator.html" style="text-decoration:none;"><span class="dot"></span><span data-i18n="nav_simulator">Simülatör</span></a>
   <div style="margin-top:auto;padding-top:1rem;">
     <div class="nav" onclick="toggleLang()" style="cursor:pointer;"><span class="dot"></span><span id="langLabel">English</span></div>
@@ -168,7 +169,7 @@ const sb = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 // ====== DİL ======
 const I18N = {
   tr: {
-    nav_products:"Ürün karlılığı", nav_expenses:"Sabit giderler", nav_dashboard:"Dashboard", nav_simulator:"Simülatör", nav_logout:"Çıkış yap",
+    nav_products:"Ürün karlılığı", nav_expenses:"Sabit giderler", nav_dashboard:"Dashboard", nav_simulator:"Simülatör", nav_pnl:"Gelir Tablosu", nav_logout:"Çıkış yap",
     alarms_title:"🔔 Alarmlar & Öneriler", calculating:"Hesaplanıyor…",
     pnl_title:"💰 Bu Ay — Kâr / Zarar Özeti", pnl_rev:"Tahmini Gelir", pnl_cost:"Toplam Gider", pnl_net:"Net Sonuç (NOI)",
     products_title:"📦 Ürün Karlılığı", th_product:"Ürün", th_cat:"Kategori", th_sale:"Satış €", th_cost:"Maliyet €", th_profit:"Birim kâr", th_margin:"Marj",
@@ -215,7 +216,7 @@ const I18N = {
     a_empty_h:"Dashboard verilerini bekliyor", a_empty_d:"Henüz ürün eklemedin. Ürün Karlılığı modülünden birkaç ürün ekleyince burada kârlılık analizin, alarmların ve akıllı önerilerin otomatik belirir.", a_empty_p:"Ürün Karlılığı sekmesinden başla"
   },
   en: {
-    nav_products:"Product profit", nav_expenses:"Fixed expenses", nav_dashboard:"Dashboard", nav_simulator:"Simulator", nav_logout:"Log out",
+    nav_products:"Product profit", nav_expenses:"Fixed expenses", nav_dashboard:"Dashboard", nav_simulator:"Simulator", nav_pnl:"Income Statement", nav_logout:"Log out",
     alarms_title:"🔔 Alerts & Recommendations", calculating:"Calculating…",
     pnl_title:"💰 This Month — Profit / Loss Summary", pnl_rev:"Estimated Revenue", pnl_cost:"Total Expenses", pnl_net:"Net Result (NOI)",
     products_title:"📦 Product Profitability", th_product:"Product", th_cat:"Category", th_sale:"Sale €", th_cost:"Cost €", th_profit:"Unit profit", th_margin:"Margin",
@@ -558,6 +559,10 @@ function calcTax() {
   const emptyEl = document.getElementById('taxEmpty');
   if (!sel || !resultEl) return;
 
+  // Kaydedilmiş seçimi geri yükle (ilk yüklemede)
+  const saved = localStorage.getItem('mp_taxType');
+  if (saved && sel.value !== saved && !sel.dataset.restored) { sel.value = saved; sel.dataset.restored = '1'; }
+
   const monthlyProfit = window.currentNet || 0;
 
   if (monthlyProfit <= 0) {
@@ -568,6 +573,7 @@ function calcTax() {
   if (emptyEl) emptyEl.style.display = 'none';
 
   const type = sel.value;
+  localStorage.setItem('mp_taxType', type);
   const annualProfit = monthlyProfit * 12;
   let rate, note;
 
