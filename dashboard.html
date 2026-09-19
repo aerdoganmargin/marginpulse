@@ -126,10 +126,19 @@ td{padding:9px 8px 9px 0;border-bottom:1px solid #F1F5F9;color:#1E293B;}
     <div class="tax-field">
       <label data-i18n="tax_country">Ülke & şirket tipi</label>
       <select id="taxType" onchange="calcTax()">
-        <option value="nl_zzp" data-i18n="tax_nl_zzp">Hollanda — ZZP (şahıs)</option>
-        <option value="nl_bv" data-i18n="tax_nl_bv">Hollanda — BV (limited)</option>
-        <option value="tr_sahis" data-i18n="tax_tr_s">Türkiye — Şahıs</option>
-        <option value="tr_limited" data-i18n="tax_tr_l">Türkiye — Limited</option>
+        <optgroup label="Nederland — ZZP" data-i18n-label="grp_nl_zzp">
+          <option value="nl_zzp_1" data-rate="0.3582" data-i18n="tax_nl_zzp_1">Hollanda ZZP — Dilim 1: %35,82 (yıllık ≤ €38.441)</option>
+          <option value="nl_zzp_2" data-rate="0.3748" data-i18n="tax_nl_zzp_2">Hollanda ZZP — Dilim 2: %37,48 (€38.441–76.817)</option>
+          <option value="nl_zzp_3" data-rate="0.4950" data-i18n="tax_nl_zzp_3">Hollanda ZZP — Dilim 3: %49,50 (€76.817+)</option>
+        </optgroup>
+        <optgroup label="Nederland — BV" data-i18n-label="grp_nl_bv">
+          <option value="nl_bv_1" data-rate="0.19" data-i18n="tax_nl_bv_1">Hollanda BV — %19 (yıllık kâr ≤ €200.000)</option>
+          <option value="nl_bv_2" data-rate="0.258" data-i18n="tax_nl_bv_2">Hollanda BV — %25,8 (€200.000+)</option>
+        </optgroup>
+        <optgroup label="Türkiye" data-i18n-label="grp_tr">
+          <option value="tr_sahis" data-rate="0.20" data-i18n="tax_tr_s">Türkiye — Şahıs (%20, ortalama)</option>
+          <option value="tr_limited" data-rate="0.25" data-i18n="tax_tr_l">Türkiye — Limited (%25)</option>
+        </optgroup>
       </select>
     </div>
     <div class="tax-result" id="taxResult" style="display:none;"></div>
@@ -175,12 +184,15 @@ const I18N = {
     products_title:"📦 Ürün Karlılığı", th_product:"Ürün", th_cat:"Kategori", th_sale:"Satış €", th_cost:"Maliyet €", th_profit:"Birim kâr", th_margin:"Marj",
     forecast_title:"📈 Gelecek Ay Tahmini", forecast_note:"tahmini gelir (ürünlerin gelecek ay adetlerine göre)",
     tax_title:"🧾 Vergi Tahmini", tax_country:"Ülke & şirket tipi",
-    tax_nl_zzp:"Hollanda — ZZP (şahıs)", tax_nl_bv:"Hollanda — BV (limited)", tax_tr_s:"Türkiye — Şahıs", tax_tr_l:"Türkiye — Limited",
+    grp_nl_zzp:"Hollanda — ZZP", grp_nl_bv:"Hollanda — BV", grp_tr:"Türkiye",
+    tax_nl_zzp_1:"ZZP Dilim 1: %35,82 (yıllık kâr ≤ €38.441)", tax_nl_zzp_2:"ZZP Dilim 2: %37,48 (€38.441–76.817)", tax_nl_zzp_3:"ZZP Dilim 3: %49,50 (€76.817 üzeri)",
+    tax_nl_bv_1:"BV: %19 (yıllık kâr ≤ €200.000)", tax_nl_bv_2:"BV: %25,8 (€200.000 üzeri)",
+    tax_tr_s:"Türkiye — Şahıs (%20)", tax_tr_l:"Türkiye — Limited (%25)",
     tax_line:"Net kârından aylık tahmini vergi:", tax_approx:"yaklaşık", tax_disclaimer:"Bu bir tahmindir, kesin hesap için mali müşavirine danış.",
     tax_empty:"Vergi tahmini için önce kâra geçmen gerekiyor. Şu an net sonucun sıfır veya negatif.",
     tax_after_lbl:"💰 Vergi sonrası cebine kalan",
-    note_nl_zzp:"Hollanda gelir vergisi (box 1). ZZP indirimleri hariç kaba tahmin.",
-    note_nl_bv:"Hollanda kurumlar vergisi (vennootschapsbelasting). Maaş/temettü hariç.",
+    note_nl_zzp:"Seçtiğin ZZP dilim oranı net kâra uygulandı. ZZP indirimleri (zelfstandigenaftrek, MKB) hariç — gerçek vergin bir miktar düşük olabilir.",
+    note_nl_bv:"Hollanda kurumlar vergisi (vennootschapsbelasting). Maaş/temettü dağıtımı hariç.",
     note_tr_s:"Türkiye gelir vergisi — kademeli sistemde yaklaşık ortalama oran.",
     note_tr_l:"Türkiye kurumlar vergisi (%25).",
     greet_morning:"Günaydın", greet_day:"İyi günler", greet_evening:"İyi akşamlar",
@@ -222,12 +234,15 @@ const I18N = {
     products_title:"📦 Product Profitability", th_product:"Product", th_cat:"Category", th_sale:"Sale €", th_cost:"Cost €", th_profit:"Unit profit", th_margin:"Margin",
     forecast_title:"📈 Next Month Forecast", forecast_note:"estimated revenue (based on products' next-month quantities)",
     tax_title:"🧾 Tax Estimate", tax_country:"Country & company type",
-    tax_nl_zzp:"Netherlands — ZZP (sole trader)", tax_nl_bv:"Netherlands — BV (private ltd)", tax_tr_s:"Turkey — Sole trader", tax_tr_l:"Turkey — Limited",
+    grp_nl_zzp:"Netherlands — ZZP", grp_nl_bv:"Netherlands — BV", grp_tr:"Turkey",
+    tax_nl_zzp_1:"ZZP Bracket 1: 35.82% (annual profit ≤ €38,441)", tax_nl_zzp_2:"ZZP Bracket 2: 37.48% (€38,441–76,817)", tax_nl_zzp_3:"ZZP Bracket 3: 49.50% (above €76,817)",
+    tax_nl_bv_1:"BV: 19% (annual profit ≤ €200,000)", tax_nl_bv_2:"BV: 25.8% (above €200,000)",
+    tax_tr_s:"Turkey — Sole trader (20%)", tax_tr_l:"Turkey — Limited (25%)",
     tax_line:"Estimated monthly tax on your net profit:", tax_approx:"approx.", tax_disclaimer:"This is an estimate; consult your accountant for exact figures.",
     tax_empty:"You need to be profitable first for a tax estimate. Your net result is currently zero or negative.",
     tax_after_lbl:"💰 Your take-home after tax",
-    note_nl_zzp:"Dutch income tax (box 1). Rough estimate excluding ZZP deductions.",
-    note_nl_bv:"Dutch corporate tax (vennootschapsbelasting). Excluding salary/dividends.",
+    note_nl_zzp:"Your selected ZZP bracket rate applied to net profit. Excludes ZZP deductions (zelfstandigenaftrek, MKB) — your real tax may be somewhat lower.",
+    note_nl_bv:"Dutch corporate tax (vennootschapsbelasting). Excludes salary/dividend distribution.",
     note_tr_s:"Turkish income tax — approximate average rate in the bracketed system.",
     note_tr_l:"Turkish corporate tax (25%).",
     greet_morning:"Good morning", greet_day:"Good afternoon", greet_evening:"Good evening",
@@ -269,6 +284,9 @@ function t(k){ return (I18N[lang] && I18N[lang][k]!==undefined) ? I18N[lang][k] 
 function applyLang() {
   document.querySelectorAll('[data-i18n]').forEach(el => {
     const k=el.getAttribute('data-i18n'); if(typeof I18N[lang][k]==='string') el.textContent = I18N[lang][k];
+  });
+  document.querySelectorAll('[data-i18n-label]').forEach(el => {
+    const k=el.getAttribute('data-i18n-label'); if(typeof I18N[lang][k]==='string') el.label = I18N[lang][k];
   });
   document.documentElement.lang = lang;
   const ll=document.getElementById('langLabel'); if(ll) ll.textContent=(lang==='tr')?'English':'Türkçe';
@@ -559,10 +577,6 @@ function calcTax() {
   const emptyEl = document.getElementById('taxEmpty');
   if (!sel || !resultEl) return;
 
-  // Kaydedilmiş seçimi geri yükle (ilk yüklemede)
-  const saved = localStorage.getItem('mp_taxType');
-  if (saved && sel.value !== saved && !sel.dataset.restored) { sel.value = saved; sel.dataset.restored = '1'; }
-
   const monthlyProfit = window.currentNet || 0;
 
   if (monthlyProfit <= 0) {
@@ -574,13 +588,18 @@ function calcTax() {
 
   const type = sel.value;
   localStorage.setItem('mp_taxType', type);
-  const annualProfit = monthlyProfit * 12;
-  let rate, note;
 
-  if (type === 'nl_zzp') { rate = annualProfit < 75000 ? 0.3693 : 0.495; note = t('note_nl_zzp'); }
-  else if (type === 'nl_bv') { rate = annualProfit < 200000 ? 0.19 : 0.258; note = t('note_nl_bv'); }
-  else if (type === 'tr_sahis') { rate = 0.20; note = t('note_tr_s'); }
-  else if (type === 'tr_limited') { rate = 0.25; note = t('note_tr_l'); }
+  // Seçilen option'ın sabit oranı (data-rate)
+  const opt = sel.options[sel.selectedIndex];
+  const rate = parseFloat(opt.getAttribute('data-rate')) || 0;
+
+  // Açıklama notu: ülke/tip önekine göre
+  let note;
+  if (type.startsWith('nl_zzp')) note = t('note_nl_zzp');
+  else if (type.startsWith('nl_bv')) note = t('note_nl_bv');
+  else if (type === 'tr_sahis') note = t('note_tr_s');
+  else if (type === 'tr_limited') note = t('note_tr_l');
+  else note = '';
 
   const taxAmount = monthlyProfit * rate;
   const afterTax = monthlyProfit - taxAmount;
@@ -597,6 +616,13 @@ function calcTax() {
     <div style="font-size:11px;opacity:0.75;margin-top:10px;">${note} ${t('tax_disclaimer')}</div>
   `;
 }
+
+// Kaydedilmiş vergi dilimini bir kez geri yükle
+(function restoreTax(){
+  const saved = localStorage.getItem('mp_taxType');
+  const sel = document.getElementById('taxType');
+  if (saved && sel && sel.querySelector('option[value="'+saved+'"]')) sel.value = saved;
+})();
 
 applyLang();
 </script>

@@ -20,19 +20,49 @@ body{font-family:'Segoe UI',system-ui,sans-serif;background:#F1F5F9;display:flex
 .subtitle{font-size:13px;color:#64748B;margin-bottom:1.25rem;}
 .card{background:#fff;border-radius:14px;padding:1.5rem;box-shadow:0 1px 3px rgba(0,0,0,0.06);margin-bottom:1.25rem;}
 
-/* P&L tablo */
+/* P&L gelir tablosu — finansal belge estetiği */
 .pnl-statement{width:100%;font-size:14px;}
-.pnl-statement .line{display:flex;justify-content:space-between;align-items:center;padding:9px 0;}
-.pnl-statement .line.sub{padding:6px 0 6px 20px;color:#475569;font-size:13px;}
-.pnl-statement .line.head{font-weight:700;font-size:12px;letter-spacing:0.04em;text-transform:uppercase;color:#94A3B8;padding:14px 0 6px;}
-.pnl-statement .line.total{font-weight:700;border-top:2px solid #0F1F3D;margin-top:4px;padding-top:12px;}
-.pnl-statement .line.subtotal{font-weight:600;border-top:1px solid #E2E8F0;padding-top:10px;}
-.pnl-statement .line .amt{font-variant-numeric:tabular-nums;font-weight:600;}
+
+/* Bölüm başlığı: renkli sol şerit + küçük etiket */
+.pnl-statement .sec{margin-top:20px;}
+.pnl-statement .sec:first-child{margin-top:0;}
+.pnl-statement .sec-label{font-size:11px;font-weight:700;letter-spacing:0.06em;text-transform:uppercase;color:#94A3B8;padding-left:12px;border-left:3px solid #CBD5E1;margin-bottom:6px;}
+.pnl-statement .sec.rev .sec-label{border-color:#10B981;color:#059669;}
+.pnl-statement .sec.exp .sec-label{border-color:#F87171;color:#DC2626;}
+
+/* Normal satır */
+.pnl-statement .line{display:flex;justify-content:space-between;align-items:baseline;padding:8px 0 8px 15px;border-bottom:1px solid #F1F5F9;}
+.pnl-statement .line:last-child{border-bottom:none;}
+.pnl-statement .line .lbl-txt{color:#475569;}
+.pnl-statement .line .amt{font-variant-numeric:tabular-nums;font-weight:600;font-size:14.5px;letter-spacing:-0.01em;}
+.pnl-statement .line .amt.pos{color:#059669;}
 .pnl-statement .line .amt.neg{color:#DC2626;}
-.pnl-statement .line.net-final{background:#0F1F3D;color:#fff;border-radius:10px;padding:16px 18px;margin-top:14px;font-size:16px;font-weight:700;}
-.pnl-statement .line.net-final .amt{color:#6EE7B7;font-size:22px;}
-.pnl-statement .line.net-final.loss .amt{color:#FCA5A5;}
-.pct{font-size:11px;color:#94A3B8;font-weight:400;margin-left:8px;}
+
+/* Ara toplam bandı (Brüt kâr, Toplam gider) */
+.pnl-statement .subtotal{display:flex;justify-content:space-between;align-items:baseline;background:#F8FAFC;border-radius:8px;padding:11px 15px;margin-top:8px;}
+.pnl-statement .subtotal .lbl-txt{font-weight:700;color:#0F1F3D;font-size:13.5px;}
+.pnl-statement .subtotal .amt{font-variant-numeric:tabular-nums;font-weight:700;font-size:15px;}
+.pnl-statement .subtotal .amt.neg{color:#DC2626;}
+
+/* NOI — güçlü ara sonuç */
+.pnl-statement .noi{display:flex;justify-content:space-between;align-items:baseline;border-top:2px solid #0F1F3D;padding:14px 15px 6px;margin-top:12px;}
+.pnl-statement .noi .lbl-txt{font-weight:800;font-size:15px;color:#0F1F3D;}
+.pnl-statement .noi .amt{font-variant-numeric:tabular-nums;font-weight:800;font-size:19px;letter-spacing:-0.02em;}
+.pnl-statement .noi .amt.neg{color:#DC2626;}
+
+/* Vergi satırı */
+.pnl-statement .tax-line{display:flex;justify-content:space-between;align-items:baseline;padding:8px 15px;}
+.pnl-statement .tax-line .lbl-txt{color:#64748B;font-size:13.5px;}
+.pnl-statement .tax-line .amt{font-variant-numeric:tabular-nums;font-weight:600;color:#DC2626;}
+
+/* NET KÂR — kapanış kartı */
+.pnl-statement .net-final{display:flex;justify-content:space-between;align-items:center;background:linear-gradient(135deg,#0F1F3D,#1e3a6d);color:#fff;border-radius:12px;padding:18px 22px;margin-top:14px;box-shadow:0 6px 20px rgba(15,31,61,0.25);}
+.pnl-statement .net-final .lbl-txt{font-weight:700;font-size:15px;}
+.pnl-statement .net-final .amt{font-variant-numeric:tabular-nums;color:#6EE7B7;font-size:28px;font-weight:800;letter-spacing:-0.02em;}
+.pnl-statement .net-final.loss .amt{color:#FCA5A5;}
+
+.pct{font-size:11px;color:#94A3B8;font-weight:600;margin-left:8px;background:#F1F5F9;padding:2px 7px;border-radius:20px;}
+.pnl-statement .noi .pct{background:rgba(15,31,61,0.08);color:#475569;}
 
 .empty{text-align:center;color:#94A3B8;font-size:13px;padding:2rem 1rem;}
 .month-nav{display:flex;align-items:center;gap:12px;justify-content:space-between;background:#fff;border-radius:12px;padding:10px 16px;margin-bottom:1.25rem;box-shadow:0 1px 3px rgba(0,0,0,0.06);}
@@ -164,13 +194,14 @@ const now = new Date();
 const monthKey = now.getFullYear() + '-' + String(now.getMonth()+1).padStart(2,'0');
 let DATA = null;   // {revenue, materials, opexItems:[{cat,amt}], totalOpex, gross, noi, tax, net, taxRate}
 
-// Vergi oranı (Dashboard'da seçilen ülke tipi localStorage'da tutulur)
-function taxRateFor(type, annualProfit) {
-  if (type === 'nl_zzp') return annualProfit < 75000 ? 0.3693 : 0.495;
-  if (type === 'nl_bv')  return annualProfit < 200000 ? 0.19 : 0.258;
-  if (type === 'tr_sahis') return 0.20;
-  if (type === 'tr_limited') return 0.25;
-  return 0.3693; // varsayılan nl_zzp
+// Vergi oranı — Dashboard'da seçilen dilim localStorage'da tutulur (mp_taxType)
+const TAX_RATES = {
+  nl_zzp_1: 0.3582, nl_zzp_2: 0.3748, nl_zzp_3: 0.4950,
+  nl_bv_1: 0.19, nl_bv_2: 0.258,
+  tr_sahis: 0.20, tr_limited: 0.25
+};
+function taxRateFor(type) {
+  return TAX_RATES[type] !== undefined ? TAX_RATES[type] : 0.3582; // varsayılan ZZP dilim 1
 }
 
 async function loadData() {
@@ -222,10 +253,10 @@ async function loadData() {
   const noi = gross - totalOpex;
 
   // vergi (Dashboard ayarı)
-  const taxType = localStorage.getItem('mp_taxType') || 'nl_zzp';
+  const taxType = localStorage.getItem('mp_taxType') || 'nl_zzp_1';
   let tax = 0, taxRate = 0;
   if (noi > 0) {
-    taxRate = taxRateFor(taxType, noi * 12);
+    taxRate = taxRateFor(taxType);
     tax = noi * taxRate;
   }
   const net = noi - tax;
@@ -247,11 +278,11 @@ function render() {
 
   let opexRows = '';
   if (d.opexItems.length === 0) {
-    opexRows = `<div class="line sub"><span>${t('no_opex')}</span><span class="amt">${eur(0)}</span></div>`;
+    opexRows = `<div class="line"><span class="lbl-txt">${t('no_opex')}</span><span class="amt">${eur(0)}</span></div>`;
   } else {
     d.opexItems.forEach(it => {
       const badge = it.merged ? ` <span class="pct">×${it.merged}</span>` : '';
-      opexRows += `<div class="line sub"><span>${it.cat}${badge}</span><span class="amt neg">−${eur(it.amt)}</span></div>`;
+      opexRows += `<div class="line"><span class="lbl-txt">${it.cat}${badge}</span><span class="amt neg">−${eur(it.amt)}</span></div>`;
     });
   }
 
@@ -261,23 +292,29 @@ function render() {
 
   el.innerHTML = `
     <div class="pnl-statement">
-      <div class="line head"><span>${t('h_revenue')}</span><span></span></div>
-      <div class="line"><span>${t('l_sales')}</span><span class="amt">${eur(d.revenue)}</span></div>
+      <div class="sec rev">
+        <div class="sec-label">${t('h_revenue')}</div>
+        <div class="line"><span class="lbl-txt">${t('l_sales')}</span><span class="amt pos">${eur(d.revenue)}</span></div>
+      </div>
 
-      <div class="line head"><span>${t('h_cogs')}</span><span></span></div>
-      <div class="line sub"><span>${t('l_materials')}</span><span class="amt neg">−${eur(d.materials)}</span></div>
+      <div class="sec exp">
+        <div class="sec-label">${t('h_cogs')}</div>
+        <div class="line"><span class="lbl-txt">${t('l_materials')}</span><span class="amt neg">−${eur(d.materials)}</span></div>
+      </div>
 
-      <div class="line subtotal"><span>${t('st_gross')} ${pct(d.gross)}</span><span class="amt">${eur(d.gross)}</span></div>
+      <div class="subtotal"><span class="lbl-txt">${t('st_gross')} ${pct(d.gross)}</span><span class="amt">${eur(d.gross)}</span></div>
 
-      <div class="line head"><span>${t('h_opex')}</span><span></span></div>
-      ${opexRows}
-      <div class="line subtotal"><span>${t('st_totalopex')}</span><span class="amt neg">−${eur(d.totalOpex)}</span></div>
+      <div class="sec exp">
+        <div class="sec-label">${t('h_opex')}</div>
+        ${opexRows}
+      </div>
+      <div class="subtotal"><span class="lbl-txt">${t('st_totalopex')}</span><span class="amt neg">−${eur(d.totalOpex)}</span></div>
 
-      <div class="line total"><span>${t('st_noi')} ${pct(d.noi)}</span><span class="amt ${d.noi<0?'neg':''}">${eur(d.noi)}</span></div>
+      <div class="noi"><span class="lbl-txt">${t('st_noi')} ${pct(d.noi)}</span><span class="amt ${d.noi<0?'neg':''}">${eur(d.noi)}</span></div>
 
-      <div class="line"><span>${t('l_tax')}${taxRateLabel}</span><span class="amt ${d.tax>0?'neg':''}">${d.tax>0?'−'+eur(d.tax):t('tax_none')}</span></div>
+      <div class="tax-line"><span class="lbl-txt">${t('l_tax')}${taxRateLabel}</span><span class="amt">${d.tax>0?'−'+eur(d.tax):t('tax_none')}</span></div>
 
-      <div class="line net-final ${d.net<0?'loss':''}"><span>${t('net_final')}</span><span class="amt">${eur(d.net)}</span></div>
+      <div class="net-final ${d.net<0?'loss':''}"><span class="lbl-txt">${t('net_final')}</span><span class="amt">${eur(d.net)}</span></div>
     </div>
   `;
 }
