@@ -197,8 +197,7 @@ let DATA = null;   // {revenue, materials, opexItems:[{cat,amt}], totalOpex, gro
 // Vergi oranı — Dashboard'da seçilen dilim localStorage'da tutulur (mp_taxType)
 const TAX_RATES = {
   nl_zzp_1: 0.3582, nl_zzp_2: 0.3748, nl_zzp_3: 0.4950,
-  nl_bv_1: 0.19, nl_bv_2: 0.258,
-  tr_sahis: 0.20, tr_limited: 0.25
+  nl_bv_1: 0.19, nl_bv_2: 0.258
 };
 function taxRateFor(type) {
   return TAX_RATES[type] !== undefined ? TAX_RATES[type] : 0.3582; // varsayılan ZZP dilim 1
@@ -212,10 +211,16 @@ async function loadData() {
   const fixedCosts = costs || [];
 
   let revenue = 0, materials = 0;
+  // KDV: alkollü içecek %21, diğer her şey %9 — net ciro
+  function netPrice(p) {
+    const sp = p.sale_price || 0;
+    const vat = (p.category === 'Alkollü içecek') ? 0.21 : 0.09;
+    return sp / (1 + vat);
+  }
   prods.forEach(p => {
-    const sp = p.sale_price || 0, c = p.ingredient_cost || 0, q = p.last_month_qty || 0;
-    revenue += sp * q;
-    materials += c * q;
+    const q = p.last_month_qty || 0;
+    revenue += netPrice(p) * q;                    // KDV hariç net ciro
+    materials += (p.ingredient_cost || 0) * q;     // hammadde zaten KDV hariç
   });
 
   // faaliyet giderleri: önce birebir aynı adları topla

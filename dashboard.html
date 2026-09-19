@@ -135,10 +135,6 @@ td{padding:9px 8px 9px 0;border-bottom:1px solid #F1F5F9;color:#1E293B;}
           <option value="nl_bv_1" data-rate="0.19" data-i18n="tax_nl_bv_1">Hollanda BV — %19 (yıllık kâr ≤ €200.000)</option>
           <option value="nl_bv_2" data-rate="0.258" data-i18n="tax_nl_bv_2">Hollanda BV — %25,8 (€200.000+)</option>
         </optgroup>
-        <optgroup label="Türkiye" data-i18n-label="grp_tr">
-          <option value="tr_sahis" data-rate="0.20" data-i18n="tax_tr_s">Türkiye — Şahıs (%20, ortalama)</option>
-          <option value="tr_limited" data-rate="0.25" data-i18n="tax_tr_l">Türkiye — Limited (%25)</option>
-        </optgroup>
       </select>
     </div>
     <div class="tax-result" id="taxResult" style="display:none;"></div>
@@ -294,7 +290,7 @@ function applyLang() {
   if (typeof loadDashboard==='function') loadDashboard(); // insight'ları yeniden üret
 }
 function toggleLang(){ lang=(lang==='tr')?'en':'tr'; localStorage.setItem('mp_lang',lang); applyLang(); }
-const CAT_LABELS={tr:{"Et yemeği":"Et yemeği","Yemek":"Yemek","İçecek":"İçecek","Tatlı":"Tatlı","Aperatif":"Aperatif"},en:{"Et yemeği":"Meat dish","Yemek":"Food","İçecek":"Drink","Tatlı":"Dessert","Aperatif":"Starter"}};
+const CAT_LABELS={tr:{"Et yemeği":"Et yemeği","Yemek":"Yemek","İçecek":"İçecek","Alkollü içecek":"Alkollü içecek","Tatlı":"Tatlı","Aperatif":"Aperatif"},en:{"Et yemeği":"Meat dish","Yemek":"Food","İçecek":"Drink","Alkollü içecek":"Alcoholic drink","Tatlı":"Dessert","Aperatif":"Starter"}};
 function catLabel(v){ return (CAT_LABELS[lang] && CAT_LABELS[lang][v]) || v || '—'; }
 // ====== GİRİŞ KONTROLÜ ======
 let currentUser = null;
@@ -348,13 +344,20 @@ async function loadDashboard() {
   const fixedCosts = costs || [];
   const prevFixedCosts = prevCosts || [];
 
-  // --- Gelir & gider hesapla ---
-  let monthlyRevenue = 0;     // geçen ay adet × satış fiyatı
-  let forecastRevenue = 0;    // gelecek ay adet × satış fiyatı
-  prods.forEach(p => {
+  // KDV: alkollü içecek %21, diğer her şey %9 — fiyattan net ciroyu bul
+  function netPrice(p) {
     const sp = p.sale_price || 0;
-    monthlyRevenue += sp * (p.last_month_qty || 0);
-    forecastRevenue += sp * (p.next_month_qty || 0);
+    const vat = (p.category === 'Alkollü içecek') ? 0.21 : 0.09;
+    return sp / (1 + vat);
+  }
+
+  // --- Gelir & gider hesapla (KDV hariç net ciro) ---
+  let monthlyRevenue = 0;     // geçen ay adet × net satış fiyatı
+  let forecastRevenue = 0;    // gelecek ay adet × net satış fiyatı
+  prods.forEach(p => {
+    const np = netPrice(p);
+    monthlyRevenue += np * (p.last_month_qty || 0);
+    forecastRevenue += np * (p.next_month_qty || 0);
   });
 
   // Değişken maliyet (ürün başına hammadde × adet)
@@ -390,7 +393,8 @@ async function loadDashboard() {
   } else {
     tbody.innerHTML = '';
     prods.forEach(p => {
-      const sp = p.sale_price || 0;
+      const spGross = p.sale_price || 0;           // menü fiyatı (KDV dahil)
+      const sp = netPrice(p);                       // net satış (KDV hariç)
       const cost = p.ingredient_cost || 0;
       const profit = sp - cost;
       const margin = sp > 0 ? (profit/sp*100) : 0;
@@ -398,7 +402,7 @@ async function loadDashboard() {
       tbody.innerHTML += `<tr>
         <td><strong>${p.name}</strong></td>
         <td style="color:#94A3B8">${catLabel(p.category)}</td>
-        <td class="r">€${sp.toFixed(2)}</td>
+        <td class="r">€${spGross.toFixed(2)}</td>
         <td class="r">€${cost.toFixed(2)}</td>
         <td class="r">€${profit.toFixed(2)}</td>
         <td class="r"><span class="margin-tag ${tag}">%${margin.toFixed(0)}</span></td>
@@ -418,9 +422,9 @@ async function loadDashboard() {
     });
   }
 
-  // Zarar eden ürünler
+  // Zarar eden ürünler (net satış üzerinden)
   prods.forEach(p => {
-    const sp = p.sale_price||0, cost=p.ingredient_cost||0;
+    const sp = netPrice(p), cost=p.ingredient_cost||0;
     const margin = sp>0 ? ((sp-cost)/sp*100) : 0;
     if (sp>0 && margin < 0) {
       alarms.push({
@@ -450,9 +454,9 @@ async function loadDashboard() {
   const sold = prods.filter(p => (p.last_month_qty||0) > 0 && (p.sale_price||0) > 0);
 
   if (sold.length > 0) {
-    // Her ürün için birim kâr, marj, toplam katkı
+    // Her ürün için birim kâr, marj, toplam katkı (net satış üzerinden)
     const stats = sold.map(p => {
-      const sp = p.sale_price||0, c = p.ingredient_cost||0, q = p.last_month_qty||0;
+      const sp = netPrice(p), c = p.ingredient_cost||0, q = p.last_month_qty||0;
       const unitProfit = sp - c;
       return {
         name: p.name, sp, c, q,
@@ -597,8 +601,6 @@ function calcTax() {
   let note;
   if (type.startsWith('nl_zzp')) note = t('note_nl_zzp');
   else if (type.startsWith('nl_bv')) note = t('note_nl_bv');
-  else if (type === 'tr_sahis') note = t('note_tr_s');
-  else if (type === 'tr_limited') note = t('note_tr_l');
   else note = '';
 
   const taxAmount = monthlyProfit * rate;
