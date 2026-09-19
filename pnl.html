@@ -187,13 +187,35 @@ async function loadData() {
     materials += c * q;
   });
 
-  // faaliyet giderleri: kategori bazında topla
+  // faaliyet giderleri: önce birebir aynı adları topla
   const byCat = {};
   fixedCosts.forEach(c => {
-    const key = c.category || '—';
+    const key = (c.category || '—').trim();
     byCat[key] = (byCat[key] || 0) + (c.monthly_equivalent || 0);
   });
-  const opexItems = Object.entries(byCat).map(([cat,amt]) => ({cat,amt})).sort((a,b)=>b.amt-a.amt);
+
+  // Akıllı gruplama: sondaki numara/harf/varyasyon ekini soyup ortak köke göre grupla
+  // "Personel Maaş 1" + "Personel Maaş 2" -> "Personel Maaş"
+  function rootOf(name) {
+    return name
+      .replace(/[\s\-–_#.]*(?:no|nr|#)?\s*[0-9]+\s*$/i, '')   // sondaki sayı (No 1, #2, -3)
+      .replace(/[\s\-–_.]+[a-zA-ZçğıöşüÇĞİÖŞÜ]\s*$/,'')        // sondaki tek harf (a, b)
+      .replace(/\s*\([^)]*\)\s*$/,'')                          // sondaki (parantez)
+      .trim();
+  }
+  const rootGroups = {};   // kök -> {items:[{cat,amt}], total}
+  Object.entries(byCat).forEach(([cat,amt]) => {
+    const r = rootOf(cat) || cat;
+    if (!rootGroups[r]) rootGroups[r] = { items:[], total:0 };
+    rootGroups[r].items.push({cat,amt});
+    rootGroups[r].total += amt;
+  });
+
+  // Kökte 2+ kalem varsa kök adıyla birleştir; tek kalemse kendi adıyla kalsın
+  const opexItems = Object.entries(rootGroups).map(([root,g]) => {
+    if (g.items.length >= 2) return { cat: root, amt: g.total, merged: g.items.length };
+    return { cat: g.items[0].cat, amt: g.items[0].amt };
+  }).sort((a,b)=>b.amt-a.amt);
   const totalOpex = opexItems.reduce((s,x)=>s+x.amt, 0);
 
   const gross = revenue - materials;
@@ -228,7 +250,8 @@ function render() {
     opexRows = `<div class="line sub"><span>${t('no_opex')}</span><span class="amt">${eur(0)}</span></div>`;
   } else {
     d.opexItems.forEach(it => {
-      opexRows += `<div class="line sub"><span>${it.cat}</span><span class="amt neg">−${eur(it.amt)}</span></div>`;
+      const badge = it.merged ? ` <span class="pct">×${it.merged}</span>` : '';
+      opexRows += `<div class="line sub"><span>${it.cat}${badge}</span><span class="amt neg">−${eur(it.amt)}</span></div>`;
     });
   }
 
