@@ -118,15 +118,15 @@ td input,td select{width:100%;padding:6px 8px;border:1px solid #E2E8F0;border-ra
     </table>
     <button class="btn-add-row" onclick="addCostRow()" data-i18n="add_expense">+ Gider ekle</button>
     <div class="preset-cats" id="presets">
-      <div class="preset" onclick="addCostRow('Kira')" data-i18n="preset_rent">+ Kira</div>
-      <div class="preset" onclick="addCostRow('Elektrik')" data-i18n="preset_elec">+ Elektrik</div>
-      <div class="preset" onclick="addCostRow('Su')" data-i18n="preset_water">+ Su</div>
-      <div class="preset" onclick="addCostRow('Gaz')" data-i18n="preset_gas">+ Gaz</div>
-      <div class="preset" onclick="addCostRow('Personel maaşı')" data-i18n="preset_staff">+ Personel</div>
-      <div class="preset" onclick="addCostRow('İnternet & telefon')" data-i18n="preset_net">+ İnternet</div>
-      <div class="preset" onclick="addCostRow('Sigorta')" data-i18n="preset_ins">+ Sigorta</div>
-      <div class="preset" onclick="addCostRow('Muhasebe')" data-i18n="preset_acc">+ Muhasebe</div>
-      <div class="preset" onclick="addCostRow('Temizlik')" data-i18n="preset_clean">+ Temizlik</div>
+      <div class="preset" onclick="addPreset('rent')" data-i18n="preset_rent">+ Kira</div>
+      <div class="preset" onclick="addPreset('elec')" data-i18n="preset_elec">+ Elektrik</div>
+      <div class="preset" onclick="addPreset('water')" data-i18n="preset_water">+ Su</div>
+      <div class="preset" onclick="addPreset('gas')" data-i18n="preset_gas">+ Gaz</div>
+      <div class="preset" onclick="addPreset('staff')" data-i18n="preset_staff">+ Personel</div>
+      <div class="preset" onclick="addPreset('net')" data-i18n="preset_net">+ İnternet</div>
+      <div class="preset" onclick="addPreset('ins')" data-i18n="preset_ins">+ Sigorta</div>
+      <div class="preset" onclick="addPreset('acc')" data-i18n="preset_acc">+ Muhasebe</div>
+      <div class="preset" onclick="addPreset('clean')" data-i18n="preset_clean">+ Temizlik</div>
     </div>
     <div class="total-box">
       <span class="lbl" data-i18n="total_label">Toplam aylık sabit gider</span>
@@ -254,6 +254,16 @@ function changeMonth(delta) {
   currentDate.setMonth(currentDate.getMonth() + delta);
   document.getElementById('monthLabel').textContent = monthLabel(currentDate);
   loadCosts();
+}
+
+// Preset butonu: gider adını o anki dilin tam adıyla ekle
+const PRESET_NAMES = {
+  tr: { rent:"Kira", elec:"Elektrik", water:"Su", gas:"Gaz", staff:"Personel maaşı", net:"İnternet & telefon", ins:"Sigorta", acc:"Muhasebe", clean:"Temizlik" },
+  en: { rent:"Rent", elec:"Electricity", water:"Water", gas:"Gas", staff:"Staff wages", net:"Internet & phone", ins:"Insurance", acc:"Accounting", clean:"Cleaning" }
+};
+function addPreset(key) {
+  const name = (PRESET_NAMES[lang] && PRESET_NAMES[lang][key]) || PRESET_NAMES.tr[key] || '';
+  addCostRow(name);
 }
 
 function addCostRow(category='', amount='', period='monthly') {
