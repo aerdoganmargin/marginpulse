@@ -213,6 +213,10 @@ const I18N = {
     a_mix_p:(bm,ex)=>`Ayda 10 adet daha "${bm}" satsan +${ex} kâr — garsonlara önerttir`,
     a_food_h:(r)=>`Hammadde maliyeti yüksek: ciroya oranı %${r}`,
     a_food_d:"Restoranlarda hammadde genelde cironun %28-35'i arasındadır.", a_food_p:"Tedarikçi fiyatlarını ve porsiyon gramajlarını gözden geçir",
+    a_prime_h:(r)=>`Prime cost (hammadde + işçilik): cironun %${r}'i`,
+    a_prime_d:(v,l,p)=>`Hammadde ${v} + işçilik ${l} = ${p}. Restoranda en kritik metrik budur.`,
+    a_prime_p_ok:"Sektör hedefi %60 altında — sağlıklı bölgedesin 👏",
+    a_prime_p_high:"Sektör hedefi %60. Üstündeysen porsiyon, tedarikçi ve personel verimini gözden geçir",
     a_fixed_h:(r)=>`Sabit giderler yüksek: ciroya oranı %${r}`,
     a_fixed_d:(cat,amt,pc)=>`En büyük kalem: ${cat} (${amt}/ay, sabit giderin yaklaşık %${pc} kadarı).`,
     a_fixed_d0:"Sabit gider oranı yüksek.", a_fixed_p:"Ciroyu artırmak ya da bu kalemi düşürmek en yüksek etkiyi yaratır",
@@ -263,6 +267,10 @@ const I18N = {
     a_mix_p:(bm,ex)=>`Selling 10 more "${bm}" a month would add +${ex} profit — have your staff recommend it`,
     a_food_h:(r)=>`Ingredient cost is high: ${r}% of revenue`,
     a_food_d:"In restaurants, ingredients are usually 28-35% of revenue.", a_food_p:"Review supplier prices and portion sizes",
+    a_prime_h:(r)=>`Prime cost (ingredients + labor): ${r}% of revenue`,
+    a_prime_d:(v,l,p)=>`Ingredients ${v} + labor ${l} = ${p}. This is a restaurant's single most important metric.`,
+    a_prime_p_ok:"Below the 60% industry target — you're in a healthy zone 👏",
+    a_prime_p_high:"Industry target is 60%. Above it, review portions, suppliers and staff efficiency",
     a_fixed_h:(r)=>`Fixed expenses are high: ${r}% of revenue`,
     a_fixed_d:(cat,amt,pc)=>`Biggest item: ${cat} (${amt}/mo, about ${pc}% of fixed expenses).`,
     a_fixed_d0:"Fixed-expense ratio is high.", a_fixed_p:"Raising revenue or cutting this item has the biggest impact",
@@ -369,6 +377,10 @@ async function loadDashboard() {
   const totalFixed = fixedCosts.reduce((s,c) => s + (c.monthly_equivalent || 0), 0);
   const totalCost = variableCost + totalFixed;
   const net = monthlyRevenue - totalCost;
+
+  // İşçilik gideri (is_labor işaretli) ve prime cost = hammadde + işçilik
+  const laborCost = fixedCosts.reduce((s,c) => s + (c.is_labor ? (c.monthly_equivalent || 0) : 0), 0);
+  const primeCost = variableCost + laborCost;
 
   // --- P&L kutuları ---
   document.getElementById('revenue').textContent = eur(monthlyRevenue);
@@ -496,6 +508,21 @@ async function loadDashboard() {
     if (monthlyRevenue > 0) {
       const foodRatio = variableCost/monthlyRevenue*100;
       const fixedRatio = totalFixed/monthlyRevenue*100;
+
+      // PRIME COST (hammadde + işçilik) — restoran sektörünün 1 numaralı metriği
+      if (laborCost > 0) {
+        const primeRatio = primeCost/monthlyRevenue*100;
+        let pcType, pcIco;
+        if (primeRatio <= 60) { pcType='green'; pcIco='✅'; }
+        else if (primeRatio <= 65) { pcType='yellow'; pcIco='⚠️'; }
+        else { pcType='red'; pcIco='🔴'; }
+        alarms.push({
+          type: pcType, ico: pcIco,
+          head: t('a_prime_h')(primeRatio.toFixed(0)),
+          desc: t('a_prime_d')(eur(variableCost), eur(laborCost), eur(primeCost)),
+          pill: primeRatio <= 60 ? t('a_prime_p_ok') : t('a_prime_p_high')
+        });
+      }
 
       if (foodRatio > 35) {
         alarms.push({

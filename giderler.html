@@ -111,6 +111,7 @@ td input,td select{width:100%;padding:6px 8px;border:1px solid #E2E8F0;border-ra
         <th data-i18n="th_category">Kategori</th>
         <th style="width:110px" data-i18n="th_amount">Tutar (€)</th>
         <th style="width:110px" data-i18n="th_period">Periyot</th>
+        <th style="width:70px;text-align:center" data-i18n="th_labor" title="">İşçilik</th>
         <th style="width:110px" data-i18n="th_monthly">Aylık karşılık</th>
         <th style="width:30px"></th>
       </tr></thead>
@@ -152,6 +153,7 @@ const I18N = {
     page_title:"Sabit Giderler", copy_text:"Bu ay boş. Önceki aydan giderleri kopyalayabilirsin.", copy_btn:"Önceki aydan kopyala",
     expense_items:"Gider Kalemleri", auto_calc:"Aylık karşılık otomatik hesaplanır",
     th_category:"Kategori", th_amount:"Tutar (€)", th_period:"Periyot", th_monthly:"Aylık karşılık",
+    th_labor:"İşçilik", labor_hint:"Bu bir personel/işçilik gideri mi? (prime cost hesabı için)",
     add_expense:"+ Gider ekle", total_label:"Toplam aylık sabit gider", save_month:"Bu Ayı Kaydet",
     tax_title:"📊 Vergi Tahmini", tax_country:"Ülke & şirket tipi", tax_profit:"Aylık net kâr tahmini (€)",
     tax_nl_zzp:"Hollanda — ZZP (şahıs)", tax_nl_bv:"Hollanda — BV (limited)", tax_tr_s:"Türkiye — Şahıs", tax_tr_l:"Türkiye — Limited",
@@ -173,6 +175,7 @@ const I18N = {
     page_title:"Fixed Expenses", copy_text:"This month is empty. You can copy expenses from the previous month.", copy_btn:"Copy from previous month",
     expense_items:"Expense Items", auto_calc:"Monthly equivalent calculated automatically",
     th_category:"Category", th_amount:"Amount (€)", th_period:"Period", th_monthly:"Monthly equivalent",
+    th_labor:"Labor", labor_hint:"Is this a staff/labor expense? (for prime cost calculation)",
     add_expense:"+ Add expense", total_label:"Total monthly fixed expenses", save_month:"Save This Month",
     tax_title:"📊 Tax Estimate", tax_country:"Country & company type", tax_profit:"Estimated monthly net profit (€)",
     tax_nl_zzp:"Netherlands — ZZP (sole trader)", tax_nl_bv:"Netherlands — BV (private ltd)", tax_tr_s:"Turkey — Sole trader", tax_tr_l:"Turkey — Limited",
@@ -263,10 +266,10 @@ const PRESET_NAMES = {
 };
 function addPreset(key) {
   const name = (PRESET_NAMES[lang] && PRESET_NAMES[lang][key]) || PRESET_NAMES.tr[key] || '';
-  addCostRow(name);
+  addCostRow(name, '', 'monthly', key === 'staff');   // Personel preset'i otomatik işçilik
 }
 
-function addCostRow(category='', amount='', period='monthly') {
+function addCostRow(category='', amount='', period='monthly', isLabor=false) {
   const tbody = document.getElementById('costRows');
   const tr = document.createElement('tr');
   tr.innerHTML = `
@@ -278,6 +281,7 @@ function addCostRow(category='', amount='', period='monthly') {
       <option value="semiannual" ${period==='semiannual'?'selected':''}>${t('p_semiannual')}</option>
       <option value="annual" ${period==='annual'?'selected':''}>${t('p_annual')}</option>
     </select></td>
+    <td style="text-align:center"><input type="checkbox" class="labor" ${isLabor?'checked':''} title="${t('labor_hint')}" style="width:17px;height:17px;cursor:pointer;accent-color:#2563EB;" /></td>
     <td class="col-eq">€0</td>
     <td><button class="btn-del" onclick="this.closest('tr').remove();recalc();">×</button></td>
   `;
@@ -313,10 +317,12 @@ async function saveCosts() {
     const category = tr.querySelector('.cat').value.trim();
     const amount = parseFloat(tr.querySelector('.amount').value) || 0;
     const period = tr.querySelector('.period').value;
+    const isLabor = tr.querySelector('.labor').checked;
     if (category && amount > 0) {
       rows.push({
         category, amount, period,
         monthly_equivalent: amount / PERIOD_DIVISORS[period],
+        is_labor: isLabor,
         month: mk,
         user_id: user.id
       });
@@ -351,7 +357,7 @@ async function loadCosts() {
     }
     addCostRow();
   } else {
-    data.forEach(c => addCostRow(c.category, c.amount, c.period));
+    data.forEach(c => addCostRow(c.category, c.amount, c.period, c.is_labor));
   }
   recalc();
 }
@@ -361,7 +367,7 @@ async function copyFromPrevMonth() {
   const { data } = await sb.from('fixed_costs').select('*').eq('month', monthKey(prev));
   if (data && data.length > 0) {
     document.getElementById('costRows').innerHTML = '';
-    data.forEach(c => addCostRow(c.category, c.amount, c.period));
+    data.forEach(c => addCostRow(c.category, c.amount, c.period, c.is_labor));
     document.getElementById('copyNotice').classList.remove('show');
     recalc();
     setStatus('📋 Kopyalandı — kaydetmeyi unutma', '#1d4ed8');
