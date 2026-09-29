@@ -136,17 +136,17 @@ td{padding:9px 8px 9px 0;border-bottom:1px solid #F1F5F9;color:#1E293B;}
     <div class="card-title" data-i18n="kpi_title">📊 Kilit Oranlar</div>
     <div class="kpi-grid">
       <div class="kpi na" id="kpiFood">
-        <div class="klbl" data-i18n="kpi_food">Hammadde (food cost)</div>
+        <div class="klbl" data-i18n="kpi_food">Hammadde maliyeti</div>
         <div class="kval" id="kpiFoodVal">—</div>
         <div class="ktarget" data-i18n="kpi_food_t">hedef %28-35</div>
       </div>
       <div class="kpi na" id="kpiLabor">
-        <div class="klbl" data-i18n="kpi_labor">İşçilik (labor)</div>
+        <div class="klbl" data-i18n="kpi_labor">İşçilik maliyeti</div>
         <div class="kval" id="kpiLaborVal">—</div>
         <div class="ktarget" data-i18n="kpi_labor_t">hedef %25-30</div>
       </div>
       <div class="kpi na" id="kpiPrime">
-        <div class="klbl" data-i18n="kpi_prime">Prime cost</div>
+        <div class="klbl" data-i18n="kpi_prime">Temel maliyet (hammadde + işçilik)</div>
         <div class="kval" id="kpiPrimeVal">—</div>
         <div class="ktarget" data-i18n="kpi_prime_t">hedef ≤%60</div>
       </div>
@@ -156,7 +156,7 @@ td{padding:9px 8px 9px 0;border-bottom:1px solid #F1F5F9;color:#1E293B;}
         <div class="ktarget" data-i18n="kpi_margin_t">hedef ≥%10</div>
       </div>
     </div>
-    <div style="font-size:11px;color:#94A3B8;margin-top:10px;" id="kpiNote" data-i18n="kpi_note">İşçilik ve prime cost için Sabit Giderler'de personel giderini "İşçilik" olarak işaretle.</div>
+    <div style="font-size:11px;color:#94A3B8;margin-top:10px;" id="kpiNote" data-i18n="kpi_note">İşçilik ve temel maliyet için Sabit Giderler'de personel giderini "İşçilik" olarak işaretle.</div>
   </div>
 
   <!-- Vergi Tahmini (net kâr üstünden) -->
@@ -216,9 +216,9 @@ const I18N = {
     nav_products:"Ürün karlılığı", nav_expenses:"Sabit giderler", nav_dashboard:"Dashboard", nav_simulator:"Simülatör", nav_pnl:"Gelir Tablosu", nav_logout:"Çıkış yap",
     alarms_title:"🔔 Alarmlar & Öneriler", calculating:"Hesaplanıyor…",
     pnl_title:"💰 Bu Ay — Kâr / Zarar Özeti", pnl_rev:"Tahmini Gelir", pnl_cost:"Toplam Gider", pnl_net:"Net Sonuç (NOI)",
-    kpi_title:"📊 Kilit Oranlar", kpi_food:"Hammadde (food cost)", kpi_food_t:"hedef %28-35", kpi_labor:"İşçilik (labor)", kpi_labor_t:"hedef %25-30",
-    kpi_prime:"Prime cost", kpi_prime_t:"hedef ≤%60", kpi_margin:"Net kâr marjı", kpi_margin_t:"hedef ≥%10",
-    kpi_note:'İşçilik ve prime cost için Sabit Giderler\'de personel giderini "İşçilik" olarak işaretle.', kpi_na:"—",
+    kpi_title:"📊 Kilit Oranlar", kpi_food:"Hammadde maliyeti", kpi_food_t:"hedef %28-35", kpi_labor:"İşçilik maliyeti", kpi_labor_t:"hedef %25-30",
+    kpi_prime:"Temel maliyet (hammadde + işçilik)", kpi_prime_t:"hedef ≤%60", kpi_margin:"Net kâr marjı", kpi_margin_t:"hedef ≥%10",
+    kpi_note:'İşçilik ve temel maliyet için Sabit Giderler\'de personel giderini "İşçilik" olarak işaretle.', kpi_na:"—",
     products_title:"📦 Ürün Karlılığı", th_product:"Ürün", th_cat:"Kategori", th_sale:"Satış €", th_cost:"Maliyet €", th_profit:"Birim kâr", th_margin:"Marj",
     forecast_title:"📈 Gelecek Ay Tahmini", forecast_note:"tahmini gelir (ürünlerin gelecek ay adetlerine göre)",
     tax_title:"🧾 Vergi Tahmini", tax_country:"Ülke & şirket tipi",
@@ -274,7 +274,7 @@ const I18N = {
     alarms_title:"🔔 Alerts & Recommendations", calculating:"Calculating…",
     pnl_title:"💰 This Month — Profit / Loss Summary", pnl_rev:"Estimated Revenue", pnl_cost:"Total Expenses", pnl_net:"Net Result (NOI)",
     kpi_title:"📊 Key Ratios", kpi_food:"Food cost", kpi_food_t:"target 28-35%", kpi_labor:"Labor", kpi_labor_t:"target 25-30%",
-    kpi_prime:"Prime cost", kpi_prime_t:"target ≤60%", kpi_margin:"Net profit margin", kpi_margin_t:"target ≥10%",
+    kpi_prime:"Prime Cost (food cost + labor)", kpi_prime_t:"target ≤60%", kpi_margin:"Net profit margin", kpi_margin_t:"target ≥10%",
     kpi_note:'For labor and prime cost, mark staff expenses as "Labor" in Fixed Expenses.', kpi_na:"—",
     products_title:"📦 Product Profitability", th_product:"Product", th_cat:"Category", th_sale:"Sale €", th_cost:"Cost €", th_profit:"Unit profit", th_margin:"Margin",
     forecast_title:"📈 Next Month Forecast", forecast_note:"estimated revenue (based on products' next-month quantities)",
