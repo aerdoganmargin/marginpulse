@@ -41,6 +41,17 @@ body{font-family:'Segoe UI',system-ui,sans-serif;background:#F0F4F8;display:flex
 .pnl-net{background:#0F1F3D;color:#fff;}
 .pnl-net.loss .val{color:#FCA5A5;}
 .pnl-net.profit .val{color:#6EE7B7;}
+/* Kilit oranlar (KPI şeridi) */
+.kpi-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;}
+.kpi{border-radius:10px;padding:14px;border:1px solid #E2E8F0;background:#fff;position:relative;}
+.kpi .klbl{font-size:11px;color:#64748B;margin-bottom:6px;font-weight:600;}
+.kpi .kval{font-size:26px;font-weight:800;letter-spacing:-0.02em;line-height:1;}
+.kpi .ktarget{font-size:10.5px;color:#94A3B8;margin-top:6px;}
+.kpi.ok{background:#F0FDF4;border-color:#BBF7D0;} .kpi.ok .kval{color:#059669;}
+.kpi.warn{background:#FFFBEB;border-color:#FDE68A;} .kpi.warn .kval{color:#D97706;}
+.kpi.bad{background:#FEF2F2;border-color:#FECACA;} .kpi.bad .kval{color:#DC2626;}
+.kpi.na .kval{color:#CBD5E1;font-size:22px;}
+@media (max-width:760px){ .kpi-grid{grid-template-columns:repeat(2,1fr);} }
 .tax-field label{font-size:11px;color:#64748B;display:block;margin-bottom:4px;}
 .tax-field select{width:100%;max-width:340px;padding:9px 12px;border:1px solid #E2E8F0;border-radius:8px;font-size:13px;}
 .tax-result{background:#0F1F3D;color:#fff;border-radius:10px;padding:16px 18px;margin-top:12px;font-size:13px;}
@@ -120,6 +131,34 @@ td{padding:9px 8px 9px 0;border-bottom:1px solid #F1F5F9;color:#1E293B;}
     <div style="font-size:11px;color:#94A3B8;margin-top:10px;" id="pnlNote"></div>
   </div>
 
+  <!-- Kilit Oranlar (KPI şeridi) -->
+  <div class="card">
+    <div class="card-title" data-i18n="kpi_title">📊 Kilit Oranlar</div>
+    <div class="kpi-grid">
+      <div class="kpi na" id="kpiFood">
+        <div class="klbl" data-i18n="kpi_food">Hammadde (food cost)</div>
+        <div class="kval" id="kpiFoodVal">—</div>
+        <div class="ktarget" data-i18n="kpi_food_t">hedef %28-35</div>
+      </div>
+      <div class="kpi na" id="kpiLabor">
+        <div class="klbl" data-i18n="kpi_labor">İşçilik (labor)</div>
+        <div class="kval" id="kpiLaborVal">—</div>
+        <div class="ktarget" data-i18n="kpi_labor_t">hedef %25-30</div>
+      </div>
+      <div class="kpi na" id="kpiPrime">
+        <div class="klbl" data-i18n="kpi_prime">Prime cost</div>
+        <div class="kval" id="kpiPrimeVal">—</div>
+        <div class="ktarget" data-i18n="kpi_prime_t">hedef ≤%60</div>
+      </div>
+      <div class="kpi na" id="kpiMargin">
+        <div class="klbl" data-i18n="kpi_margin">Net kâr marjı</div>
+        <div class="kval" id="kpiMarginVal">—</div>
+        <div class="ktarget" data-i18n="kpi_margin_t">hedef ≥%10</div>
+      </div>
+    </div>
+    <div style="font-size:11px;color:#94A3B8;margin-top:10px;" id="kpiNote" data-i18n="kpi_note">İşçilik ve prime cost için Sabit Giderler'de personel giderini "İşçilik" olarak işaretle.</div>
+  </div>
+
   <!-- Vergi Tahmini (net kâr üstünden) -->
   <div class="card">
     <div class="card-title" data-i18n="tax_title">🧾 Vergi Tahmini</div>
@@ -177,6 +216,9 @@ const I18N = {
     nav_products:"Ürün karlılığı", nav_expenses:"Sabit giderler", nav_dashboard:"Dashboard", nav_simulator:"Simülatör", nav_pnl:"Gelir Tablosu", nav_logout:"Çıkış yap",
     alarms_title:"🔔 Alarmlar & Öneriler", calculating:"Hesaplanıyor…",
     pnl_title:"💰 Bu Ay — Kâr / Zarar Özeti", pnl_rev:"Tahmini Gelir", pnl_cost:"Toplam Gider", pnl_net:"Net Sonuç (NOI)",
+    kpi_title:"📊 Kilit Oranlar", kpi_food:"Hammadde (food cost)", kpi_food_t:"hedef %28-35", kpi_labor:"İşçilik (labor)", kpi_labor_t:"hedef %25-30",
+    kpi_prime:"Prime cost", kpi_prime_t:"hedef ≤%60", kpi_margin:"Net kâr marjı", kpi_margin_t:"hedef ≥%10",
+    kpi_note:'İşçilik ve prime cost için Sabit Giderler\'de personel giderini "İşçilik" olarak işaretle.', kpi_na:"—",
     products_title:"📦 Ürün Karlılığı", th_product:"Ürün", th_cat:"Kategori", th_sale:"Satış €", th_cost:"Maliyet €", th_profit:"Birim kâr", th_margin:"Marj",
     forecast_title:"📈 Gelecek Ay Tahmini", forecast_note:"tahmini gelir (ürünlerin gelecek ay adetlerine göre)",
     tax_title:"🧾 Vergi Tahmini", tax_country:"Ülke & şirket tipi",
@@ -231,6 +273,9 @@ const I18N = {
     nav_products:"Product profit", nav_expenses:"Fixed expenses", nav_dashboard:"Dashboard", nav_simulator:"Simulator", nav_pnl:"Income Statement", nav_logout:"Log out",
     alarms_title:"🔔 Alerts & Recommendations", calculating:"Calculating…",
     pnl_title:"💰 This Month — Profit / Loss Summary", pnl_rev:"Estimated Revenue", pnl_cost:"Total Expenses", pnl_net:"Net Result (NOI)",
+    kpi_title:"📊 Key Ratios", kpi_food:"Food cost", kpi_food_t:"target 28-35%", kpi_labor:"Labor", kpi_labor_t:"target 25-30%",
+    kpi_prime:"Prime cost", kpi_prime_t:"target ≤60%", kpi_margin:"Net profit margin", kpi_margin_t:"target ≥10%",
+    kpi_note:'For labor and prime cost, mark staff expenses as "Labor" in Fixed Expenses.', kpi_na:"—",
     products_title:"📦 Product Profitability", th_product:"Product", th_cat:"Category", th_sale:"Sale €", th_cost:"Cost €", th_profit:"Unit profit", th_margin:"Margin",
     forecast_title:"📈 Next Month Forecast", forecast_note:"estimated revenue (based on products' next-month quantities)",
     tax_title:"🧾 Tax Estimate", tax_country:"Country & company type",
@@ -396,6 +441,9 @@ async function loadDashboard() {
   window.currentNet = net;
   calcTax();
 
+  // --- KİLİT ORANLAR (KPI şeridi) ---
+  updateKpis(monthlyRevenue, variableCost, laborCost, primeCost, net);
+
   document.getElementById('forecastRevenue').textContent = eur(forecastRevenue);
 
   // --- Ürün tablosu ---
@@ -504,35 +552,11 @@ async function loadDashboard() {
       });
     }
 
-    // --- 4) GİDER OPTİMİZASYONU ---
+    // --- 4) OCCUPANCY / İŞLETME GİDERİ (food & prime artık KPI şeridinde) ---
     if (monthlyRevenue > 0) {
-      const foodRatio = variableCost/monthlyRevenue*100;
       // İşçilik hariç sabit giderler (kira, fatura, sigorta...) — işçilik prime cost'ta sayılıyor
       const opexFixed = totalFixed - laborCost;
       const opexRatio = opexFixed/monthlyRevenue*100;
-
-      // PRIME COST (hammadde + işçilik) — restoran sektörünün 1 numaralı metriği
-      if (laborCost > 0) {
-        const primeRatio = primeCost/monthlyRevenue*100;
-        let pcType, pcIco;
-        if (primeRatio <= 60) { pcType='green'; pcIco='✅'; }
-        else if (primeRatio <= 65) { pcType='yellow'; pcIco='⚠️'; }
-        else { pcType='red'; pcIco='🔴'; }
-        alarms.push({
-          type: pcType, ico: pcIco,
-          head: t('a_prime_h')(primeRatio.toFixed(0)),
-          desc: t('a_prime_d')(eur(variableCost), eur(laborCost), eur(primeCost)),
-          pill: primeRatio <= 60 ? t('a_prime_p_ok') : t('a_prime_p_high')
-        });
-      }
-
-      if (foodRatio > 35) {
-        alarms.push({
-          type:'yellow', ico:'🥩', head:t('a_food_h')(foodRatio.toFixed(0)),
-          desc:t('a_food_d'),
-          pill:t('a_food_p')
-        });
-      }
 
       if (opexFixed > 0 && opexRatio > 30) {
         // en büyük gider kalemi (işçilik hariç)
@@ -570,14 +594,7 @@ async function loadDashboard() {
     }
   }
 
-  // Pozitif
-  if (prods.length > 0 && net > 0) {
-    alarms.push({
-      type:'green', ico:'🟢', head:t('a_profit_h')(eur(net)),
-      desc:t('a_profit_d'),
-      pill:t('a_profit_p')(monthlyRevenue>0?(net/monthlyRevenue*100).toFixed(0):0)
-    });
-  }
+  // (Kâr durumu artık Net Sonuç kutusunda ve Net marj KPI'sında görünüyor — ayrı insight kaldırıldı)
 
   if (prods.length === 0) {
     alarms.push({
@@ -602,6 +619,39 @@ async function loadDashboard() {
       </div>
     </div>`;
   });
+}
+
+// ====== KİLİT ORANLAR (KPI şeridi) ======
+function pctStr(r){ return lang==='tr' ? ('%'+r.toFixed(0)) : (r.toFixed(0)+'%'); }
+function setKpi(id, valStr, cls){
+  const box = document.getElementById(id);
+  if (!box) return;
+  box.className = 'kpi ' + cls;
+  document.getElementById(id+'Val').textContent = valStr;
+}
+function updateKpis(revenue, variableCost, laborCost, primeCost, net){
+  if (!(revenue > 0)) {
+    ['kpiFood','kpiLabor','kpiPrime','kpiMargin'].forEach(id => setKpi(id, t('kpi_na'), 'na'));
+    return;
+  }
+  // Food cost: <=35 iyi, <=40 sınır, üstü kötü
+  const food = variableCost/revenue*100;
+  setKpi('kpiFood', pctStr(food), food<=35?'ok':(food<=40?'warn':'bad'));
+  // Net kâr marjı: >=10 iyi, >=5 sınır, altı kötü (yüksek iyi)
+  const margin = net/revenue*100;
+  setKpi('kpiMargin', pctStr(margin), margin>=10?'ok':(margin>=5?'warn':'bad'));
+  // İşçilik ve prime — sadece işçilik işaretliyse
+  if (laborCost > 0) {
+    const labor = laborCost/revenue*100;
+    setKpi('kpiLabor', pctStr(labor), labor<=30?'ok':(labor<=35?'warn':'bad'));
+    const prime = primeCost/revenue*100;
+    setKpi('kpiPrime', pctStr(prime), prime<=60?'ok':(prime<=65?'warn':'bad'));
+    const kn = document.getElementById('kpiNote'); if (kn) kn.style.display = 'none';
+  } else {
+    setKpi('kpiLabor', t('kpi_na'), 'na');
+    setKpi('kpiPrime', t('kpi_na'), 'na');
+    const kn = document.getElementById('kpiNote'); if (kn) kn.style.display = 'block';
+  }
 }
 
 // ====== VERGİ TAHMİNİ (gerçek net kâr üstünden) ======
