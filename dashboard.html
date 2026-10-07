@@ -67,6 +67,13 @@ td{padding:9px 8px 9px 0;border-bottom:1px solid #F1F5F9;color:#1E293B;}
 .tag-yellow{background:#FEF3C7;color:#D97706;}
 .tag-red{background:#FEE2E2;color:#DC2626;}
 .empty{text-align:center;color:#94A3B8;font-size:13px;padding:1.5rem;}
+.cat-row{cursor:pointer;background:#F8FAFC;}
+.cat-row:hover{background:#F1F5F9;}
+.cat-row td{padding:11px 8px;border-bottom:1px solid #E2E8F0;}
+.cat-caret{display:inline-block;width:18px;height:18px;line-height:16px;text-align:center;border:1px solid #CBD5E1;border-radius:5px;color:#2563EB;font-size:13px;font-weight:700;margin-right:9px;background:#fff;}
+.cat-count{color:#94A3B8;font-size:11px;font-weight:400;margin-left:7px;}
+.prod-row td{background:#fff;}
+.prod-row .prod-name{padding-left:30px;color:#1E293B;}
 .forecast{display:flex;align-items:center;gap:16px;background:#F8FAFC;border-radius:10px;padding:16px;}
 .forecast .big{font-size:28px;font-weight:700;color:#0F1F3D;}
 .forecast .lbl{font-size:12px;color:#64748B;}
@@ -185,7 +192,7 @@ td{padding:9px 8px 9px 0;border-bottom:1px solid #F1F5F9;color:#1E293B;}
     <div class="card-title" data-i18n="products_title">📦 Ürün Karlılığı</div>
     <table>
       <thead><tr>
-        <th data-i18n="th_product">Ürün</th><th data-i18n="th_cat">Kategori</th>
+        <th data-i18n="th_product">Ürün</th>
         <th class="r" data-i18n="th_sale">Satış €</th><th class="r" data-i18n="th_cost">Maliyet €</th>
         <th class="r" data-i18n="th_profit">Birim kâr</th><th class="r" data-i18n="th_margin">Marj</th>
       </tr></thead>
@@ -383,6 +390,14 @@ function applyLang() {
 function toggleLang(){ lang=(lang==='tr')?'en':'tr'; localStorage.setItem('mp_lang',lang); applyLang(); }
 const CAT_LABELS={tr:{"Et yemeği":"Et yemeği","Yemek":"Yemek","İçecek":"İçecek","Alkollü içecek":"Alkollü içecek","Tatlı":"Tatlı","Aperatif":"Aperatif"},en:{"Et yemeği":"Meat dish","Yemek":"Food","İçecek":"Drink","Alkollü içecek":"Alcoholic drink","Tatlı":"Dessert","Aperatif":"Starter"}};
 function catLabel(v){ return (CAT_LABELS[lang] && CAT_LABELS[lang][v]) || v || '—'; }
+function toggleCat(gid){
+  const caret = document.getElementById(gid+'-caret');
+  if (!caret) return;
+  const open = !caret.classList.contains('open');
+  caret.classList.toggle('open', open);
+  caret.textContent = open ? '−' : '+';
+  document.querySelectorAll('tr.prod-row.'+gid).forEach(r => { r.style.display = open ? '' : 'none'; });
+}
 // ====== GİRİŞ KONTROLÜ ======
 let currentUser = null;
 (async () => {
@@ -487,25 +502,45 @@ async function loadDashboard() {
   // --- Ürün tablosu ---
   const tbody = document.getElementById('productRows');
   if (prods.length === 0) {
-    tbody.innerHTML = '<tr><td colspan="6" class="empty">'+t('no_products_row')+'</td></tr>';
+    tbody.innerHTML = '<tr><td colspan="5" class="empty">'+t('no_products_row')+'</td></tr>';
   } else {
-    tbody.innerHTML = '';
+    // Kategorilere göre grupla (ilk görülme sırasını koru)
+    const groups = {}; const order = [];
     prods.forEach(p => {
-      const spGross = p.sale_price || 0;           // menü fiyatı (KDV dahil)
-      const sp = netPrice(p);                       // net satış (KDV hariç)
-      const cost = p.ingredient_cost || 0;
-      const profit = sp - cost;
-      const margin = sp > 0 ? (profit/sp*100) : 0;
-      let tag = 'tag-green'; if (margin < 0) tag='tag-red'; else if (margin < 30) tag='tag-yellow';
-      tbody.innerHTML += `<tr>
-        <td><strong>${p.name}</strong></td>
-        <td style="color:#94A3B8">${catLabel(p.category)}</td>
-        <td class="r">€${spGross.toFixed(2)}</td>
-        <td class="r">€${cost.toFixed(2)}</td>
-        <td class="r">€${profit.toFixed(2)}</td>
-        <td class="r"><span class="margin-tag ${tag}">%${margin.toFixed(0)}</span></td>
-      </tr>`;
+      const key = p.category || '—';
+      if (!groups[key]) { groups[key] = []; order.push(key); }
+      groups[key].push(p);
     });
+    let html = '';
+    order.forEach((key, gi) => {
+      const items = groups[key];
+      // Kategori birleşik marjı: toplam net satış ve toplam maliyet üzerinden (birim bazlı)
+      let sumNet = 0, sumCost = 0;
+      items.forEach(p => { sumNet += netPrice(p); sumCost += (p.ingredient_cost||0); });
+      const gMargin = sumNet > 0 ? ((sumNet - sumCost)/sumNet*100) : 0;
+      let gtag = 'tag-green'; if (gMargin < 0) gtag='tag-red'; else if (gMargin < 30) gtag='tag-yellow';
+      const gid = 'cat'+gi;
+      html += `<tr class="cat-row" onclick="toggleCat('${gid}')">
+        <td colspan="4"><span class="cat-caret" id="${gid}-caret">+</span><strong>${catLabel(key)}</strong><span class="cat-count">(${items.length})</span></td>
+        <td class="r"><span class="margin-tag ${gtag}">%${gMargin.toFixed(0)}</span></td>
+      </tr>`;
+      items.forEach(p => {
+        const spGross = p.sale_price || 0;           // menü fiyatı (KDV dahil)
+        const sp = netPrice(p);                       // net satış (KDV hariç)
+        const cost = p.ingredient_cost || 0;
+        const profit = sp - cost;
+        const margin = sp > 0 ? (profit/sp*100) : 0;
+        let tag = 'tag-green'; if (margin < 0) tag='tag-red'; else if (margin < 30) tag='tag-yellow';
+        html += `<tr class="prod-row ${gid}" style="display:none">
+          <td class="prod-name">${p.name}</td>
+          <td class="r">€${spGross.toFixed(2)}</td>
+          <td class="r">€${cost.toFixed(2)}</td>
+          <td class="r">€${profit.toFixed(2)}</td>
+          <td class="r"><span class="margin-tag ${tag}">%${margin.toFixed(0)}</span></td>
+        </tr>`;
+      });
+    });
+    tbody.innerHTML = html;
   }
 
   // --- ALARMLAR ---
