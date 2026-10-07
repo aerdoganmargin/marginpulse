@@ -523,7 +523,7 @@ async function loadDashboard() {
       let gtag = 'tag-green'; if (gMargin < 0) gtag='tag-red'; else if (gMargin < 30) gtag='tag-yellow';
       const gid = 'cat'+gi;
       html += `<tr class="cat-row" onclick="toggleCat('${gid}')">
-        <td colspan="4"><span class="cat-caret" id="${gid}-caret">+</span><strong>${catLabel(key)}</strong><span class="cat-count">(${items.length})</span></td>
+        <td colspan="4"><span class="cat-caret open" id="${gid}-caret">−</span><strong>${catLabel(key)}</strong><span class="cat-count">(${items.length})</span></td>
         <td class="r"><span class="margin-tag ${gtag}">%${gMargin.toFixed(0)}</span></td>
       </tr>`;
       items.forEach(p => {
@@ -533,7 +533,7 @@ async function loadDashboard() {
         const profit = sp - cost;
         const margin = sp > 0 ? (profit/sp*100) : 0;
         let tag = 'tag-green'; if (margin < 0) tag='tag-red'; else if (margin < 30) tag='tag-yellow';
-        html += `<tr class="prod-row ${gid}" style="display:none">
+        html += `<tr class="prod-row ${gid}">
           <td class="prod-name">${p.name}</td>
           <td class="r">€${spGross.toFixed(2)}</td>
           <td class="r">€${cost.toFixed(2)}</td>
