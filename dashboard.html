@@ -388,8 +388,10 @@ function applyLang() {
   if (typeof loadDashboard==='function') loadDashboard(); // insight'ları yeniden üret
 }
 function toggleLang(){ lang=(lang==='tr')?'en':'tr'; localStorage.setItem('mp_lang',lang); applyLang(); }
-const CAT_LABELS={tr:{"Et yemeği":"Et yemeği","Yemek":"Yemek","İçecek":"İçecek","Alkollü içecek":"Alkollü içecek","Tatlı":"Tatlı","Aperatif":"Aperatif"},en:{"Et yemeği":"Meat dish","Yemek":"Food","İçecek":"Drink","Alkollü içecek":"Alcoholic drink","Tatlı":"Dessert","Aperatif":"Starter"}};
-function catLabel(v){ return (CAT_LABELS[lang] && CAT_LABELS[lang][v]) || v || '—'; }
+const CAT_LABELS={tr:{"Ana yemek":"Ana yemek","İçecek":"İçecek","Alkollü içecek":"Alkollü içecek","Tatlı":"Tatlı","Aperatif":"Aperatif"},en:{"Ana yemek":"Main dish","İçecek":"Drink","Alkollü içecek":"Alcoholic drink","Tatlı":"Dessert","Aperatif":"Starter"}};
+// Eski kayıtlar ("Et yemeği", "Yemek") artık "Ana yemek" sayılır
+function normCat(c){ return (c==="Et yemeği"||c==="Yemek") ? "Ana yemek" : c; }
+function catLabel(v){ v=normCat(v); return (CAT_LABELS[lang] && CAT_LABELS[lang][v]) || v || '—'; }
 function toggleCat(gid){
   const caret = document.getElementById(gid+'-caret');
   if (!caret) return;
@@ -507,7 +509,7 @@ async function loadDashboard() {
     // Kategorilere göre grupla (ilk görülme sırasını koru)
     const groups = {}; const order = [];
     prods.forEach(p => {
-      const key = p.category || '—';
+      const key = normCat(p.category) || '—';
       if (!groups[key]) { groups[key] = []; order.push(key); }
       groups[key].push(p);
     });
