@@ -74,6 +74,15 @@ td{padding:9px 8px 9px 0;border-bottom:1px solid #F1F5F9;color:#1E293B;}
 .cat-count{color:#94A3B8;font-size:11px;font-weight:400;margin-left:7px;}
 .prod-row td{background:#fff;}
 .prod-row .prod-name{padding-left:30px;color:#1E293B;}
+.tag-neutral{background:#E2E8F0;color:#334155;}
+.pnote{font-size:10.5px;color:#B45309;margin-top:2px;font-weight:500;}
+.pnote.bad{color:#DC2626;}
+.mcol{min-width:110px;}
+.mbar{height:4px;background:#F1F5F9;border-radius:3px;margin-top:4px;margin-left:auto;width:90px;overflow:hidden;}
+.mbar span{display:block;height:100%;background:#2563EB;border-radius:3px;margin-left:auto;}
+.share{font-size:10.5px;color:#64748B;font-weight:400;margin-top:2px;}
+.muted{color:#CBD5E1;}
+.prod-legend{font-size:11px;color:#94A3B8;margin-top:10px;line-height:1.5;}
 .forecast{display:flex;align-items:center;gap:16px;background:#F8FAFC;border-radius:10px;padding:16px;}
 .forecast .big{font-size:28px;font-weight:700;color:#0F1F3D;}
 .forecast .lbl{font-size:12px;color:#64748B;}
@@ -195,9 +204,11 @@ td{padding:9px 8px 9px 0;border-bottom:1px solid #F1F5F9;color:#1E293B;}
         <th data-i18n="th_product">Ürün</th>
         <th class="r" data-i18n="th_sale">Satış €</th><th class="r" data-i18n="th_cost">Maliyet €</th>
         <th class="r" data-i18n="th_profit">Birim kâr</th><th class="r" data-i18n="th_margin">Marj</th>
+        <th class="r" data-i18n="th_monthly">Aylık kâr</th>
       </tr></thead>
       <tbody id="productRows"></tbody>
     </table>
+    <div class="prod-legend" data-i18n="prod_legend">Marj rengi ürünü kendi kategorisinin ortalamasıyla kıyaslar: sarı = kategori ortalamasının 5 puan veya daha altında. Aylık kâr = birim kâr × geçen ay satış adedi.</div>
   </div>
 
   <!-- Gelecek ay tahmini -->
@@ -226,7 +237,11 @@ const I18N = {
     kpi_title:"📊 Kilit Oranlar", kpi_food:"Hammadde maliyeti", kpi_food_t:"hedef %28-35", kpi_labor:"İşçilik maliyeti", kpi_labor_t:"hedef %25-30",
     kpi_prime:"Temel maliyet (hammadde + işçilik)", kpi_prime_t:"hedef ≤%60", kpi_margin:"Net kâr marjı", kpi_margin_t:"hedef ≥%10",
     kpi_note:'İşçilik ve temel maliyet için Sabit Giderler\'de personel giderini "İşçilik" olarak işaretle.', kpi_na:"—",
-    products_title:"📦 Ürün Karlılığı", th_product:"Ürün", th_cat:"Kategori", th_sale:"Satış €", th_cost:"Maliyet €", th_profit:"Birim kâr", th_margin:"Marj",
+    products_title:"📦 Ürün Karlılığı", th_product:"Ürün", th_cat:"Kategori", th_sale:"Satış €", th_cost:"Maliyet €", th_profit:"Birim kâr", th_margin:"Marj", th_monthly:"Aylık kâr",
+    cat_share:(p)=>`toplam kârın %${p}`, cat_avg_tip:"Kategori ortalaması (satış adediyle ağırlıklı)",
+    note_below:(d)=>`▼ kategori ortalamasının ${d} puan altında`, note_loss:"▼ zararına satılıyor",
+    no_qty_tip:"Geçen ay satış adedi girilmemiş",
+    prod_legend:"Marj rengi ürünü kendi kategorisinin ortalamasıyla kıyaslar: sarı = kategori ortalamasının 5 puan veya daha altında. Aylık kâr = birim kâr × geçen ay satış adedi.",
     forecast_title:"📈 Gelecek Ay Tahmini", forecast_note:"tahmini gelir (ürünlerin gelecek ay adetlerine göre)",
     tax_title:"🧾 Vergi Tahmini", tax_country:"Ülke & şirket tipi",
     grp_nl_zzp:"Hollanda — ZZP", grp_nl_bv:"Hollanda — BV", grp_tr:"Türkiye",
@@ -302,7 +317,11 @@ const I18N = {
     kpi_title:"📊 Key Ratios", kpi_food:"Food cost", kpi_food_t:"target 28-35%", kpi_labor:"Labor", kpi_labor_t:"target 25-30%",
     kpi_prime:"Prime Cost (food cost + labor)", kpi_prime_t:"target ≤60%", kpi_margin:"Net profit margin", kpi_margin_t:"target ≥10%",
     kpi_note:'For labor and prime cost, mark staff expenses as "Labor" in Fixed Expenses.', kpi_na:"—",
-    products_title:"📦 Product Profitability", th_product:"Product", th_cat:"Category", th_sale:"Sale €", th_cost:"Cost €", th_profit:"Unit profit", th_margin:"Margin",
+    products_title:"📦 Product Profitability", th_product:"Product", th_cat:"Category", th_sale:"Sale €", th_cost:"Cost €", th_profit:"Unit profit", th_margin:"Margin", th_monthly:"Monthly profit",
+    cat_share:(p)=>`${p}% of total profit`, cat_avg_tip:"Category average (weighted by units sold)",
+    note_below:(d)=>`▼ ${d} pts below category average`, note_loss:"▼ sold at a loss",
+    no_qty_tip:"Last month's units sold not entered",
+    prod_legend:"Margin color compares each product to its own category average: yellow = 5+ points below the category average. Monthly profit = unit profit × units sold last month.",
     forecast_title:"📈 Next Month Forecast", forecast_note:"estimated revenue (based on products' next-month quantities)",
     tax_title:"🧾 Tax Estimate", tax_country:"Country & company type",
     grp_nl_zzp:"Netherlands — ZZP", grp_nl_bv:"Netherlands — BV", grp_tr:"Turkey",
@@ -504,41 +523,69 @@ async function loadDashboard() {
   // --- Ürün tablosu ---
   const tbody = document.getElementById('productRows');
   if (prods.length === 0) {
-    tbody.innerHTML = '<tr><td colspan="5" class="empty">'+t('no_products_row')+'</td></tr>';
+    tbody.innerHTML = '<tr><td colspan="6" class="empty">'+t('no_products_row')+'</td></tr>';
   } else {
-    // Kategorilere göre grupla (ilk görülme sırasını koru)
-    const groups = {}; const order = [];
-    prods.forEach(p => {
-      const key = normCat(p.category) || '—';
-      if (!groups[key]) { groups[key] = []; order.push(key); }
-      groups[key].push(p);
+    // Her ürün için birim ve aylık rakamlar
+    const rows = prods.map(p => {
+      const spGross = p.sale_price || 0;            // menü fiyatı (KDV dahil)
+      const sp = netPrice(p);                        // net satış (KDV hariç)
+      const cost = p.ingredient_cost || 0;
+      const qty = p.last_month_qty || 0;
+      const profit = sp - cost;
+      return { p, spGross, sp, cost, qty, profit,
+               margin: sp > 0 ? (profit/sp*100) : 0,
+               monthly: profit * qty };
     });
+    const totalMonthly = rows.reduce((s,r) => s + Math.max(r.monthly,0), 0);
+    const maxMonthly = Math.max(0, ...rows.map(r => r.monthly));
+
+    // Kategorilere göre grupla
+    const groups = {};
+    rows.forEach(r => { const k = normCat(r.p.category) || '—'; (groups[k] = groups[k] || []).push(r); });
+    const cats = Object.keys(groups).map(k => {
+      const items = groups[k];
+      const monthly = items.reduce((s,r) => s + r.monthly, 0);
+      const soldNet = items.reduce((s,r) => s + r.sp*r.qty, 0);
+      let margin;
+      if (soldNet > 0) {
+        // Satış adetiyle ağırlıklı kategori marjı (gerçek karışım)
+        margin = monthly / soldNet * 100;
+      } else {
+        // Satış verisi yoksa: birim bazlı birleşik marj
+        const n = items.reduce((s,r) => s + r.sp, 0), c = items.reduce((s,r) => s + r.cost, 0);
+        margin = n > 0 ? (n-c)/n*100 : 0;
+      }
+      items.sort((a,b) => (b.monthly - a.monthly) || (b.profit - a.profit));
+      return { k, items, monthly, margin };
+    }).sort((a,b) => (b.monthly - a.monthly) || (b.items.length - a.items.length));
+
     let html = '';
-    order.forEach((key, gi) => {
-      const items = groups[key];
-      // Kategori birleşik marjı: toplam net satış ve toplam maliyet üzerinden (birim bazlı)
-      let sumNet = 0, sumCost = 0;
-      items.forEach(p => { sumNet += netPrice(p); sumCost += (p.ingredient_cost||0); });
-      const gMargin = sumNet > 0 ? ((sumNet - sumCost)/sumNet*100) : 0;
-      let gtag = 'tag-green'; if (gMargin < 0) gtag='tag-red'; else if (gMargin < 30) gtag='tag-yellow';
+    cats.forEach((g, gi) => {
       const gid = 'cat'+gi;
+      const share = totalMonthly > 0 ? Math.round(Math.max(g.monthly,0)/totalMonthly*100) : null;
+      const gtag = g.margin < 0 ? 'tag-red' : 'tag-neutral';
       html += `<tr class="cat-row" onclick="toggleCat('${gid}')">
-        <td colspan="4"><span class="cat-caret open" id="${gid}-caret">−</span><strong>${catLabel(key)}</strong><span class="cat-count">(${items.length})</span></td>
-        <td class="r"><span class="margin-tag ${gtag}">%${gMargin.toFixed(0)}</span></td>
+        <td colspan="4"><span class="cat-caret open" id="${gid}-caret">−</span><strong>${catLabel(g.k)}</strong><span class="cat-count">(${g.items.length})</span></td>
+        <td class="r"><span class="margin-tag ${gtag}" title="${t('cat_avg_tip')}">%${g.margin.toFixed(0)}</span></td>
+        <td class="r mcol">${g.monthly !== 0 ? `<strong>${eur(g.monthly)}</strong>` : '<span class="muted">—</span>'}${share !== null ? `<div class="share">${t('cat_share')(share)}</div>` : ''}</td>
       </tr>`;
-      items.forEach(p => {
-        const spGross = p.sale_price || 0;           // menü fiyatı (KDV dahil)
-        const sp = netPrice(p);                       // net satış (KDV hariç)
-        const cost = p.ingredient_cost || 0;
-        const profit = sp - cost;
-        const margin = sp > 0 ? (profit/sp*100) : 0;
-        let tag = 'tag-green'; if (margin < 0) tag='tag-red'; else if (margin < 30) tag='tag-yellow';
+      g.items.forEach(r => {
+        // Ürünü kendi kategorisinin ortalamasıyla kıyasla
+        const diff = r.margin - g.margin;
+        let tag = 'tag-green', note = '';
+        if (r.margin < 0) { tag = 'tag-red'; note = `<div class="pnote bad">${t('note_loss')}</div>`; }
+        else if (g.items.length >= 2 && diff <= -5) {
+          tag = 'tag-yellow';
+          note = `<div class="pnote">${t('note_below')(Math.round(-diff))}</div>`;
+        }
+        const barW = (maxMonthly > 0 && r.monthly > 0) ? Math.max(3, r.monthly/maxMonthly*100) : 0;
         html += `<tr class="prod-row ${gid}">
-          <td class="prod-name">${p.name}</td>
-          <td class="r">€${spGross.toFixed(2)}</td>
-          <td class="r">€${cost.toFixed(2)}</td>
-          <td class="r">€${profit.toFixed(2)}</td>
-          <td class="r"><span class="margin-tag ${tag}">%${margin.toFixed(0)}</span></td>
+          <td class="prod-name">${r.p.name}${note}</td>
+          <td class="r">€${r.spGross.toFixed(2)}</td>
+          <td class="r">€${r.cost.toFixed(2)}</td>
+          <td class="r">€${r.profit.toFixed(2)}</td>
+          <td class="r"><span class="margin-tag ${tag}">%${r.margin.toFixed(0)}</span></td>
+          <td class="r mcol">${r.qty > 0 ? `${eur(r.monthly)}<div class="mbar"><span style="width:${barW}%"></span></div>` : `<span class="muted" title="${t('no_qty_tip')}">—</span>`}</td>
         </tr>`;
       });
     });
