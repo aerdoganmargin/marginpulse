@@ -253,6 +253,25 @@ const I18N = {
     a_mix_h:(bm,r,bs)=>`1 adet "${bm}" satmak ≈ ${r} adet "${bs}" satmak kadar kâr`,
     a_mix_d:(bs,q,bsp,bm,bmp)=>`En çok sattığın ürün "${bs}" (${q} adet) ama adet başına sadece €${bsp} kâr bırakıyor. "${bm}" ise €${bmp} bırakıyor.`,
     a_mix_p:(bm,ex)=>`Ayda 10 adet daha "${bm}" satsan +${ex} kâr — garsonlara önerttir`,
+    // Menü mühendisliği (Kasavana-Smith)
+    me_loss_h:(name)=>`"${name}" her satışta zarar ettiriyor`,
+    me_loss_d:(sp,c,loss)=>`Net satış €${sp}, hammadde €${c} — birim başına €${loss} kayıp. Bu üründen ne kadar çok satarsan o kadar çok kaybedersin.`,
+    me_loss_p:(be,tgt)=>`Fiyatı en az €${be}'a çıkar (başabaş), sağlıklı kâr için €${tgt} (gıda maliyeti %30). Alternatif: reçeteyi ucuzlat veya menüden çıkar.`,
+    me_dog_h:(name)=>`"${name}" ne satıyor ne kâr bırakıyor`,
+    me_dog_d:(q)=>`Az satan (ayda ${q}) ve düşük kârlı ürünlerinden biri. Menüde yer kaplıyor ama getirisi zayıf.`,
+    me_dog_p:`Menüden çıkarmayı ya da reçete/sunumu baştan tasarlamayı düşün. Menü mühendisliğinde buna "köpek" ürün denir — temizlenecek ilk kalem.`,
+    me_puzzle_h:(name)=>`"${name}" kârlı ama gölgede kalmış`,
+    me_puzzle_d:(up,q)=>`Birim kârı yüksek (€${up}, menü ortalamasının üstünde) ama ayda sadece ${q} adet satıyor.`,
+    me_puzzle_p:`Menüde öne al, adını iştah açıcı yaz, garsonlara önerttir. Satışı artarsa en değerli ürünlerinden olur — buna "bilmece" ürün denir.`,
+    me_plow_h:(name)=>`"${name}" çok satıyor ama kârı zayıf`,
+    me_plow_d:(q,up)=>`En çok satanlardan (ayda ${q}) ama birim kârı düşük (€${up}, ortalamanın altında).`,
+    me_plow_p:(gain)=>`%5 zam ya da porsiyon/maliyet ayarı ayda +${gain} getirir. Hacim yüksek olduğu için küçük dokunuş büyük etki yapar — "beygir" ürün.`,
+    me_star_h:(name)=>`"${name}" menünün yıldızı`,
+    me_star_d:(q,share)=>`Hem çok satıyor (ayda ${q}) hem yüksek kâr bırakıyor. Cironun %${share}'i bu üründen geliyor.`,
+    me_star_p:`Menüde en görünür yere koy, fiyatına dokunma, stoğu asla tükenmesin. İşini bu ürün taşıyor.`,
+    me_conc_h:(share,name)=>`Cironun %${share}'i tek üründe: "${name}"`,
+    me_conc_d:`Gelirinin büyük kısmı tek ürüne bağlı. Bu üründe tedarik, fiyat ya da talep değişimi olursa cironun büyük parçası sarsılır.`,
+    me_conc_p:`İkinci bir güçlü ürün geliştir. Tek yıldıza bağımlılık kırılganlıktır — menüyü dengele.`,
     a_food_h:(r)=>`Hammadde maliyeti yüksek: ciroya oranı %${r}`,
     a_food_d:"Restoranlarda hammadde genelde cironun %28-35'i arasındadır.", a_food_p:"Tedarikçi fiyatlarını ve porsiyon gramajlarını gözden geçir",
     a_prime_h:(r)=>`Prime cost (hammadde + işçilik): cironun %${r}'i`,
@@ -310,6 +329,25 @@ const I18N = {
     a_mix_h:(bm,r,bs)=>`Selling 1 "${bm}" ≈ as much profit as ${r} "${bs}"`,
     a_mix_d:(bs,q,bsp,bm,bmp)=>`Your best seller "${bs}" (${q} sold) leaves only €${bsp} profit each. "${bm}" leaves €${bmp}.`,
     a_mix_p:(bm,ex)=>`Selling 10 more "${bm}" a month would add +${ex} profit — have your staff recommend it`,
+    // Menu engineering (Kasavana-Smith)
+    me_loss_h:(name)=>`"${name}" loses money on every sale`,
+    me_loss_d:(sp,c,loss)=>`Net sale €${sp}, ingredients €${c} — €${loss} lost per unit. The more you sell of this, the more you lose.`,
+    me_loss_p:(be,tgt)=>`Raise the price to at least €${be} (break-even), or €${tgt} for a healthy margin (30% food cost). Or cut the recipe cost, or drop it from the menu.`,
+    me_dog_h:(name)=>`"${name}" neither sells nor earns`,
+    me_dog_d:(q)=>`One of your low-selling (${q}/mo) and low-profit items. It takes up menu space with little return.`,
+    me_dog_p:`Consider removing it or redesigning the recipe/presentation. In menu engineering this is a "dog" — the first item to clean up.`,
+    me_puzzle_h:(name)=>`"${name}" is profitable but overlooked`,
+    me_puzzle_d:(up,q)=>`High unit profit (€${up}, above the menu average) but only ${q} sold per month.`,
+    me_puzzle_p:`Feature it, give it an appetizing name, have staff recommend it. If sales rise it becomes one of your best items — this is a "puzzle".`,
+    me_plow_h:(name)=>`"${name}" sells a lot but earns little`,
+    me_plow_d:(q,up)=>`One of your best sellers (${q}/mo) but low unit profit (€${up}, below average).`,
+    me_plow_p:(gain)=>`A 5% price rise or a portion/cost tweak adds +${gain} per month. High volume means a small change has a big impact — a "plowhorse".`,
+    me_star_h:(name)=>`"${name}" is your menu star`,
+    me_star_d:(q,share)=>`It sells well (${q}/mo) and leaves high profit. ${share}% of your revenue comes from it.`,
+    me_star_p:`Put it in the most visible menu spot, don't touch the price, never let it run out. This product carries the business.`,
+    me_conc_h:(share,name)=>`${share}% of revenue in one product: "${name}"`,
+    me_conc_d:`Most of your revenue depends on a single product. A supply, price or demand shift in it would shake a big chunk of revenue.`,
+    me_conc_p:`Develop a second strong product. Depending on one star is fragile — balance the menu.`,
     a_food_h:(r)=>`Ingredient cost is high: ${r}% of revenue`,
     a_food_d:"In restaurants, ingredients are usually 28-35% of revenue.", a_food_p:"Review supplier prices and portion sizes",
     a_prime_h:(r)=>`Prime cost (ingredients + labor): ${r}% of revenue`,
@@ -473,105 +511,87 @@ async function loadDashboard() {
   // --- ALARMLAR ---
   const alarms = [];
 
-  // Kritik: net zarar
-  if (prods.length > 0 && net < 0) {
-    alarms.push({
-      type:'red', ico:'🔴', head:t('a_deficit_h')(eur(Math.abs(net))),
-      desc:t('a_deficit_d'),
-      pill:t('a_deficit_p')(eur(Math.abs(net)))
-    });
-  }
-
-  // Zarar eden ürünler (net satış üzerinden)
-  prods.forEach(p => {
-    const sp = netPrice(p), cost=p.ingredient_cost||0;
-    const margin = sp>0 ? ((sp-cost)/sp*100) : 0;
-    if (sp>0 && margin < 0) {
-      alarms.push({
-        type:'red', ico:'🔴', head:t('a_loss_h')(p.name),
-        desc:t('a_loss_d')(cost.toFixed(2), sp.toFixed(2)),
-        pill:t('a_loss_p')((cost/0.7).toFixed(2))
-      });
-    } else if (sp>0 && margin < 20) {
-      alarms.push({
-        type:'yellow', ico:'🟡', head:t('a_lowmargin_h')(p.name, margin.toFixed(0)),
-        desc:t('a_lowmargin_d'),
-        pill:t('a_lowmargin_p')((cost/0.7).toFixed(2))
-      });
-    }
-  });
-
-  // Sabit gider girilmemiş
-  if (fixedCosts.length === 0) {
+  // Sabit gider girilmemiş (veri uyarısı)
+  if (fixedCosts.length === 0 && prods.length > 0) {
     alarms.push({
       type:'yellow', ico:'🟡', head:t('a_nofixed_h'),
-      desc:t('a_nofixed_d'),
-      pill:t('a_nofixed_p')
+      desc:t('a_nofixed_d'), pill:t('a_nofixed_p')
     });
   }
 
-  // ====== AKILLI ÖNERİLER ======
-  const sold = prods.filter(p => (p.last_month_qty||0) > 0 && (p.sale_price||0) > 0);
+  // ====== MENÜ MÜHENDİSLİĞİ (Kasavana-Smith) ======
+  const soldAll = prods.filter(p => (p.last_month_qty||0) > 0 && (p.sale_price||0) > 0);
+  const statsAll = soldAll.map(p => {
+    const sp = netPrice(p), c = p.ingredient_cost||0, q = p.last_month_qty||0;
+    const vat = (p.category === 'Alkollü içecek') ? 0.21 : 0.09;
+    const unitProfit = sp - c;
+    return { name:p.name, sp, c, q, vat, unitProfit, totalProfit:unitProfit*q, revenue:sp*q };
+  });
 
-  if (sold.length > 0) {
-    // Her ürün için birim kâr, marj, toplam katkı (net satış üzerinden)
-    const stats = sold.map(p => {
-      const sp = netPrice(p), c = p.ingredient_cost||0, q = p.last_month_qty||0;
-      const unitProfit = sp - c;
-      return {
-        name: p.name, sp, c, q,
-        unitProfit,
-        margin: sp>0 ? (unitProfit/sp*100) : 0,
-        totalProfit: unitProfit * q
-      };
+  // 1) Zarar eden ürünler (kritik) — en fazla 2, en kötüden
+  statsAll.filter(s => s.unitProfit < 0).sort((a,b)=>a.unitProfit-b.unitProfit).slice(0,2).forEach(s => {
+    const beGross = s.c * (1+s.vat);          // başabaş (net satış = maliyet) → brüt menü fiyatı
+    const tgtGross = (s.c/0.70) * (1+s.vat);  // gıda maliyeti %30 hedefi → brüt menü fiyatı
+    alarms.push({
+      type:'red', ico:'🔴',
+      head: t('me_loss_h')(s.name),
+      desc: t('me_loss_d')(s.sp.toFixed(2), s.c.toFixed(2), Math.abs(s.unitProfit).toFixed(2)),
+      pill: t('me_loss_p')(beGross.toFixed(2), tgtGross.toFixed(2))
     });
+  });
 
-    // --- 1) YILDIZ ÜRÜN: en çok kâr getiren ---
+  // 2) Kâr eden ürünleri popülerlik × kârlılık matrisine yerleştir
+  const stats = statsAll.filter(s => s.unitProfit >= 0);
+  if (stats.length >= 3) {
+    const N = stats.length;
+    const totalQty = stats.reduce((s,x)=>s+x.q, 0);
+    const totalCM = stats.reduce((s,x)=>s+x.unitProfit*x.q, 0);
+    const avgCM = totalQty>0 ? totalCM/totalQty : 0;   // ortalama bir tabağın bıraktığı kâr
+    const popTh = (1/N) * 0.70;                          // Kasavana-Smith popülerlik eşiği
+    stats.forEach(s => {
+      s.pop = totalQty>0 && (s.q/totalQty) >= popTh;
+      s.prof = s.unitProfit >= avgCM;
+      s.cls = s.pop ? (s.prof?'star':'plow') : (s.prof?'puzzle':'dog');
+    });
+    // 🐕 Köpek — en düşük toplam kârlı
+    const dog = stats.filter(s=>s.cls==='dog').sort((a,b)=>a.totalProfit-b.totalProfit)[0];
+    if (dog) alarms.push({ type:'yellow', ico:'🐕', head:t('me_dog_h')(dog.name), desc:t('me_dog_d')(dog.q), pill:t('me_dog_p') });
+    // 🧩 Bilmece — en yüksek birim kârlı (az satan)
+    const puzzle = stats.filter(s=>s.cls==='puzzle').sort((a,b)=>b.unitProfit-a.unitProfit)[0];
+    if (puzzle) alarms.push({ type:'blue', ico:'🧩', head:t('me_puzzle_h')(puzzle.name), desc:t('me_puzzle_d')(puzzle.unitProfit.toFixed(2), puzzle.q), pill:t('me_puzzle_p') });
+    // 🐴 Beygir — en çok satan (düşük kârlı)
+    const plow = stats.filter(s=>s.cls==='plow').sort((a,b)=>b.q-a.q)[0];
+    if (plow) { const gain = plow.q * plow.sp * 0.05; alarms.push({ type:'yellow', ico:'🐴', head:t('me_plow_h')(plow.name), desc:t('me_plow_d')(plow.q, plow.unitProfit.toFixed(2)), pill:t('me_plow_p')(eur(gain)) }); }
+    // ⭐ Yıldız — en yüksek toplam kârlı
+    const star = stats.filter(s=>s.cls==='star').sort((a,b)=>b.totalProfit-a.totalProfit)[0];
+    if (star) { const share = monthlyRevenue>0 ? (star.revenue/monthlyRevenue*100) : 0; alarms.push({ type:'green', ico:'⭐', head:t('me_star_h')(star.name), desc:t('me_star_d')(star.q, share.toFixed(0)), pill:t('me_star_p') }); }
+  } else if (stats.length > 0) {
+    // 3'ten az ürün: matris anlamsız — sadece en kârlıyı yıldız olarak öv
     const star = [...stats].sort((a,b)=>b.totalProfit-a.totalProfit)[0];
     if (star && star.totalProfit > 0) {
-      const share = monthlyRevenue>0 ? (star.sp*star.q/monthlyRevenue*100) : 0;
-      alarms.push({
-        type:'blue', ico:'⭐', head:t('a_star_h')(star.name),
-        desc:t('a_star_d')(star.q, eur(star.totalProfit), star.margin.toFixed(0)),
-        pill:t('a_star_p')(share.toFixed(0))
-      });
+      const share = monthlyRevenue>0 ? (star.revenue/monthlyRevenue*100) : 0;
+      alarms.push({ type:'green', ico:'⭐', head:t('me_star_h')(star.name), desc:t('me_star_d')(star.q, share.toFixed(0)), pill:t('me_star_p') });
     }
+  }
 
-    // --- 2) MENÜ MİX: çok satan düşük kârlı vs yüksek kârlı ---
-    const bestSeller = [...stats].sort((a,b)=>b.q-a.q)[0];
-    const bestMargin = [...stats].sort((a,b)=>b.unitProfit-a.unitProfit)[0];
-    if (bestSeller && bestMargin && bestSeller.name !== bestMargin.name
-        && bestSeller.unitProfit > 0 && bestMargin.unitProfit > bestSeller.unitProfit * 1.5) {
-      const ratio = bestMargin.unitProfit / bestSeller.unitProfit;
-      const extra10 = 10 * bestMargin.unitProfit;
-      alarms.push({
-        type:'blue', ico:'🔀',
-        head:t('a_mix_h')(bestMargin.name, ratio.toFixed(1).replace('.', lang==='tr'?',':'.'), bestSeller.name),
-        desc:t('a_mix_d')(bestSeller.name, bestSeller.q, bestSeller.unitProfit.toFixed(2), bestMargin.name, bestMargin.unitProfit.toFixed(2)),
-        pill:t('a_mix_p')(bestMargin.name, eur(extra10))
-      });
+  // 3) Konsantrasyon riski — cironun büyük kısmı tek üründe
+  if (monthlyRevenue > 0 && statsAll.length >= 2) {
+    const topRev = [...statsAll].sort((a,b)=>b.revenue-a.revenue)[0];
+    const share = topRev.revenue/monthlyRevenue*100;
+    if (share > 40) {
+      alarms.push({ type:'yellow', ico:'⚠️', head:t('me_conc_h')(share.toFixed(0), topRev.name), desc:t('me_conc_d'), pill:t('me_conc_p') });
     }
+  }
 
-    // --- 4) OCCUPANCY / İŞLETME GİDERİ (food & prime artık KPI şeridinde) ---
-    if (monthlyRevenue > 0) {
-      // İşçilik hariç sabit giderler (kira, fatura, sigorta...) — işçilik prime cost'ta sayılıyor
-      const opexFixed = totalFixed - laborCost;
-      const opexRatio = opexFixed/monthlyRevenue*100;
-
-      if (opexFixed > 0 && opexRatio > 30) {
-        // en büyük gider kalemi (işçilik hariç)
-        const byCat = {};
-        fixedCosts.forEach(c => {
-          if (c.is_labor) return;   // işçilik prime cost'ta sayıldı, burada hariç
-          byCat[c.category||'Diğer'] = (byCat[c.category||'Diğer']||0) + (c.monthly_equivalent||0);
-        });
-        const top = Object.entries(byCat).sort((a,b)=>b[1]-a[1])[0];
-        alarms.push({
-          type:'yellow', ico:'🏠', head:t('a_fixed_h')(opexRatio.toFixed(0)),
-          desc: top ? t('a_fixed_d')(top[0], eur(top[1])) : t('a_fixed_d0'),
-          pill:t('a_fixed_p')
-        });
-      }
+  // 4) Occupancy / işletme gideri (işçilik hariç — food & prime KPI şeridinde)
+  if (monthlyRevenue > 0) {
+    const opexFixed = totalFixed - laborCost;
+    const opexRatio = opexFixed/monthlyRevenue*100;
+    if (opexFixed > 0 && opexRatio > 30) {
+      const byCat = {};
+      fixedCosts.forEach(c => { if (c.is_labor) return; byCat[c.category||'Diğer'] = (byCat[c.category||'Diğer']||0) + (c.monthly_equivalent||0); });
+      const top = Object.entries(byCat).sort((a,b)=>b[1]-a[1])[0];
+      alarms.push({ type:'yellow', ico:'🏠', head:t('a_fixed_h')(opexRatio.toFixed(0)), desc: top ? t('a_fixed_d')(top[0], eur(top[1])) : t('a_fixed_d0'), pill:t('a_fixed_p') });
     }
   }
 
