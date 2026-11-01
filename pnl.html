@@ -17,6 +17,12 @@ body{font-family:'Segoe UI',system-ui,sans-serif;background:#F1F5F9;display:flex
 .nav .dot{width:6px;height:6px;border-radius:50%;background:currentColor;opacity:0.6;}
 .main{flex:1;padding:1.5rem;max-width:820px;}
 .title{font-size:20px;font-weight:700;color:#0F1F3D;}
+.export-bar{display:flex;align-items:center;gap:8px;justify-content:flex-end;margin:-0.5rem 0 0.75rem;flex-wrap:wrap;}
+.export-lbl{font-size:12px;color:#64748B;}
+.exp-btn{background:#fff;border:1px solid #CBD5E1;color:#0F1F3D;border-radius:8px;padding:7px 14px;font-size:12.5px;font-weight:600;cursor:pointer;}
+.exp-btn:hover:not(:disabled){border-color:#2563EB;color:#2563EB;}
+.exp-btn:disabled{opacity:0.45;cursor:not-allowed;}
+.export-status{font-size:11.5px;color:#64748B;}
 .subtitle{font-size:13px;color:#64748B;margin-bottom:1.25rem;}
 .card{background:#fff;border-radius:14px;padding:1.5rem;box-shadow:0 1px 3px rgba(0,0,0,0.06);margin-bottom:1.25rem;}
 
@@ -111,6 +117,13 @@ a.nav{text-decoration:none;}
     <button id="nextBtn" onclick="changeMonth(1)" disabled title="">›</button>
   </div>
 
+  <div class="export-bar">
+    <span class="export-lbl" data-i18n="export_lbl">Bu tabloyu indir:</span>
+    <button class="exp-btn" id="btnXlsx" onclick="exportExcel()" disabled>📊 <span data-i18n="export_xlsx">Excel</span></button>
+    <button class="exp-btn" id="btnPdf" onclick="exportPdf()" disabled>📄 <span data-i18n="export_pdf">PDF</span></button>
+    <span class="export-status" id="exportStatus"></span>
+  </div>
+
   <div class="card">
     <div id="pnlBody"><div class="empty" data-i18n="calculating">Hesaplanıyor…</div></div>
   </div>
@@ -179,7 +192,11 @@ const I18N = {
     st_ebitda:"FAVÖK (amortisman öncesi kâr)", l_dep:"Amortisman", st_noi:"NET FAALİYET KÂRI (NOI)", l_tax:"Tahmini vergi", net_final:"NET KÂR (vergi sonrası)",
     no_data:"Bu ay için henüz veri yok. Ürün ve gider ekleyince tablo otomatik dolar.",
     no_opex:"(sabit gider girilmemiş)", tax_none:"—",
-    tax_note:"Vergi ayarını Dashboard'dan seçebilirsin."
+    tax_note:"Vergi ayarını Dashboard'dan seçebilirsin.",
+    export_lbl:"Bu tabloyu indir:", export_xlsx:"Excel", export_pdf:"PDF", exporting:"Hazırlanıyor…", export_err:"İndirme hazırlanamadı, internet bağlantını kontrol edip tekrar dene.",
+    x_title:"Gelir Tablosu", x_item:"Kalem", x_amount:"Tutar (€)", x_pct:"Cironun %'si", x_generated:"Oluşturulma", x_business:"İşletme",
+    x_basis:"Tutarlar KDV hariçtir. Gelir ve hammadde, ürünlerin geçen ay satış adetlerine göre; giderler, amortisman ve fire bu aya göre hesaplanmıştır. Vergi tahminidir, kesin hesap için muhasebecine danış.",
+    x_file:"Gelir_Tablosu"
   },
   en: {
     nav_products:"Product profit", nav_expenses:"Fixed expenses", nav_assets:"Depreciation", nav_waste:"Waste", nav_dashboard:"Dashboard", nav_pnl:"Income Statement", nav_simulator:"Simulator", nav_logout:"Log out",
@@ -194,7 +211,11 @@ const I18N = {
     st_ebitda:"EBITDA (profit before depreciation)", l_dep:"Depreciation", st_noi:"NET OPERATING INCOME (NOI)", l_tax:"Estimated tax", net_final:"NET PROFIT (after tax)",
     no_data:"No data for this month yet. Add products and expenses and the statement fills in automatically.",
     no_opex:"(no fixed expenses entered)", tax_none:"—",
-    tax_note:"You can choose the tax setting on the Dashboard."
+    tax_note:"You can choose the tax setting on the Dashboard.",
+    export_lbl:"Download this statement:", export_xlsx:"Excel", export_pdf:"PDF", exporting:"Preparing…", export_err:"Couldn't prepare the download. Check your internet connection and try again.",
+    x_title:"Income Statement", x_item:"Line item", x_amount:"Amount (€)", x_pct:"% of revenue", x_generated:"Generated", x_business:"Business",
+    x_basis:"Amounts exclude VAT. Revenue and ingredients are based on products' last-month units sold; expenses, depreciation and waste are for this month. Tax is an estimate; check exact figures with your accountant.",
+    x_file:"Income_Statement"
   }
 };
 let lang = localStorage.getItem('mp_lang');
@@ -328,6 +349,8 @@ function render() {
   if (!DATA.hasData) { el.innerHTML = '<div class="empty">'+t('no_data')+'</div>'; return; }
 
   const d = DATA;
+  document.getElementById('btnXlsx').disabled = false;
+  document.getElementById('btnPdf').disabled = false;
   const pct = (v) => d.revenue>0 ? `<span class="pct">${lang==='tr'?('%'+(v/d.revenue*100).toFixed(0)):((v/d.revenue*100).toFixed(0)+'%')}</span>` : '';
 
   let opexRows = '';
@@ -377,6 +400,130 @@ ${d.depreciation > 0 ? `
       <div class="net-final ${d.net<0?'loss':''}"><span class="lbl-txt">${t('net_final')}</span><span class="amt">${eur(d.net)}</span></div>
     </div>
   `;
+}
+
+
+// ====== DIŞA AKTARMA (Excel / PDF) ======
+function loadScript(src){ return new Promise((res, rej) => { if (document.querySelector(`script[src="${src}"]`)) return res(); const sc=document.createElement('script'); sc.src=src; sc.onload=res; sc.onerror=rej; document.head.appendChild(sc); }); }
+function exportStatus(msg){ document.getElementById('exportStatus').textContent = msg || ''; }
+function exportMeta(){
+  const biz = (currentUser && currentUser.user_metadata && currentUser.user_metadata.business_name) || '';
+  const month = MONTHS_arr()[now.getMonth()] + ' ' + now.getFullYear();
+  const mk = now.getFullYear() + '-' + String(now.getMonth()+1).padStart(2,'0');
+  const gen = new Date().toLocaleDateString(lang==='tr'?'tr-TR':'en-GB');
+  const safe = (biz || 'MarginPulse').replace(/[^\p{L}\p{N}]+/gu,'_').replace(/^_|_$/g,'');
+  return { biz, month, mk, gen, file: `${safe}_${t('x_file')}_${mk}` };
+}
+// Tablonun satırları: [tip, etiket, tutar]  tip: h=bölüm başlığı, l=kalem, s=ara toplam, k=ana sonuç
+function statementLines(){
+  const d = DATA, L = [];
+  L.push(['h', t('h_revenue')]);
+  L.push(['l', t('l_sales'), d.revenue]);
+  L.push(['h', t('h_cogs')]);
+  L.push(['l', t('l_materials'), -d.materials]);
+  if (d.waste > 0) L.push(['l', t('l_waste') + (d.wasteEst !== null ? ' ' + t('est_tag')(d.wasteEst) : ''), -d.waste]);
+  L.push(['s', t('st_gross'), d.gross]);
+  L.push(['h', t('h_opex')]);
+  d.opexItems.forEach(it => L.push(['l', it.cat + (it.merged ? ` (×${it.merged})` : ''), -it.amt]));
+  L.push(['s', t('st_totalopex'), -d.totalOpex, true]);   // gider ara toplamı: % pozitif gösterilir
+  if (d.depreciation > 0) {
+    L.push(['s', t('st_ebitda'), d.ebitda]);
+    L.push(['l', t('l_dep'), -d.depreciation]);
+  }
+  L.push(['k', t('st_noi'), d.noi]);
+  L.push(['l', t('l_tax') + (d.noi > 0 ? ` (${lang==='tr' ? '%'+(d.taxRate*100).toFixed(1).replace('.', ',') : (d.taxRate*100).toFixed(1)+'%'})` : ''), -d.tax]);
+  L.push(['k', t('net_final'), d.net]);
+  return L;
+}
+
+async function exportExcel(){
+  if (!DATA || !DATA.hasData) return;
+  exportStatus(t('exporting'));
+  try { await loadScript('https://cdn.jsdelivr.net/npm/xlsx-js-style@1.2.0/dist/xlsx.bundle.js'); }
+  catch(e){ exportStatus(t('export_err')); return; }
+  const m = exportMeta(), lines = statementLines();
+  const EUR = '"€"#,##0.00;[Red]-"€"#,##0.00', PCT = '0.0%;[Red]-0.0%';
+  const B = { font:{ bold:true } };
+  const ws = {}; let r = 0;
+  const put = (c, v, st) => { const ref = XLSX.utils.encode_cell({r, c}); ws[ref] = Object.assign({}, v, st ? { s: st } : {}); };
+  put(0, { t:'s', v:'MarginPulse — ' + t('x_title') }, { font:{ bold:true, sz:14, color:{ rgb:'0F1F3D' } } }); r++;
+  put(0, { t:'s', v: (m.biz ? m.biz + ' · ' : '') + m.month }, { font:{ color:{ rgb:'475569' } } }); r++;
+  put(0, { t:'s', v: t('x_generated') + ': ' + m.gen }, { font:{ sz:9, color:{ rgb:'94A3B8' } } }); r += 2;
+  const head = { font:{ bold:true, color:{ rgb:'FFFFFF' } }, fill:{ fgColor:{ rgb:'0F1F3D' } }, alignment:{ horizontal:'left' } };
+  put(0, { t:'s', v:t('x_item') }, head); put(1, { t:'s', v:t('x_amount') }, Object.assign({}, head, { alignment:{ horizontal:'right' } })); put(2, { t:'s', v:t('x_pct') }, Object.assign({}, head, { alignment:{ horizontal:'right' } })); r++;
+  const revRow = r + 2;   // gelir satırı: başlıktan sonraki satır (Excel 1 tabanlı)
+  lines.forEach(([type, label, val, isCost]) => {
+    const absPct = type === 'l' ? val < 0 : !!isCost;   // gider satırları: cironun pozitif %'si
+    if (type === 'h') {
+      put(0, { t:'s', v: label.toLocaleUpperCase(lang==='tr'?'tr-TR':'en-US') }, { font:{ bold:true, sz:9, color:{ rgb:'64748B' } } });
+    } else {
+      const st = type === 'l' ? null : (type === 's'
+        ? { font:{ bold:true }, border:{ top:{ style:'thin', color:{ rgb:'CBD5E1' } } } }
+        : { font:{ bold:true, color:{ rgb:'0F1F3D' } }, fill:{ fgColor:{ rgb:'E0E7FF' } } });
+      put(0, { t:'s', v: (type === 'l' ? '   ' : '') + label }, st);
+      put(1, { t:'n', v: Math.round(val*100)/100, z: EUR }, Object.assign({}, st || {}, { numFmt: EUR }));
+      put(2, { t:'n', v: DATA.revenue ? Math.round((absPct?Math.abs(val):val)/DATA.revenue*10000)/10000 : 0, f: absPct ? `IF($B$${revRow}=0,"",ABS(B${r+1})/$B$${revRow})` : `IF($B$${revRow}=0,"",B${r+1}/$B$${revRow})`, z: PCT }, Object.assign({}, st || {}, { numFmt: PCT }));
+    }
+    r++;
+  });
+  r++;
+  put(0, { t:'s', v: t('x_basis') }, { font:{ italic:true, sz:9, color:{ rgb:'64748B' } }, alignment:{ wrapText:true, vertical:'top' } });
+  ws['!merges'] = [{ s:{ r, c:0 }, e:{ r, c:2 } }];
+  ws['!rows'] = []; ws['!rows'][r] = { hpt: 42 };
+  ws['!ref'] = XLSX.utils.encode_range({ s:{ r:0, c:0 }, e:{ r, c:2 } });
+  ws['!cols'] = [{ wch: 46 }, { wch: 16 }, { wch: 14 }];
+  const wb = XLSX.utils.book_new();
+  XLSX.utils.book_append_sheet(wb, ws, (t('x_title')).slice(0,31));
+  XLSX.writeFile(wb, m.file + '.xlsx');
+  exportStatus('');
+}
+
+async function exportPdf(){
+  if (!DATA || !DATA.hasData) return;
+  exportStatus(t('exporting'));
+  try { await loadScript('https://cdn.jsdelivr.net/npm/html2pdf.js@0.10.1/dist/html2pdf.bundle.min.js'); }
+  catch(e){ exportStatus(t('export_err')); return; }
+  const m = exportMeta(), d = DATA, lines = statementLines();
+  const money = v => (v < 0 ? '−' : '') + '€' + Math.abs(v).toLocaleString(lang==='tr'?'tr-TR':'en-US', { minimumFractionDigits:2, maximumFractionDigits:2 });
+  const share = v => d.revenue > 0 ? (lang==='tr' ? '%' + (v/d.revenue*100).toFixed(1).replace('.', ',') : (v/d.revenue*100).toFixed(1) + '%') : '';
+  let rows = '';
+  lines.forEach(([type, label, val, isCost]) => {
+    if (type === 'h') rows += `<tr><td colspan="3" style="padding:14px 0 4px;font-size:9.5px;font-weight:700;letter-spacing:.06em;color:#64748B;">${label.toLocaleUpperCase(lang==='tr'?'tr-TR':'en-US')}</td></tr>`;
+    else if (type === 'l') rows += `<tr><td style="padding:5px 0 5px 14px;color:#334155;">${label}</td><td style="text-align:right;color:${val<0?'#B91C1C':'#0F172A'};">${money(val)}</td><td style="text-align:right;color:#94A3B8;">${share(Math.abs(val))}</td></tr>`;
+    else if (type === 's') rows += `<tr><td style="padding:7px 0;font-weight:700;border-top:1px solid #CBD5E1;">${label}</td><td style="text-align:right;font-weight:700;border-top:1px solid #CBD5E1;">${money(val)}</td><td style="text-align:right;color:#64748B;border-top:1px solid #CBD5E1;">${share(isCost ? Math.abs(val) : val)}</td></tr>`;
+    else rows += `<tr><td style="padding:9px 8px;font-weight:800;background:#0F1F3D;color:#fff;">${label}</td><td style="text-align:right;font-weight:800;background:#0F1F3D;color:${val<0?'#FCA5A5':'#6EE7B7'};padding-right:8px;">${money(val)}</td><td style="text-align:right;background:#0F1F3D;color:#CBD5E1;padding-right:8px;">${share(val)}</td></tr>`;
+  });
+  const el = document.createElement('div');
+  el.innerHTML = `
+    <div style="font-family:'Segoe UI',system-ui,Arial,sans-serif;color:#0F172A;padding:6px 4px;width:680px;">
+      <div style="display:flex;justify-content:space-between;align-items:flex-end;border-bottom:3px solid #0F1F3D;padding-bottom:10px;margin-bottom:6px;">
+        <div>
+          <div style="font-size:20px;font-weight:800;color:#0F1F3D;">${t('x_title')}</div>
+          <div style="font-size:12.5px;color:#475569;margin-top:2px;">${m.biz ? m.biz + ' · ' : ''}${m.month}</div>
+        </div>
+        <div style="text-align:right;">
+          <div style="font-size:15px;font-weight:700;color:#0F1F3D;">Margin<span style="color:#2563EB;">Pulse</span></div>
+          <div style="font-size:9.5px;color:#94A3B8;">${t('x_generated')}: ${m.gen}</div>
+        </div>
+      </div>
+      <table style="width:100%;border-collapse:collapse;font-size:11.5px;">
+        <thead><tr>
+          <th style="text-align:left;font-size:9.5px;color:#94A3B8;font-weight:600;padding:6px 0;">${t('x_item')}</th>
+          <th style="text-align:right;font-size:9.5px;color:#94A3B8;font-weight:600;width:130px;">${t('x_amount')}</th>
+          <th style="text-align:right;font-size:9.5px;color:#94A3B8;font-weight:600;width:95px;">${t('x_pct')}</th>
+        </tr></thead>
+        <tbody>${rows}</tbody>
+      </table>
+      <div style="font-size:9px;color:#64748B;margin-top:18px;line-height:1.5;border-top:1px solid #E2E8F0;padding-top:8px;">${t('x_basis')}</div>
+    </div>`;
+  try {
+    await html2pdf().set({
+      margin: [14, 14, 14, 14], filename: m.file + '.pdf',
+      image: { type:'jpeg', quality:0.98 }, html2canvas: { scale: 2, backgroundColor:'#ffffff' },
+      jsPDF: { unit:'mm', format:'a4', orientation:'portrait' }
+    }).from(el).save();
+    exportStatus('');
+  } catch(e) { console.error(e); exportStatus(t('export_err')); }
 }
 
 // Ay gezinme — şimdilik devre dışı (aylık satış geçmişi altyapısı gelince açılacak)
