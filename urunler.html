@@ -104,6 +104,7 @@ a.nav{text-decoration:none;}
   <div class="logo">Margin<span>Pulse</span></div>
   <div class="nav active"><span class="dot"></span><span data-i18n="nav_products">Ürün karlılığı</span></div>
   <a class="nav" href="giderler.html" style="text-decoration:none;"><span class="dot"></span><span data-i18n="nav_expenses">Sabit giderler</span></a>
+  <a class="nav" href="amortisman.html"><span class="dot"></span><span data-i18n="nav_assets">Amortisman</span></a>
   <a class="nav" href="dashboard.html" style="text-decoration:none;"><span class="dot"></span><span data-i18n="nav_dashboard">Dashboard</span></a>
   <a class="nav" href="pnl.html"><span class="dot"></span><span data-i18n="nav_pnl">Gelir Tablosu</span></a>
   <a class="nav" href="simulator.html" style="text-decoration:none;"><span class="dot"></span><span data-i18n="nav_simulator">Simülatör</span></a>
@@ -221,7 +222,7 @@ const sb = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 // ====== DİL ======
 const I18N = {
   tr: {
-    nav_products:"Ürün karlılığı", nav_expenses:"Sabit giderler", nav_dashboard:"Dashboard", nav_simulator:"Simülatör", nav_pnl:"Gelir Tablosu", nav_logout:"Çıkış yap",
+    nav_products:"Ürün karlılığı", nav_expenses:"Sabit giderler", nav_assets:"Amortisman", nav_dashboard:"Dashboard", nav_simulator:"Simülatör", nav_pnl:"Gelir Tablosu", nav_logout:"Çıkış yap",
     page_title:"Ürün Karlılığı", btn_new:"+ Yeni ürün", edit_mode:"Düzenleme modu", edit_cancel:"İptal et, yeni ürün başlat",
     welcome_title:"MarginPulse'a hoş geldin! 🎉",
     welcome_body:'Başlamak çok kolay: aşağıya ilk ürününün adını yaz (örn. <em>Adana kebap</em>), reçetesini ekle veya <strong style="color:#fff;">✨ AI ile öner</strong> butonuna bas — malzemeler ve tahmini maliyet otomatik gelsin. Ürünü kaydettiğinde kârını, marjını ve önerileri anında göreceksin.',
@@ -248,7 +249,7 @@ const I18N = {
     editing:" düzenleniyor", del_fail:"Silinemedi: ", ai_ph_empty:"⚠️ Önce ürün adını gir (örn. Adana kebap)"
   },
   en: {
-    nav_products:"Product profit", nav_expenses:"Fixed expenses", nav_dashboard:"Dashboard", nav_simulator:"Simulator", nav_pnl:"Income Statement", nav_logout:"Log out",
+    nav_products:"Product profit", nav_expenses:"Fixed expenses", nav_assets:"Depreciation", nav_dashboard:"Dashboard", nav_simulator:"Simulator", nav_pnl:"Income Statement", nav_logout:"Log out",
     page_title:"Product Profitability", btn_new:"+ New product", edit_mode:"Edit mode", edit_cancel:"Cancel, start a new product",
     welcome_title:"Welcome to MarginPulse! 🎉",
     welcome_body:'Getting started is easy: type your first product name below (e.g. <em>Tomato soup</em>), add its recipe or press <strong style="color:#fff;">✨ Suggest with AI</strong> — ingredients and estimated cost appear automatically. When you save the product, you\'ll instantly see its profit, margin and recommendations.',

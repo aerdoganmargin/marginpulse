@@ -117,6 +117,7 @@ a.nav{text-decoration:none;}
   <div class="logo">Margin<span>Pulse</span></div>
   <a class="nav" href="urunler.html"><span class="dot"></span><span data-i18n="nav_products">Ürün karlılığı</span></a>
   <a class="nav" href="giderler.html"><span class="dot"></span><span data-i18n="nav_expenses">Sabit giderler</span></a>
+  <a class="nav" href="amortisman.html"><span class="dot"></span><span data-i18n="nav_assets">Amortisman</span></a>
   <div class="nav active"><span class="dot"></span><span data-i18n="nav_dashboard">Dashboard</span></div>
   <a class="nav" href="pnl.html"><span class="dot"></span><span data-i18n="nav_pnl">Gelir Tablosu</span></a>
   <a class="nav" href="simulator.html" style="text-decoration:none;"><span class="dot"></span><span data-i18n="nav_simulator">Simülatör</span></a>
@@ -229,10 +230,27 @@ const SUPABASE_URL = 'https://dmklhurvzahoiaklsnwo.supabase.co';
 const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImRta2xodXJ2emFob2lha2xzbndvIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODAxNjQxNjMsImV4cCI6MjA5NTc0MDE2M30.e-jJJ_Ru3pDKBnK_cw63pHhl_TN44LXAIC7P8w9mSns';
 const sb = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
+// ====== AMORTİSMAN (assets tablosu; doğrusal, aylık) ======
+function depForMonth(a, y, m) {
+  const cost = +a.cost || 0, life = +a.useful_life_years || 0, resid = Math.min(+a.residual_value || 0, cost);
+  if (!a.purchase_date || cost <= 0 || life <= 0) return 0;
+  const [py, pm] = String(a.purchase_date).split('-').map(Number);
+  const n = Math.round(life * 12), idx = (y - py) * 12 + (m - (pm - 1));
+  return (idx < 0 || idx >= n) ? 0 : (cost - resid) / n;
+}
+async function loadMonthlyDep(y, m) {
+  try {
+    const { data, error } = await sb.from('assets').select('*');
+    if (error || !data) return 0;     // tablo henüz yoksa amortisman 0 sayılır
+    return data.reduce((s, a) => s + depForMonth(a, y, m), 0);
+  } catch (e) { return 0; }
+}
+
+
 // ====== DİL ======
 const I18N = {
   tr: {
-    nav_products:"Ürün karlılığı", nav_expenses:"Sabit giderler", nav_dashboard:"Dashboard", nav_simulator:"Simülatör", nav_pnl:"Gelir Tablosu", nav_logout:"Çıkış yap",
+    nav_products:"Ürün karlılığı", nav_expenses:"Sabit giderler", nav_assets:"Amortisman", nav_dashboard:"Dashboard", nav_simulator:"Simülatör", nav_pnl:"Gelir Tablosu", nav_logout:"Çıkış yap",
     alarms_title:"🔔 Alarmlar & Öneriler", calculating:"Hesaplanıyor…",
     pnl_title:"💰 Bu Ay — Kâr / Zarar Özeti", pnl_rev:"Tahmini Gelir", pnl_cost:"Toplam Gider", pnl_net:"Net Sonuç (NOI)",
     kpi_title:"📊 Kilit Oranlar", kpi_food:"Hammadde maliyeti", kpi_food_t:"hedef %28-35", kpi_labor:"İşçilik maliyeti", kpi_labor_t:"hedef %25-30",
@@ -259,7 +277,7 @@ const I18N = {
     greet_morning:"Günaydın", greet_day:"İyi günler", greet_evening:"İyi akşamlar",
     subtitle:(m)=>`${m} · otomatik hesaplanır`,
     months:["Ocak","Şubat","Mart","Nisan","Mayıs","Haziran","Temmuz","Ağustos","Eylül","Ekim","Kasım","Aralık"],
-    pnl_note:(v,f)=>`Gelir: geçen ay satış adetleri × fiyat · Gider: değişken (${v}) + sabit (${f})`,
+    pnl_note:(v,f,a)=>`Gelir: geçen ay satış adetleri × fiyat · Gider: değişken (${v}) + sabit (${f})${a?` + amortisman (${a})`:''}`,
     no_products_row:"Henüz ürün yok. Ürün Karlılığı modülünden ekle.",
     a_deficit_h:(n)=>`Bu ay ${n} açık veriyorsun`, a_deficit_d:"Gelirin giderlerini karşılamıyor.",
     a_deficit_p:(n)=>`Açığı kapatmak için gelir ${n} artmalı ya da gider azalmalı`,
@@ -312,7 +330,7 @@ const I18N = {
     a_empty_h:"Dashboard verilerini bekliyor", a_empty_d:"Henüz ürün eklemedin. Ürün Karlılığı modülünden birkaç ürün ekleyince burada kârlılık analizin, alarmların ve akıllı önerilerin otomatik belirir.", a_empty_p:"Ürün Karlılığı sekmesinden başla"
   },
   en: {
-    nav_products:"Product profit", nav_expenses:"Fixed expenses", nav_dashboard:"Dashboard", nav_simulator:"Simulator", nav_pnl:"Income Statement", nav_logout:"Log out",
+    nav_products:"Product profit", nav_expenses:"Fixed expenses", nav_assets:"Depreciation", nav_dashboard:"Dashboard", nav_simulator:"Simulator", nav_pnl:"Income Statement", nav_logout:"Log out",
     alarms_title:"🔔 Alerts & Recommendations", calculating:"Calculating…",
     pnl_title:"💰 This Month — Profit / Loss Summary", pnl_rev:"Estimated Revenue", pnl_cost:"Total Expenses", pnl_net:"Net Result (NOI)",
     kpi_title:"📊 Key Ratios", kpi_food:"Food cost", kpi_food_t:"target 28-35%", kpi_labor:"Labor", kpi_labor_t:"target 25-30%",
@@ -339,7 +357,7 @@ const I18N = {
     greet_morning:"Good morning", greet_day:"Good afternoon", greet_evening:"Good evening",
     subtitle:(m)=>`${m} · calculated automatically`,
     months:["January","February","March","April","May","June","July","August","September","October","November","December"],
-    pnl_note:(v,f)=>`Revenue: last month's sold quantities × price · Expenses: variable (${v}) + fixed (${f})`,
+    pnl_note:(v,f,a)=>`Revenue: last month's sold quantities × price · Expenses: variable (${v}) + fixed (${f})${a?` + depreciation (${a})`:''}`,
     no_products_row:"No products yet. Add them from the Product Profitability module.",
     a_deficit_h:(n)=>`You're running a ${n} deficit this month`, a_deficit_d:"Your revenue doesn't cover your expenses.",
     a_deficit_p:(n)=>`To close the gap, revenue must rise by ${n} or expenses must fall`,
@@ -495,7 +513,8 @@ async function loadDashboard() {
   });
 
   const totalFixed = fixedCosts.reduce((s,c) => s + (c.monthly_equivalent || 0), 0);
-  const totalCost = variableCost + totalFixed;
+  const depreciation = await loadMonthlyDep(now.getFullYear(), now.getMonth());   // amortisman
+  const totalCost = variableCost + totalFixed + depreciation;
   const net = monthlyRevenue - totalCost;
 
   // İşçilik gideri (is_labor işaretli) ve prime cost = hammadde + işçilik
@@ -506,7 +525,7 @@ async function loadDashboard() {
   document.getElementById('revenue').textContent = eur(monthlyRevenue);
   document.getElementById('costs').textContent = eur(totalCost);
   document.getElementById('net').textContent = eur(net);
-  document.getElementById('pnlNote').textContent = t('pnl_note')(eur(variableCost), eur(totalFixed));
+  document.getElementById('pnlNote').textContent = t('pnl_note')(eur(variableCost), eur(totalFixed), depreciation > 0 ? eur(depreciation) : '');
 
   const netBox = document.getElementById('netBox');
   netBox.classList.toggle('loss', net < 0);
