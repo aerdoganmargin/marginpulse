@@ -7,7 +7,9 @@ export default async function handler(req, res) {
     return res.status(405).json({ error: 'Method not allowed' });
   }
 
-  const { productName, category, portionSize, portionUnit, lang } = req.body || {};
+  const { productName, category, portionSize, portionUnit, lang, description } = req.body || {};
+  // Kullanıcının yazdığı içerik (isteğe bağlı) — kısalt ve tırnakları temizle
+  const desc = (typeof description === 'string' ? description : '').replace(/["`]/g, "'").trim().slice(0, 400);
   const isEN = (lang === 'en');
 
   if (!productName || productName.trim().length === 0) {
@@ -43,11 +45,19 @@ export default async function handler(req, res) {
     }
   }
 
+  // İçerik satırı (kullanıcı yazdıysa)
+  let descLine = '';
+  if (desc) {
+    descLine = isEN
+      ? `\nUSER-PROVIDED CONTENTS: The owner describes this dish as: "${desc}".\nThis may be the restaurant's own creation, so do NOT guess from the name alone. Build the recipe around these listed components (you may add small basics like oil, salt, spices if clearly needed) and estimate realistic quantities for one serving.\n`
+      : `\nKULLANICININ YAZDIĞI İÇERİK: Restoran sahibi bu yemeği şöyle tarif ediyor: "${desc}".\nBu restoranın kendi yemeği olabilir, sadece isme bakarak tahmin YAPMA. Reçeteyi bu malzemeler üzerine kur (gerekirse yağ, tuz, baharat gibi küçük temel kalemleri ekleyebilirsin) ve 1 porsiyon için gerçekçi miktarlar tahmin et.\n`;
+  }
+
   // Claude'a göndereceğimiz talimat
   const prompt = isEN ? `You are a restaurant cost expert. Create a recipe for the dish below.
 
 Dish: "${productName}"${category ? ` (Category: ${category})` : ''}
-
+${descLine}
 ${portionLine}
 
 Respond in this JSON format:
@@ -66,7 +76,7 @@ IMPORTANT:
 - 4-8 main ingredients is enough.` : `Sen bir restoran maliyet uzmanısın. Aşağıdaki yemek için reçete oluştur.
 
 Yemek: "${productName}"${category ? ` (Kategori: ${category})` : ''}
-
+${descLine}
 ${portionLine}
 
 Cevabını şu JSON formatında ver:
