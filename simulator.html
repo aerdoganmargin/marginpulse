@@ -112,6 +112,7 @@ a.nav{text-decoration:none;}
   <a class="nav" href="urunler.html"><span class="dot"></span><span data-i18n="nav_products">Ürün karlılığı</span></a>
   <a class="nav" href="giderler.html"><span class="dot"></span><span data-i18n="nav_expenses">Sabit giderler</span></a>
   <a class="nav" href="amortisman.html"><span class="dot"></span><span data-i18n="nav_assets">Amortisman</span></a>
+  <a class="nav" href="fire.html"><span class="dot"></span><span data-i18n="nav_waste">Fire & zayiat</span></a>
   <a class="nav" href="dashboard.html"><span class="dot"></span><span data-i18n="nav_dashboard">Dashboard</span></a>
   <a class="nav" href="pnl.html"><span class="dot"></span><span data-i18n="nav_pnl">Gelir Tablosu</span></a>
   <div class="nav active"><span class="dot"></span><span data-i18n="nav_simulator">Simülatör</span></div>
@@ -222,6 +223,16 @@ const SUPABASE_URL = 'https://dmklhurvzahoiaklsnwo.supabase.co';
 const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImRta2xodXJ2emFob2lha2xzbndvIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODAxNjQxNjMsImV4cCI6MjA5NTc0MDE2M30.e-jJJ_Ru3pDKBnK_cw63pHhl_TN44LXAIC7P8w9mSns';
 const sb = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
+
+// ====== FİRE & ZAYİAT (waste_logs tablosu) ======
+async function loadMonthlyWaste(mk) {
+  try {
+    const { data, error } = await sb.from('waste_logs').select('*').eq('month', mk);
+    if (error || !data) return 0;     // tablo henüz yoksa fire 0 sayılır
+    return data.reduce((s, w) => s + (parseFloat(w.cost) || 0), 0);
+  } catch (e) { return 0; }
+}
+
 // ====== AMORTİSMAN (assets tablosu; doğrusal, aylık) ======
 function depForMonth(a, y, m) {
   const cost = +a.cost || 0, life = +a.useful_life_years || 0, resid = Math.min(+a.residual_value || 0, cost);
@@ -242,7 +253,7 @@ async function loadMonthlyDep(y, m) {
 // ====== DİL ======
 const I18N = {
   tr: {
-    nav_products:"Ürün karlılığı", nav_expenses:"Sabit giderler", nav_assets:"Amortisman", nav_dashboard:"Dashboard", nav_simulator:"Simülatör", nav_pnl:"Gelir Tablosu", nav_logout:"Çıkış yap",
+    nav_products:"Ürün karlılığı", nav_expenses:"Sabit giderler", nav_assets:"Amortisman", nav_waste:"Fire & zayiat", nav_dashboard:"Dashboard", nav_simulator:"Simülatör", nav_pnl:"Gelir Tablosu", nav_logout:"Çıkış yap",
     page_title:"Fiyat Simülatörü", subtitle:'"Ne olur?" senaryolarını test et — fiyat veya maliyet değiştir, sonucu anında gör.',
     no_product:'👋 Simülatörü kullanmak için önce en az bir ürün eklemelisin. <strong>Ürün Karlılığı</strong> sekmesinden bir ürün ekle, sonra buraya dönüp fiyat/maliyet senaryolarını test et.',
     select_product:"Ürün seç", loading:"Yükleniyor…", no_products_opt:"Henüz ürün yok", pick_product:"— Ürün seç —",
@@ -273,7 +284,7 @@ const I18N = {
     saving:"Kaydediliyor...", del_confirm:"Bu senaryoyu silmek istediğine emin misin?", need_change:"Önce bir değişiklik yap (kaydırıcıyı oynat).", cost_detail:(o,n)=>` (maliyet €${o}→€${n})`
   },
   en: {
-    nav_products:"Product profit", nav_expenses:"Fixed expenses", nav_assets:"Depreciation", nav_dashboard:"Dashboard", nav_simulator:"Simulator", nav_pnl:"Income Statement", nav_logout:"Log out",
+    nav_products:"Product profit", nav_expenses:"Fixed expenses", nav_assets:"Depreciation", nav_waste:"Waste", nav_dashboard:"Dashboard", nav_simulator:"Simulator", nav_pnl:"Income Statement", nav_logout:"Log out",
     page_title:"Price Simulator", subtitle:'Test "what if?" scenarios — change price or cost, see the result instantly.',
     no_product:'👋 To use the simulator, add at least one product first. Add one from the <strong>Product Profitability</strong> tab, then come back here to test price/cost scenarios.',
     select_product:"Select product", loading:"Loading…", no_products_opt:"No products yet", pick_product:"— Select product —",
@@ -629,7 +640,8 @@ async function updateMiniDash(scenarios) {
 
   const prods = products || [];
   const totalFixed = (costs||[]).reduce((s,c)=>s+(parseFloat(c.monthly_equivalent)||0),0)
-                   + await loadMonthlyDep(now.getFullYear(), now.getMonth());   // sabit gider + amortisman
+                   + await loadMonthlyDep(now.getFullYear(), now.getMonth())   // + amortisman
+                   + await loadMonthlyWaste(mk);                                // + fire & zayiat
 
   // Her ürün için: en son eklenen senaryosunu bul (varsa)
   const latestScenario = {};

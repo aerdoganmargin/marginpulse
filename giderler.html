@@ -78,6 +78,7 @@ a.nav{text-decoration:none;}
   <a class="nav" href="urunler.html"><span class="dot"></span><span data-i18n="nav_products">Ürün karlılığı</span></a>
   <div class="nav active"><span class="dot"></span><span data-i18n="nav_expenses">Sabit giderler</span></div>
   <a class="nav" href="amortisman.html"><span class="dot"></span><span data-i18n="nav_assets">Amortisman</span></a>
+  <a class="nav" href="fire.html"><span class="dot"></span><span data-i18n="nav_waste">Fire & zayiat</span></a>
   <a class="nav" href="dashboard.html" style="text-decoration:none;"><span class="dot"></span><span data-i18n="nav_dashboard">Dashboard</span></a>
   <a class="nav" href="pnl.html"><span class="dot"></span><span data-i18n="nav_pnl">Gelir Tablosu</span></a>
   <a class="nav" href="simulator.html" style="text-decoration:none;"><span class="dot"></span><span data-i18n="nav_simulator">Simülatör</span></a>
@@ -151,7 +152,7 @@ const sb = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 // ====== DİL ======
 const I18N = {
   tr: {
-    nav_products:"Ürün karlılığı", nav_expenses:"Sabit giderler", nav_assets:"Amortisman", nav_dashboard:"Dashboard", nav_simulator:"Simülatör", nav_pnl:"Gelir Tablosu", nav_logout:"Çıkış yap",
+    nav_products:"Ürün karlılığı", nav_expenses:"Sabit giderler", nav_assets:"Amortisman", nav_waste:"Fire & zayiat", nav_dashboard:"Dashboard", nav_simulator:"Simülatör", nav_pnl:"Gelir Tablosu", nav_logout:"Çıkış yap",
     page_title:"Sabit Giderler", copy_text:"Bu ay boş. Önceki aydan giderleri kopyalayabilirsin.", copy_btn:"Önceki aydan kopyala",
     expense_items:"Gider Kalemleri", auto_calc:"Aylık karşılık otomatik hesaplanır",
     th_category:"Kategori", th_amount:"Tutar (€)", th_period:"Periyot", th_monthly:"Aylık karşılık",
@@ -173,7 +174,7 @@ const I18N = {
     months:["Ocak","Şubat","Mart","Nisan","Mayıs","Haziran","Temmuz","Ağustos","Eylül","Ekim","Kasım","Aralık"]
   },
   en: {
-    nav_products:"Product profit", nav_expenses:"Fixed expenses", nav_assets:"Depreciation", nav_dashboard:"Dashboard", nav_simulator:"Simulator", nav_pnl:"Income Statement", nav_logout:"Log out",
+    nav_products:"Product profit", nav_expenses:"Fixed expenses", nav_assets:"Depreciation", nav_waste:"Waste", nav_dashboard:"Dashboard", nav_simulator:"Simulator", nav_pnl:"Income Statement", nav_logout:"Log out",
     page_title:"Fixed Expenses", copy_text:"This month is empty. You can copy expenses from the previous month.", copy_btn:"Copy from previous month",
     expense_items:"Expense Items", auto_calc:"Monthly equivalent calculated automatically",
     th_category:"Category", th_amount:"Amount (€)", th_period:"Period", th_monthly:"Monthly equivalent",

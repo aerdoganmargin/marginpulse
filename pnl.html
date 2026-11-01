@@ -90,6 +90,7 @@ a.nav{text-decoration:none;}
   <a class="nav" href="urunler.html"><span class="dot"></span><span data-i18n="nav_products">Ürün karlılığı</span></a>
   <a class="nav" href="giderler.html"><span class="dot"></span><span data-i18n="nav_expenses">Sabit giderler</span></a>
   <a class="nav" href="amortisman.html"><span class="dot"></span><span data-i18n="nav_assets">Amortisman</span></a>
+  <a class="nav" href="fire.html"><span class="dot"></span><span data-i18n="nav_waste">Fire & zayiat</span></a>
   <a class="nav" href="dashboard.html"><span class="dot"></span><span data-i18n="nav_dashboard">Dashboard</span></a>
   <div class="nav active"><span class="dot"></span><span data-i18n="nav_pnl">Gelir Tablosu</span></div>
   <a class="nav" href="simulator.html"><span class="dot"></span><span data-i18n="nav_simulator">Simülatör</span></a>
@@ -122,6 +123,16 @@ const SUPABASE_URL = 'https://dmklhurvzahoiaklsnwo.supabase.co';
 const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImRta2xodXJ2emFob2lha2xzbndvIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODAxNjQxNjMsImV4cCI6MjA5NTc0MDE2M30.e-jJJ_Ru3pDKBnK_cw63pHhl_TN44LXAIC7P8w9mSns';
 const sb = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
+
+// ====== FİRE & ZAYİAT (waste_logs tablosu) ======
+async function loadMonthlyWaste(mk) {
+  try {
+    const { data, error } = await sb.from('waste_logs').select('*').eq('month', mk);
+    if (error || !data) return 0;     // tablo henüz yoksa fire 0 sayılır
+    return data.reduce((s, w) => s + (parseFloat(w.cost) || 0), 0);
+  } catch (e) { return 0; }
+}
+
 // ====== AMORTİSMAN (assets tablosu; doğrusal, aylık) ======
 function depForMonth(a, y, m) {
   const cost = +a.cost || 0, life = +a.useful_life_years || 0, resid = Math.min(+a.residual_value || 0, cost);
@@ -142,14 +153,14 @@ async function loadMonthlyDep(y, m) {
 // ====== DİL ======
 const I18N = {
   tr: {
-    nav_products:"Ürün karlılığı", nav_expenses:"Sabit giderler", nav_assets:"Amortisman", nav_dashboard:"Dashboard", nav_pnl:"Gelir Tablosu", nav_simulator:"Simülatör", nav_logout:"Çıkış yap",
+    nav_products:"Ürün karlılığı", nav_expenses:"Sabit giderler", nav_assets:"Amortisman", nav_waste:"Fire & zayiat", nav_dashboard:"Dashboard", nav_pnl:"Gelir Tablosu", nav_simulator:"Simülatör", nav_logout:"Çıkış yap",
     page_title:"Gelir Tablosu (P&L)", subtitle:"Klasik gelir tablosu formatında bu ayki kâr/zarar dökümün.",
     calculating:"Hesaplanıyor…",
     foot_note:"Bu tablo, ürünlerinin geçen ay gerçek satış adetleri ve bu ayki sabit giderleri ile amortismana göre hesaplanır. Vergi tahmini net faaliyet kârı üzerindendir.",
     greet_morning:"Günaydın", greet_day:"İyi günler", greet_evening:"İyi akşamlar",
     months:["Ocak","Şubat","Mart","Nisan","Mayıs","Haziran","Temmuz","Ağustos","Eylül","Ekim","Kasım","Aralık"],
     h_revenue:"Gelir", l_sales:"Ürün satışları", h_cogs:"Satılan malın maliyeti",
-    l_materials:"Hammadde maliyeti", st_gross:"BRÜT KÂR",
+    l_materials:"Hammadde maliyeti", l_waste:"Fire & zayiat", st_gross:"BRÜT KÂR",
     h_opex:"Faaliyet giderleri (sabit)", st_totalopex:"Toplam faaliyet gideri",
     st_ebitda:"FAVÖK (amortisman öncesi kâr)", l_dep:"Amortisman", st_noi:"NET FAALİYET KÂRI (NOI)", l_tax:"Tahmini vergi", net_final:"NET KÂR (vergi sonrası)",
     no_data:"Bu ay için henüz veri yok. Ürün ve gider ekleyince tablo otomatik dolar.",
@@ -157,14 +168,14 @@ const I18N = {
     tax_note:"Vergi ayarını Dashboard'dan seçebilirsin."
   },
   en: {
-    nav_products:"Product profit", nav_expenses:"Fixed expenses", nav_assets:"Depreciation", nav_dashboard:"Dashboard", nav_pnl:"Income Statement", nav_simulator:"Simulator", nav_logout:"Log out",
+    nav_products:"Product profit", nav_expenses:"Fixed expenses", nav_assets:"Depreciation", nav_waste:"Waste", nav_dashboard:"Dashboard", nav_pnl:"Income Statement", nav_simulator:"Simulator", nav_logout:"Log out",
     page_title:"Income Statement (P&L)", subtitle:"Your profit/loss for this month in classic income-statement format.",
     calculating:"Calculating…",
     foot_note:"This statement is based on your products' last-month actual sales quantities and this month's fixed expenses and depreciation. The tax estimate is on net operating income.",
     greet_morning:"Good morning", greet_day:"Good afternoon", greet_evening:"Good evening",
     months:["January","February","March","April","May","June","July","August","September","October","November","December"],
     h_revenue:"Revenue", l_sales:"Product sales", h_cogs:"Cost of goods sold",
-    l_materials:"Ingredient cost", st_gross:"GROSS PROFIT",
+    l_materials:"Ingredient cost", l_waste:"Waste", st_gross:"GROSS PROFIT",
     h_opex:"Operating expenses (fixed)", st_totalopex:"Total operating expenses",
     st_ebitda:"EBITDA (profit before depreciation)", l_dep:"Depreciation", st_noi:"NET OPERATING INCOME (NOI)", l_tax:"Estimated tax", net_final:"NET PROFIT (after tax)",
     no_data:"No data for this month yet. Add products and expenses and the statement fills in automatically.",
@@ -273,7 +284,8 @@ async function loadData() {
   }).sort((a,b)=>b.amt-a.amt);
   const totalOpex = opexItems.reduce((s,x)=>s+x.amt, 0);
 
-  const gross = revenue - materials;
+  const waste = await loadMonthlyWaste(monthKey);                    // fire & zayiat
+  const gross = revenue - materials - waste;
   const ebitda = gross - totalOpex;                                  // FAVÖK
   const depreciation = await loadMonthlyDep(now.getFullYear(), now.getMonth());
   const noi = ebitda - depreciation;                                  // amortisman sonrası faaliyet kârı
@@ -287,7 +299,7 @@ async function loadData() {
   }
   const net = noi - tax;
 
-  DATA = { revenue, materials, opexItems, totalOpex, gross, ebitda, depreciation, noi, tax, net, taxRate, hasData: (prods.length>0 || fixedCosts.length>0) };
+  DATA = { revenue, materials, waste, opexItems, totalOpex, gross, ebitda, depreciation, noi, tax, net, taxRate, hasData: (prods.length>0 || fixedCosts.length>0) };
   render();
 }
 
@@ -326,6 +338,7 @@ function render() {
       <div class="sec exp">
         <div class="sec-label">${t('h_cogs')}</div>
         <div class="line"><span class="lbl-txt">${t('l_materials')}</span><span class="amt neg">−${eur(d.materials)}</span></div>
+        ${d.waste > 0 ? `<div class="line"><span class="lbl-txt">${t('l_waste')} ${pct(d.waste)}</span><span class="amt neg">−${eur(d.waste)}</span></div>` : ''}
       </div>
 
       <div class="subtotal"><span class="lbl-txt">${t('st_gross')} ${pct(d.gross)}</span><span class="amt">${eur(d.gross)}</span></div>
