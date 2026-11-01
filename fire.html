@@ -95,6 +95,19 @@ td input[type=month]{min-width:130px;}
 .brow .bv{width:70px;text-align:right;font-weight:600;color:#0F1F3D;}
 .tip{background:#EFF6FF;border:1px solid #BFDBFE;border-radius:10px;padding:12px 16px;font-size:12px;color:#1E3A8A;line-height:1.55;margin-bottom:1rem;display:none;}
 .tip strong{color:#1E40AF;}
+.mode-tabs{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:12px;}
+.mtab{background:#F1F5F9;border:1px solid #E2E8F0;color:#475569;border-radius:8px;padding:9px 14px;font-size:12.5px;font-weight:600;cursor:pointer;}
+.mtab.on{background:#0F1F3D;border-color:#0F1F3D;color:#fff;}
+.rate-row{display:flex;gap:8px;align-items:center;flex-wrap:wrap;}
+.rbtn{background:#fff;border:1px solid #E2E8F0;border-radius:10px;padding:8px 14px;cursor:pointer;display:flex;flex-direction:column;align-items:center;min-width:76px;}
+.rbtn b{font-size:15px;color:#0F1F3D;} .rbtn span{font-size:10.5px;color:#94A3B8;}
+.rbtn.on{border-color:#2563EB;background:#EFF6FF;} .rbtn.on b{color:#2563EB;}
+.rcustom{font-size:12px;color:#64748B;display:flex;align-items:center;gap:6px;margin-left:6px;}
+.rcustom input{width:70px;padding:7px 8px;border:1px solid #E2E8F0;border-radius:8px;font-size:13px;}
+.est-line{font-size:12.5px;color:#334155;margin-top:12px;background:#F8FAFC;border-radius:8px;padding:10px 14px;}
+.est-line strong{color:#0F1F3D;}
+.mode-note{font-size:11.5px;color:#64748B;margin-top:10px;}
+.mode-note.hl{color:#1d4ed8;}
 .src{font-size:10.5px;color:#059669;margin-top:3px;}
 @media (max-width:760px){ .two-col{grid-template-columns:1fr;} }
 </style>
@@ -126,9 +139,28 @@ td input[type=month]{min-width:130px;}
     <button onclick="changeMonth(1)">›</button>
   </div>
 
+  <div class="card" id="modeCard">
+    <div class="card-title" data-i18n="mode_title">Fire nasıl hesaplansın?</div>
+    <div class="mode-tabs">
+      <button class="mtab" data-mode="estimate" onclick="setMode('estimate')" data-i18n="mode_est">⚡ Tahmini oran (hızlı)</button>
+      <button class="mtab" data-mode="detailed" onclick="setMode('detailed')" data-i18n="mode_det">📋 Sadece detaylı kayıt</button>
+    </div>
+    <div id="estBox">
+      <div class="rate-row">
+        <button class="rbtn" data-rate="4" onclick="setRate(4)"><b>%4</b><span data-i18n="r_good">iyi</span></button>
+        <button class="rbtn" data-rate="6" onclick="setRate(6)"><b>%6</b><span data-i18n="r_avg">ortalama</span></button>
+        <button class="rbtn" data-rate="10" onclick="setRate(10)"><b>%10</b><span data-i18n="r_high">yüksek</span></button>
+        <label class="rcustom"><span data-i18n="r_custom">Kendi oranın</span> <input type="number" id="rateInput" min="0" max="50" step="0.5" oninput="onRateInput()" /> %</label>
+        <span class="status" id="rateStatus"></span>
+      </div>
+      <div class="est-line" id="estLine"></div>
+    </div>
+    <div class="mode-note" id="modeNote"></div>
+  </div>
+
   <div class="sum-grid">
-    <div class="sum-box dark"><div class="lbl" data-i18n="sum_total">Bu ayki fire maliyeti</div><div class="val" id="sumTotal">€0</div><div class="sub" data-i18n="sum_total_sub">Hammadde maliyetine eklenir (Dashboard + Gelir Tablosu)</div></div>
-    <div class="sum-box"><div class="lbl" data-i18n="sum_ratio">Fire oranı</div><div class="val" id="sumRatio">—</div><div class="sub" data-i18n="sum_ratio_sub">Kullanılan toplam hammaddenin yüzdesi · hedef ≤%5</div></div>
+    <div class="sum-box dark"><div class="lbl" data-i18n="sum_total">Bu ayki fire maliyeti</div><div class="val" id="sumTotal">€0</div><div class="sub" id="sumTotalSub"></div></div>
+    <div class="sum-box"><div class="lbl" data-i18n="sum_ratio">Fire oranı</div><div class="val" id="sumRatio">—</div><div class="sub" id="sumRatioSub"></div></div>
     <div class="sum-box"><div class="lbl" data-i18n="sum_year">Bu gidişle yıllık</div><div class="val" id="sumYear">€0</div><div class="sub" data-i18n="sum_year_sub">Aylık fire × 12</div></div>
   </div>
 
@@ -181,6 +213,15 @@ const I18N = {
     page_sub:"Bozulan, atılan, geri dönen her şey. Kaydettikçe gerçek hammadde maliyetin ve paranın nereye gittiği ortaya çıkar.",
     sum_total:"Bu ayki fire maliyeti", sum_total_sub:"Hammadde maliyetine eklenir (Dashboard + Gelir Tablosu)",
     sum_ratio:"Fire oranı", sum_ratio_sub:"Kullanılan toplam hammaddenin yüzdesi · hedef ≤%5",
+    sub_logged:"Kayıtlardan · hammadde maliyetine eklenir", sub_est:"Tahmini · hammadde maliyetine eklenir", sub_none:"Bu ay kayıt yok",
+    sub_ratio_est:"Seçtiğin tahmini oran",
+    mode_title:"Fire nasıl hesaplansın?", mode_est:"⚡ Tahmini oran (hızlı)", mode_det:"📋 Sadece detaylı kayıt",
+    r_good:"iyi", r_avg:"ortalama", r_high:"yüksek", r_custom:"Kendi oranın", rate_saved:"✓ kaydedildi",
+    est_line:(w,u,r)=>`Bu ay tahmini fire: <strong>${w}</strong> · satılan ürünlerin hammaddesi (${u}) üzerinden %${r}. Dashboard, Gelir Tablosu ve Simülatör'e otomatik eklenir.`,
+    est_line_nodata:"Ürünlerine geçen ay satış adedi girince tahmini fire burada hesaplanır.",
+    note_est:"Bir ay için aşağıya detaylı kayıt girersen o ay tahmini oran yerine gerçek kayıtlar kullanılır.",
+    note_est_override:"Bu ay detaylı kayıt girdiğin için tahmini oran yerine kayıtların kullanılıyor.",
+    note_det:"Sadece girdiğin kayıtlar sayılır. Kayıt girmediğin aylarda fire 0 kabul edilir, bu da kârı olduğundan yüksek gösterebilir.",
     sum_year:"Bu gidişle yıllık", sum_year_sub:"Aylık fire × 12",
     log_title:"Fire kayıtları", log_hint:"Menüdeki bir ürünü ya da reçetelerindeki bir malzemeyi yazınca fiyatı otomatik gelir",
     th_date:"Tarih", th_item:"Ne atıldı?", th_qty:"Miktar", th_unit:"Birim fiyat (€)", th_uom:"Birim", u_portion:"porsiyon", u_kg:"kg", u_l:"litre", u_pc:"adet", th_total:"Toplam", th_reason:"Sebep",
@@ -207,6 +248,15 @@ const I18N = {
     page_sub:"Everything that spoils, gets thrown away or comes back. The more you log, the clearer your true food cost and where the money goes.",
     sum_total:"This month's waste cost", sum_total_sub:"Added to ingredient cost (Dashboard + Income Statement)",
     sum_ratio:"Waste rate", sum_ratio_sub:"Share of total ingredients used · target ≤5%",
+    sub_logged:"From your log · added to ingredient cost", sub_est:"Estimated · added to ingredient cost", sub_none:"No entries this month",
+    sub_ratio_est:"Your chosen estimated rate",
+    mode_title:"How should waste be calculated?", mode_est:"⚡ Estimated rate (quick)", mode_det:"📋 Detailed log only",
+    r_good:"good", r_avg:"average", r_high:"high", r_custom:"Your own rate", rate_saved:"✓ saved",
+    est_line:(w,u,r)=>`Estimated waste this month: <strong>${w}</strong> · ${r}% based on the ingredient cost of products sold (${u}). Added automatically to the Dashboard, Income Statement and Simulator.`,
+    est_line_nodata:"Enter last month's units sold for your products and the estimated waste will be calculated here.",
+    note_est:"If you add a detailed log below for a month, that month uses your real entries instead of the estimated rate.",
+    note_est_override:"You've logged entries this month, so they are used instead of the estimated rate.",
+    note_det:"Only your logged entries count. Months without entries count as zero waste, which can overstate profit.",
     sum_year:"Yearly at this pace", sum_year_sub:"Monthly waste × 12",
     log_title:"Waste log", log_hint:"Type a menu item or an ingredient from your recipes and its price fills in automatically",
     th_date:"Date", th_item:"What was wasted?", th_qty:"Qty", th_unit:"Unit price (€)", th_uom:"Unit", u_portion:"serving", u_kg:"kg", u_l:"litre", u_pc:"piece", th_total:"Total", th_reason:"Reason",
@@ -241,18 +291,23 @@ function applyLang() {
   document.querySelectorAll('#wasteRows .wreason').forEach(sel=>{ sel.querySelectorAll('option').forEach(o=>o.textContent=t('r_'+o.value)); });
   document.querySelectorAll('#wasteRows .wuom').forEach(sel=>{ sel.querySelectorAll('option').forEach(o=>o.textContent=t('u_'+o.value)); });
   if (typeof fillDatalist==='function' && PRODUCTS.length) fillDatalist();
-  showGreeting(); recalc();
+  showGreeting(); renderMode();
 }
 function toggleLang(){ lang=(lang==='tr')?'en':'tr'; localStorage.setItem('mp_lang',lang); applyLang(); }
 
 let currentUser = null;
 let PRODUCTS = [];            // {id,name,ingredient_cost,last_month_qty}
 let usedIngredients = 0;      // satılan ürünlerin hammaddesi (fire oranı paydası)
+let wasteMode = 'estimate', wasteRate = 5;   // kullanıcı ayarı (user_metadata), varsayılan %5 tahmini
 let INGREDIENTS = {};         // reçetelerden: ad -> {name, price (€/kg|€/l|€/adet), uom, count}
 (async () => {
   const { data } = await sb.auth.getSession();
   if (!data.session) { window.location.href = "login.html"; return; }
   currentUser = data.session.user;
+  const md = currentUser.user_metadata || {};
+  if (md.waste_mode) wasteMode = md.waste_mode;
+  if (md.waste_rate !== undefined && md.waste_rate !== null) wasteRate = +md.waste_rate || 0;
+  renderMode();
   showGreeting();
   const { data: prods } = await sb.from('products').select('*');
   PRODUCTS = prods || [];
@@ -274,6 +329,7 @@ function eur(n){ return '€' + Math.round(n).toLocaleString(lang==='tr'?'tr-TR'
 function eur2(n){ return '€' + n.toLocaleString(lang==='tr'?'tr-TR':'en-US',{minimumFractionDigits:2,maximumFractionDigits:2}); }
 function esc(s){ return String(s).replace(/&/g,'&amp;').replace(/"/g,'&quot;').replace(/</g,'&lt;'); }
 function dec1(n){ return n.toLocaleString(lang==='tr'?'tr-TR':'en-US',{minimumFractionDigits:1,maximumFractionDigits:1}); }
+function rstr(n){ return (+n).toLocaleString(lang==='tr'?'tr-TR':'en-US',{maximumFractionDigits:1}); }
 function pct(v){ return lang==='tr' ? '%'+v : v+'%'; }
 
 // ====== MALZEME KATALOĞU (ürün reçetelerinden) ======
@@ -307,6 +363,35 @@ function fillDatalist(){
   document.getElementById('prodList').innerHTML = opts.join('');
 }
 function findIngredient(name){ return INGREDIENTS[norm(name)]; }
+
+// ====== HESAPLAMA YÖNTEMİ ======
+function renderMode(){
+  document.querySelectorAll('.mtab').forEach(b=>b.classList.toggle('on', b.dataset.mode===wasteMode));
+  document.getElementById('estBox').style.display = wasteMode==='estimate' ? 'block' : 'none';
+  document.querySelectorAll('.rbtn').forEach(b=>b.classList.toggle('on', +b.dataset.rate===wasteRate));
+  const ri = document.getElementById('rateInput'); if (document.activeElement !== ri) ri.value = wasteRate;
+  document.querySelectorAll('.rbtn b').forEach(b=>{ const r=b.parentElement.dataset.rate; b.textContent = pct(r); });
+  recalc();
+}
+let saveTimer = null;
+function persistSettings(){
+  clearTimeout(saveTimer);
+  saveTimer = setTimeout(async () => {
+    const { data, error } = await sb.auth.updateUser({ data: { waste_mode: wasteMode, waste_rate: wasteRate } });
+    if (!error && data && data.user) currentUser = data.user;
+    const st = document.getElementById('rateStatus');
+    st.textContent = error ? ('❌ ' + error.message) : t('rate_saved'); st.style.color = error ? '#DC2626' : '#059669';
+    if (!error) setTimeout(()=>{ st.textContent=''; }, 2000);
+  }, 500);
+}
+function setMode(m){ wasteMode = m; renderMode(); persistSettings(); }
+function setRate(r){ wasteRate = r; renderMode(); persistSettings(); }
+function onRateInput(){
+  const v = parseFloat(document.getElementById('rateInput').value);
+  if (isNaN(v) || v < 0 || v > 50) return;
+  wasteRate = v; renderMode(); persistSettings();
+}
+function estimatedWaste(){ const r = wasteRate/100; return (wasteMode==='estimate' && usedIngredients>0 && r>0 && r<1) ? usedIngredients*r/(1-r) : 0; }
 
 // ====== AY ======
 let currentDate = new Date(); currentDate.setDate(1);
@@ -372,15 +457,31 @@ function recalc() {
       const k = d.item_name || '—'; byI[k] = (byI[k]||0) + d.cost;
     }
   });
-  document.getElementById('sumTotal').textContent = eur(total);
-  document.getElementById('sumYear').textContent = eur(total*12);
+  const logged = total > 0;
+  const est = estimatedWaste();
+  const shown = logged ? total : est;
+  document.getElementById('sumTotal').textContent = eur(shown);
+  document.getElementById('sumYear').textContent = eur(shown*12);
+  document.getElementById('sumTotalSub').textContent = logged ? t('sub_logged') : (est > 0 ? t('sub_est') : t('sub_none'));
+  document.getElementById('sumRatioSub').textContent = (!logged && est > 0) ? t('sub_ratio_est') : t('sum_ratio_sub');
   const rEl = document.getElementById('sumRatio');
   let ratio = null;
-  if (usedIngredients + total > 0 && total > 0) {
+  if (logged && usedIngredients + total > 0) {
     ratio = total / (usedIngredients + total) * 100;
     rEl.textContent = pct(dec1(ratio));
     rEl.className = 'val ' + (ratio <= 5 ? 'ok' : (ratio <= 10 ? 'warn' : 'bad'));
+  } else if (est > 0) {
+    rEl.textContent = pct(rstr(wasteRate)); rEl.className = 'val';
   } else { rEl.textContent = '—'; rEl.className = 'val'; }
+  // tahmini satır + not
+  const el = document.getElementById('estLine');
+  if (el) el.innerHTML = usedIngredients > 0 ? t('est_line')(eur(est), eur(usedIngredients), rstr(wasteRate)) : t('est_line_nodata');
+  const note = document.getElementById('modeNote');
+  if (note) {
+    if (wasteMode === 'detailed') { note.textContent = t('note_det'); note.className = 'mode-note'; }
+    else if (logged) { note.textContent = t('note_est_override'); note.className = 'mode-note hl'; }
+    else { note.textContent = t('note_est'); note.className = 'mode-note'; }
+  }
   renderBars('byReason', Object.entries(byR).map(([k,v])=>[t('r_'+k),v]), total);
   renderBars('byItem', Object.entries(byI).sort((a,b)=>b[1]-a[1]).slice(0,5), total);
   // öneri: en büyük sebep

@@ -232,13 +232,27 @@ const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZ
 const sb = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
 
-// ====== FİRE & ZAYİAT (waste_logs tablosu) ======
-async function loadMonthlyWaste(mk) {
+// ====== FİRE & ZAYİAT ======
+// O ay detaylı kayıt varsa gerçek toplam; yoksa kullanıcının tahmini oranı (varsayılan %5)
+const DEFAULT_WASTE_RATE = 5;
+async function getWasteInfo(mk) {
+  let logged = null, rate = DEFAULT_WASTE_RATE, mode = 'estimate';
   try {
+    const { data: s } = await sb.auth.getSession();
+    const md = (s && s.session && s.session.user && s.session.user.user_metadata) || {};
+    if (md.waste_mode) mode = md.waste_mode;
+    if (md.waste_rate !== undefined && md.waste_rate !== null) rate = +md.waste_rate || 0;
     const { data, error } = await sb.from('waste_logs').select('*').eq('month', mk);
-    if (error || !data) return 0;     // tablo henüz yoksa fire 0 sayılır
-    return data.reduce((s, w) => s + (parseFloat(w.cost) || 0), 0);
-  } catch (e) { return 0; }
+    if (!error && data && data.length) logged = data.reduce((t, w) => t + (parseFloat(w.cost) || 0), 0);
+  } catch (e) {}
+  if (mode !== 'estimate') rate = 0;
+  return { logged, rate };
+}
+// used = satılan ürünlerin hammaddesi. Oran "kullanılan toplam hammaddenin %'si" olduğu için used × r/(1−r)
+function wasteFor(info, used) {
+  if (info.logged !== null) return info.logged;
+  const r = Math.min(Math.max(info.rate, 0), 50) / 100;
+  return used > 0 && r > 0 ? used * r / (1 - r) : 0;
 }
 
 // ====== AMORTİSMAN (assets tablosu; doğrusal, aylık) ======
@@ -298,7 +312,7 @@ const I18N = {
     a_lowmargin_h:(name,m)=>`"${name}" marjı düşük (%${m})`,
     a_lowmargin_d:"Düşük kârlılık — fiyat veya maliyet gözden geçirilebilir.",
     a_lowmargin_p:(p)=>`%30 marj için fiyat: €${p}`,
-    a_waste_h:(p)=>`Fire oranı %${p}, sektör hedefi %5'in üstünde`, a_waste_d:(m,y)=>`Bu ay ${m} değerinde ürün atıldı. Bu gidişle yılda ${y} demek.`, a_waste_p:"Fire & zayiat sayfasında en büyük sebebe odaklan",
+    est_tag:"tahmini", a_waste_h:(p)=>`Fire oranı %${p}, sektör hedefi %5'in üstünde`, a_waste_d:(m,y)=>`Bu ay ${m} değerinde ürün atıldı. Bu gidişle yılda ${y} demek.`, a_waste_p:"Fire & zayiat sayfasında en büyük sebebe odaklan",
     a_nofixed_h:"Bu ay sabit gider girilmemiş", a_nofixed_d:"Doğru kâr/zarar için kira, elektrik vb. giderleri ekle.", a_nofixed_p:"Sabit Giderler modülüne git",
     a_star_h:(name)=>`"${name}" en çok kâr getiren ürünün`,
     a_star_d:(q,tp,m)=>`Bu ay ${q} adet sattın, toplam ${tp} kâr bıraktı (marj %${m}).`,
@@ -379,7 +393,7 @@ const I18N = {
     a_lowmargin_h:(name,m)=>`"${name}" has a low margin (${m}%)`,
     a_lowmargin_d:"Low profitability — review the price or cost.",
     a_lowmargin_p:(p)=>`Price for a 30% margin: €${p}`,
-    a_waste_h:(p)=>`Waste rate ${p}%, above the 5% industry target`, a_waste_d:(m,y)=>`${m} worth of food was thrown away this month. That's ${y} a year at this pace.`, a_waste_p:"Focus on the biggest reason on the Waste page",
+    est_tag:"estimated", a_waste_h:(p)=>`Waste rate ${p}%, above the 5% industry target`, a_waste_d:(m,y)=>`${m} worth of food was thrown away this month. That's ${y} a year at this pace.`, a_waste_p:"Focus on the biggest reason on the Waste page",
     a_nofixed_h:"No fixed expenses entered this month", a_nofixed_d:"For accurate profit/loss, add rent, electricity, etc.", a_nofixed_p:"Go to the Fixed Expenses module",
     a_star_h:(name)=>`"${name}" is your most profitable product`,
     a_star_d:(q,tp,m)=>`You sold ${q} this month, leaving ${tp} total profit (${m}% margin).`,
@@ -527,7 +541,8 @@ async function loadDashboard() {
 
   const totalFixed = fixedCosts.reduce((s,c) => s + (c.monthly_equivalent || 0), 0);
   const depreciation = await loadMonthlyDep(now.getFullYear(), now.getMonth());   // amortisman
-  const waste = await loadMonthlyWaste(monthKey);                                   // fire & zayiat
+  const wasteInfo = await getWasteInfo(monthKey);
+  const waste = wasteFor(wasteInfo, variableCost);                                  // fire & zayiat (kayıt ya da tahmini)
   const totalCost = variableCost + waste + totalFixed + depreciation;
   const net = monthlyRevenue - totalCost;
 
@@ -539,7 +554,7 @@ async function loadDashboard() {
   document.getElementById('revenue').textContent = eur(monthlyRevenue);
   document.getElementById('costs').textContent = eur(totalCost);
   document.getElementById('net').textContent = eur(net);
-  document.getElementById('pnlNote').textContent = t('pnl_note')(eur(variableCost), eur(totalFixed), depreciation > 0 ? eur(depreciation) : '', waste > 0 ? eur(waste) : '');
+  document.getElementById('pnlNote').textContent = t('pnl_note')(eur(variableCost), eur(totalFixed), depreciation > 0 ? eur(depreciation) : '', waste > 0 ? (eur(waste) + (wasteInfo.logged === null ? ' ' + t('est_tag') : '')) : '');
 
   const netBox = document.getElementById('netBox');
   netBox.classList.toggle('loss', net < 0);
@@ -702,7 +717,7 @@ async function loadDashboard() {
   }
 
   // 3b) Fire oranı — sektör hedefi ≤%5
-  if (waste > 0 && (variableCost + waste) > 0) {
+  if (wasteInfo.logged !== null && waste > 0 && (variableCost + waste) > 0) {
     const wr = waste / (variableCost + waste) * 100;
     if (wr > 5) alarms.push({ type: wr > 10 ? 'red' : 'yellow', ico:'🗑️', head:t('a_waste_h')(wr.toLocaleString(lang==='tr'?'tr-TR':'en-US',{maximumFractionDigits:1})), desc:t('a_waste_d')(eur(waste), eur(waste*12)), pill:t('a_waste_p') });
   }

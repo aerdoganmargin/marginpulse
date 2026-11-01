@@ -224,13 +224,27 @@ const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZ
 const sb = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
 
-// ====== FİRE & ZAYİAT (waste_logs tablosu) ======
-async function loadMonthlyWaste(mk) {
+// ====== FİRE & ZAYİAT ======
+// O ay detaylı kayıt varsa gerçek toplam; yoksa kullanıcının tahmini oranı (varsayılan %5)
+const DEFAULT_WASTE_RATE = 5;
+async function getWasteInfo(mk) {
+  let logged = null, rate = DEFAULT_WASTE_RATE, mode = 'estimate';
   try {
+    const { data: s } = await sb.auth.getSession();
+    const md = (s && s.session && s.session.user && s.session.user.user_metadata) || {};
+    if (md.waste_mode) mode = md.waste_mode;
+    if (md.waste_rate !== undefined && md.waste_rate !== null) rate = +md.waste_rate || 0;
     const { data, error } = await sb.from('waste_logs').select('*').eq('month', mk);
-    if (error || !data) return 0;     // tablo henüz yoksa fire 0 sayılır
-    return data.reduce((s, w) => s + (parseFloat(w.cost) || 0), 0);
-  } catch (e) { return 0; }
+    if (!error && data && data.length) logged = data.reduce((t, w) => t + (parseFloat(w.cost) || 0), 0);
+  } catch (e) {}
+  if (mode !== 'estimate') rate = 0;
+  return { logged, rate };
+}
+// used = satılan ürünlerin hammaddesi. Oran "kullanılan toplam hammaddenin %'si" olduğu için used × r/(1−r)
+function wasteFor(info, used) {
+  if (info.logged !== null) return info.logged;
+  const r = Math.min(Math.max(info.rate, 0), 50) / 100;
+  return used > 0 && r > 0 ? used * r / (1 - r) : 0;
 }
 
 // ====== AMORTİSMAN (assets tablosu; doğrusal, aylık) ======
@@ -640,8 +654,8 @@ async function updateMiniDash(scenarios) {
 
   const prods = products || [];
   const totalFixed = (costs||[]).reduce((s,c)=>s+(parseFloat(c.monthly_equivalent)||0),0)
-                   + await loadMonthlyDep(now.getFullYear(), now.getMonth())   // + amortisman
-                   + await loadMonthlyWaste(mk);                                // + fire & zayiat
+                   + await loadMonthlyDep(now.getFullYear(), now.getMonth());  // + amortisman
+  const wasteInfo = await getWasteInfo(mk);                                     // fire & zayiat
 
   // Her ürün için: en son eklenen senaryosunu bul (varsa)
   const latestScenario = {};
@@ -669,6 +683,9 @@ async function updateMiniDash(scenarios) {
     varAfter += aCost * qty;
   });
 
+  // Fire: kayıt varsa sabit tutar; tahminiyse hammaddeyle orantılı (senaryo maliyeti değiştirirse fire de değişir)
+  varNow += wasteFor(wasteInfo, varNow);
+  varAfter += wasteFor(wasteInfo, varAfter);
   const netNow = revNow - varNow - totalFixed;
   const netAfter = revAfter - varAfter - totalFixed;
   const diff = netAfter - netNow;

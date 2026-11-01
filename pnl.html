@@ -124,13 +124,27 @@ const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZ
 const sb = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
 
-// ====== FİRE & ZAYİAT (waste_logs tablosu) ======
-async function loadMonthlyWaste(mk) {
+// ====== FİRE & ZAYİAT ======
+// O ay detaylı kayıt varsa gerçek toplam; yoksa kullanıcının tahmini oranı (varsayılan %5)
+const DEFAULT_WASTE_RATE = 5;
+async function getWasteInfo(mk) {
+  let logged = null, rate = DEFAULT_WASTE_RATE, mode = 'estimate';
   try {
+    const { data: s } = await sb.auth.getSession();
+    const md = (s && s.session && s.session.user && s.session.user.user_metadata) || {};
+    if (md.waste_mode) mode = md.waste_mode;
+    if (md.waste_rate !== undefined && md.waste_rate !== null) rate = +md.waste_rate || 0;
     const { data, error } = await sb.from('waste_logs').select('*').eq('month', mk);
-    if (error || !data) return 0;     // tablo henüz yoksa fire 0 sayılır
-    return data.reduce((s, w) => s + (parseFloat(w.cost) || 0), 0);
-  } catch (e) { return 0; }
+    if (!error && data && data.length) logged = data.reduce((t, w) => t + (parseFloat(w.cost) || 0), 0);
+  } catch (e) {}
+  if (mode !== 'estimate') rate = 0;
+  return { logged, rate };
+}
+// used = satılan ürünlerin hammaddesi. Oran "kullanılan toplam hammaddenin %'si" olduğu için used × r/(1−r)
+function wasteFor(info, used) {
+  if (info.logged !== null) return info.logged;
+  const r = Math.min(Math.max(info.rate, 0), 50) / 100;
+  return used > 0 && r > 0 ? used * r / (1 - r) : 0;
 }
 
 // ====== AMORTİSMAN (assets tablosu; doğrusal, aylık) ======
@@ -160,7 +174,7 @@ const I18N = {
     greet_morning:"Günaydın", greet_day:"İyi günler", greet_evening:"İyi akşamlar",
     months:["Ocak","Şubat","Mart","Nisan","Mayıs","Haziran","Temmuz","Ağustos","Eylül","Ekim","Kasım","Aralık"],
     h_revenue:"Gelir", l_sales:"Ürün satışları", h_cogs:"Satılan malın maliyeti",
-    l_materials:"Hammadde maliyeti", l_waste:"Fire & zayiat", st_gross:"BRÜT KÂR",
+    l_materials:"Hammadde maliyeti", l_waste:"Fire & zayiat", est_tag:(r)=>`(tahmini %${r})`, st_gross:"BRÜT KÂR",
     h_opex:"Faaliyet giderleri (sabit)", st_totalopex:"Toplam faaliyet gideri",
     st_ebitda:"FAVÖK (amortisman öncesi kâr)", l_dep:"Amortisman", st_noi:"NET FAALİYET KÂRI (NOI)", l_tax:"Tahmini vergi", net_final:"NET KÂR (vergi sonrası)",
     no_data:"Bu ay için henüz veri yok. Ürün ve gider ekleyince tablo otomatik dolar.",
@@ -175,7 +189,7 @@ const I18N = {
     greet_morning:"Good morning", greet_day:"Good afternoon", greet_evening:"Good evening",
     months:["January","February","March","April","May","June","July","August","September","October","November","December"],
     h_revenue:"Revenue", l_sales:"Product sales", h_cogs:"Cost of goods sold",
-    l_materials:"Ingredient cost", l_waste:"Waste", st_gross:"GROSS PROFIT",
+    l_materials:"Ingredient cost", l_waste:"Waste", est_tag:(r)=>`(estimated ${r}%)`, st_gross:"GROSS PROFIT",
     h_opex:"Operating expenses (fixed)", st_totalopex:"Total operating expenses",
     st_ebitda:"EBITDA (profit before depreciation)", l_dep:"Depreciation", st_noi:"NET OPERATING INCOME (NOI)", l_tax:"Estimated tax", net_final:"NET PROFIT (after tax)",
     no_data:"No data for this month yet. Add products and expenses and the statement fills in automatically.",
@@ -284,7 +298,9 @@ async function loadData() {
   }).sort((a,b)=>b.amt-a.amt);
   const totalOpex = opexItems.reduce((s,x)=>s+x.amt, 0);
 
-  const waste = await loadMonthlyWaste(monthKey);                    // fire & zayiat
+  const wasteInfo = await getWasteInfo(monthKey);
+  const waste = wasteFor(wasteInfo, materials);                      // fire & zayiat (kayıt ya da tahmini)
+  const wasteEst = wasteInfo.logged === null ? wasteInfo.rate : null;
   const gross = revenue - materials - waste;
   const ebitda = gross - totalOpex;                                  // FAVÖK
   const depreciation = await loadMonthlyDep(now.getFullYear(), now.getMonth());
@@ -299,7 +315,7 @@ async function loadData() {
   }
   const net = noi - tax;
 
-  DATA = { revenue, materials, waste, opexItems, totalOpex, gross, ebitda, depreciation, noi, tax, net, taxRate, hasData: (prods.length>0 || fixedCosts.length>0) };
+  DATA = { revenue, materials, waste, wasteEst, opexItems, totalOpex, gross, ebitda, depreciation, noi, tax, net, taxRate, hasData: (prods.length>0 || fixedCosts.length>0) };
   render();
 }
 
@@ -338,7 +354,7 @@ function render() {
       <div class="sec exp">
         <div class="sec-label">${t('h_cogs')}</div>
         <div class="line"><span class="lbl-txt">${t('l_materials')}</span><span class="amt neg">−${eur(d.materials)}</span></div>
-        ${d.waste > 0 ? `<div class="line"><span class="lbl-txt">${t('l_waste')} ${pct(d.waste)}</span><span class="amt neg">−${eur(d.waste)}</span></div>` : ''}
+        ${d.waste > 0 ? `<div class="line"><span class="lbl-txt">${t('l_waste')}${d.wasteEst !== null ? ` <span class="pct">${t('est_tag')(d.wasteEst)}</span>` : ''} ${pct(d.waste)}</span><span class="amt neg">−${eur(d.waste)}</span></div>` : ''}
       </div>
 
       <div class="subtotal"><span class="lbl-txt">${t('st_gross')} ${pct(d.gross)}</span><span class="amt">${eur(d.gross)}</span></div>
