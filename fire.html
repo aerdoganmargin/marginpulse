@@ -142,8 +142,9 @@ td input[type=month]{min-width:130px;}
       <thead><tr>
         <th style="width:135px" data-i18n="th_date">Tarih</th>
         <th data-i18n="th_item">Ne atıldı?</th>
-        <th style="width:80px" data-i18n="th_qty">Miktar</th>
-        <th style="width:105px" data-i18n="th_unit">Birim maliyet (€)</th>
+        <th style="width:70px" data-i18n="th_qty">Miktar</th>
+        <th style="width:95px" data-i18n="th_uom">Birim</th>
+        <th style="width:105px" data-i18n="th_unit">Birim fiyat (€)</th>
         <th style="width:85px" data-i18n="th_total">Toplam</th>
         <th style="width:160px" data-i18n="th_reason">Sebep</th>
         <th style="width:30px"></th>
@@ -172,6 +173,7 @@ const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZ
 const sb = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
 const REASONS = ['spoiled','prep','returned','overprod','accident','other'];
+const UOMS = ['portion','kg','l','pc'];
 const I18N = {
   tr: {
     nav_products:"Ürün karlılığı", nav_expenses:"Sabit giderler", nav_assets:"Amortisman", nav_waste:"Fire & zayiat", nav_dashboard:"Dashboard", nav_simulator:"Simülatör", nav_pnl:"Gelir Tablosu", nav_logout:"Çıkış yap",
@@ -180,10 +182,10 @@ const I18N = {
     sum_total:"Bu ayki fire maliyeti", sum_total_sub:"Hammadde maliyetine eklenir (Dashboard + Gelir Tablosu)",
     sum_ratio:"Fire oranı", sum_ratio_sub:"Kullanılan toplam hammaddenin yüzdesi · hedef ≤%5",
     sum_year:"Bu gidişle yıllık", sum_year_sub:"Aylık fire × 12",
-    log_title:"Fire kayıtları", log_hint:"Menüdeki bir ürünü yazınca maliyeti reçeteden gelir",
-    th_date:"Tarih", th_item:"Ne atıldı?", th_qty:"Miktar", th_unit:"Birim maliyet (€)", th_total:"Toplam", th_reason:"Sebep",
-    item_ph:"Örn: Adana Kebap veya 2 kg domates", add_row:"+ Kayıt ekle", save:"Bu Ayı Kaydet",
-    src_recipe:"✓ maliyet reçeteden",
+    log_title:"Fire kayıtları", log_hint:"Menüdeki bir ürünü ya da reçetelerindeki bir malzemeyi yazınca fiyatı otomatik gelir",
+    th_date:"Tarih", th_item:"Ne atıldı?", th_qty:"Miktar", th_unit:"Birim fiyat (€)", th_uom:"Birim", u_portion:"porsiyon", u_kg:"kg", u_l:"litre", u_pc:"adet", th_total:"Toplam", th_reason:"Sebep",
+    item_ph:"Örn: Adana Kebap veya Domates", add_row:"+ Kayıt ekle", save:"Bu Ayı Kaydet",
+    src_recipe:"✓ maliyet reçeteden", src_ing:(n)=>`✓ fiyat reçetelerden (${n} üründe kullanılıyor)`, opt_product:"menü ürünü", opt_ing:"malzeme",
     r_spoiled:"Bozulma / tarihi geçti", r_prep:"Hazırlık firesi", r_returned:"Geri dönen tabak", r_overprod:"Fazla üretim", r_accident:"Kaza / düşürme", r_other:"Diğer",
     by_reason:"Sebebe göre", by_item:"En çok fire veren kalemler", none:"Henüz kayıt yok",
     tip_head:(r,p)=>`En büyük fire kalemin: ${r} (%${p})`,
@@ -197,7 +199,7 @@ const I18N = {
     saving:"Kaydediliyor...", saved:"✅ Kaydedildi!", err_table:"❌ Kaydedilemedi. Supabase'de 'waste_logs' tablosu kurulmuş mu? Ayrıntı: ",
     greet_morning:"Günaydın", greet_day:"İyi günler", greet_evening:"İyi akşamlar",
     months:["Ocak","Şubat","Mart","Nisan","Mayıs","Haziran","Temmuz","Ağustos","Eylül","Ekim","Kasım","Aralık"],
-    info_html:"<strong>Nasıl kullanılır?</strong> Gün içinde atılan her şeyi kaydet. Menüdeki bir ürünün adını yazınca birim maliyet o ürünün reçete maliyetinden gelir. Çiğ malzemede (örn. 2 kg domates) miktarı ve <strong>KDV hariç</strong> birim fiyatı kendin gir.<br><strong>Fire oranı</strong> = fire ÷ (satılan ürünlerin hammaddesi + fire). Restoranlarda sağlıklı seviye %4-5'in altıdır, %10'u geçmesi ciddi kayıp demektir. Fire maliyeti Dashboard'da ve Gelir Tablosu'nda hammadde maliyetine eklenir."
+    info_html:"<strong>Nasıl kullanılır?</strong> Gün içinde atılan her şeyi kaydet. Menüdeki bir ürünün adını yazınca maliyet o ürünün reçetesinden, reçetelerinde geçen bir malzemeyi (örn. domates) yazınca kg/litre/adet fiyatı reçetelerinden gelir. Sadece miktarı gir. Reçetelerde olmayan bir şeyse birimi seç ve <strong>KDV hariç</strong> birim fiyatı kendin gir.<br><strong>Fire oranı</strong> = fire ÷ (satılan ürünlerin hammaddesi + fire). Restoranlarda sağlıklı seviye %4-5'in altıdır, %10'u geçmesi ciddi kayıp demektir. Fire maliyeti Dashboard'da ve Gelir Tablosu'nda hammadde maliyetine eklenir."
   },
   en: {
     nav_products:"Product profit", nav_expenses:"Fixed expenses", nav_assets:"Depreciation", nav_waste:"Waste", nav_dashboard:"Dashboard", nav_simulator:"Simulator", nav_pnl:"Income Statement", nav_logout:"Log out",
@@ -206,10 +208,10 @@ const I18N = {
     sum_total:"This month's waste cost", sum_total_sub:"Added to ingredient cost (Dashboard + Income Statement)",
     sum_ratio:"Waste rate", sum_ratio_sub:"Share of total ingredients used · target ≤5%",
     sum_year:"Yearly at this pace", sum_year_sub:"Monthly waste × 12",
-    log_title:"Waste log", log_hint:"Type a menu item and its cost comes from the recipe",
-    th_date:"Date", th_item:"What was wasted?", th_qty:"Qty", th_unit:"Unit cost (€)", th_total:"Total", th_reason:"Reason",
-    item_ph:"e.g. Grilled chicken or 2 kg tomatoes", add_row:"+ Add entry", save:"Save This Month",
-    src_recipe:"✓ cost from recipe",
+    log_title:"Waste log", log_hint:"Type a menu item or an ingredient from your recipes and its price fills in automatically",
+    th_date:"Date", th_item:"What was wasted?", th_qty:"Qty", th_unit:"Unit price (€)", th_uom:"Unit", u_portion:"serving", u_kg:"kg", u_l:"litre", u_pc:"piece", th_total:"Total", th_reason:"Reason",
+    item_ph:"e.g. Grilled chicken or Tomatoes", add_row:"+ Add entry", save:"Save This Month",
+    src_recipe:"✓ cost from recipe", src_ing:(n)=>`✓ price from your recipes (used in ${n} product${n>1?"s":""})`, opt_product:"menu item", opt_ing:"ingredient",
     r_spoiled:"Spoiled / expired", r_prep:"Prep waste", r_returned:"Returned plate", r_overprod:"Overproduction", r_accident:"Accident / dropped", r_other:"Other",
     by_reason:"By reason", by_item:"Top waste items", none:"No entries yet",
     tip_head:(r,p)=>`Your biggest waste source: ${r} (${p}%)`,
@@ -223,7 +225,7 @@ const I18N = {
     saving:"Saving...", saved:"✅ Saved!", err_table:"❌ Couldn't save. Is the 'waste_logs' table set up in Supabase? Details: ",
     greet_morning:"Good morning", greet_day:"Good afternoon", greet_evening:"Good evening",
     months:["January","February","March","April","May","June","July","August","September","October","November","December"],
-    info_html:"<strong>How to use it</strong> Log everything that gets thrown away during the day. Type a menu item's name and the unit cost comes from its recipe cost. For raw ingredients (e.g. 2 kg tomatoes) enter the quantity and the unit price <strong>excluding VAT</strong> yourself.<br><strong>Waste rate</strong> = waste ÷ (ingredients of products sold + waste). A healthy restaurant level is under 4-5%; above 10% is a serious loss. Waste cost is added to ingredient cost on the Dashboard and Income Statement."
+    info_html:"<strong>How to use it</strong> Log everything that gets thrown away during the day. Type a menu item and its cost comes from its recipe; type an ingredient used in your recipes (e.g. tomatoes) and its price per kg/litre/piece comes from your recipes. Just enter the quantity. For anything not in your recipes, pick the unit and enter the unit price <strong>excluding VAT</strong> yourself.<br><strong>Waste rate</strong> = waste ÷ (ingredients of products sold + waste). A healthy restaurant level is under 4-5%; above 10% is a serious loss. Waste cost is added to ingredient cost on the Dashboard and Income Statement."
   }
 };
 let lang = localStorage.getItem('mp_lang');
@@ -237,6 +239,8 @@ function applyLang() {
   document.getElementById('monthLabel').textContent = monthLabel(currentDate);
   document.querySelectorAll('#wasteRows .wname').forEach(el=>el.placeholder=t('item_ph'));
   document.querySelectorAll('#wasteRows .wreason').forEach(sel=>{ sel.querySelectorAll('option').forEach(o=>o.textContent=t('r_'+o.value)); });
+  document.querySelectorAll('#wasteRows .wuom').forEach(sel=>{ sel.querySelectorAll('option').forEach(o=>o.textContent=t('u_'+o.value)); });
+  if (typeof fillDatalist==='function' && PRODUCTS.length) fillDatalist();
   showGreeting(); recalc();
 }
 function toggleLang(){ lang=(lang==='tr')?'en':'tr'; localStorage.setItem('mp_lang',lang); applyLang(); }
@@ -244,6 +248,7 @@ function toggleLang(){ lang=(lang==='tr')?'en':'tr'; localStorage.setItem('mp_la
 let currentUser = null;
 let PRODUCTS = [];            // {id,name,ingredient_cost,last_month_qty}
 let usedIngredients = 0;      // satılan ürünlerin hammaddesi (fire oranı paydası)
+let INGREDIENTS = {};         // reçetelerden: ad -> {name, price (€/kg|€/l|€/adet), uom, count}
 (async () => {
   const { data } = await sb.auth.getSession();
   if (!data.session) { window.location.href = "login.html"; return; }
@@ -252,7 +257,8 @@ let usedIngredients = 0;      // satılan ürünlerin hammaddesi (fire oranı pa
   const { data: prods } = await sb.from('products').select('*');
   PRODUCTS = prods || [];
   usedIngredients = PRODUCTS.reduce((s,p)=>s+(p.ingredient_cost||0)*(p.last_month_qty||0),0);
-  document.getElementById('prodList').innerHTML = PRODUCTS.map(p=>`<option value="${esc(p.name)}"></option>`).join('');
+  buildIngredientCatalog();
+  fillDatalist();
   loadWaste();
 })();
 function showGreeting() {
@@ -270,6 +276,38 @@ function esc(s){ return String(s).replace(/&/g,'&amp;').replace(/"/g,'&quot;').r
 function dec1(n){ return n.toLocaleString(lang==='tr'?'tr-TR':'en-US',{minimumFractionDigits:1,maximumFractionDigits:1}); }
 function pct(v){ return lang==='tr' ? '%'+v : v+'%'; }
 
+// ====== MALZEME KATALOĞU (ürün reçetelerinden) ======
+function norm(s){ return String(s||'').trim().toLocaleLowerCase('tr'); }
+function buildIngredientCatalog(){
+  const acc = {};
+  PRODUCTS.forEach(p => {
+    let rec = p.recipe; if (typeof rec === 'string') { try { rec = JSON.parse(rec); } catch(e){ rec = []; } }
+    (rec || []).forEach(r => {
+      if (!r || !r.name || !(r.price > 0)) return;
+      const uom = r.unit === 'ml' ? 'l' : (r.unit === 'adet' ? 'pc' : 'kg');   // reçetede g→€/kg, ml→€/l, adet→€/adet
+      const k = norm(r.name) + '|' + uom;
+      if (!acc[k]) acc[k] = { name: r.name.trim(), uom, sum: 0, count: 0 };
+      acc[k].sum += +r.price; acc[k].count++;
+    });
+  });
+  INGREDIENTS = {};
+  Object.values(acc).forEach(x => {
+    const key = norm(x.name);
+    // aynı ad farklı birimde geçiyorsa en sık kullanılanı al
+    if (!INGREDIENTS[key] || INGREDIENTS[key].count < x.count)
+      INGREDIENTS[key] = { name: x.name, uom: x.uom, price: x.sum / x.count, count: x.count };
+  });
+}
+function fillDatalist(){
+  const opts = PRODUCTS.map(p => `<option value="${esc(p.name)}" label="${t('opt_product')} · ${eur2(p.ingredient_cost||0)}"></option>`);
+  Object.values(INGREDIENTS).sort((a,b)=>a.name.localeCompare(b.name)).forEach(i => {
+    if (PRODUCTS.some(p => norm(p.name) === norm(i.name))) return;
+    opts.push(`<option value="${esc(i.name)}" label="${t('opt_ing')} · ${eur2(i.price)}/${t('u_'+i.uom)}"></option>`);
+  });
+  document.getElementById('prodList').innerHTML = opts.join('');
+}
+function findIngredient(name){ return INGREDIENTS[norm(name)]; }
+
 // ====== AY ======
 let currentDate = new Date(); currentDate.setDate(1);
 function monthKey(d){ return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0'); }
@@ -282,24 +320,30 @@ function defaultDate(){
 }
 
 // ====== SATIRLAR ======
-function findProduct(name){ const n=name.trim().toLowerCase(); return PRODUCTS.find(p=>(p.name||'').trim().toLowerCase()===n); }
-function addWasteRow(date='', name='', qty='', unit='', reason='spoiled') {
+function findProduct(name){ const n=norm(name); return PRODUCTS.find(p=>norm(p.name)===n); }
+function addWasteRow(date='', name='', qty=1, unit='', reason='spoiled', uom='') {
   const tr = document.createElement('tr');
   tr.innerHTML = `
     <td><input type="date" class="wdate" value="${date||defaultDate()}" /></td>
     <td><input class="wname" list="prodList" placeholder="${t('item_ph')}" value="${esc(name)}" oninput="onName(this)" /><div class="src"></div></td>
     <td><input type="number" class="wqty" min="0" step="any" placeholder="1" value="${qty}" oninput="recalc()" /></td>
+    <td><select class="wuom" onchange="this.dataset.manual='1';recalc()">${UOMS.map(u=>`<option value="${u}" ${u===(uom||'portion')?'selected':''}>${t('u_'+u)}</option>`).join('')}</select></td>
     <td><input type="number" class="wunit" min="0" step="0.01" placeholder="0" value="${unit}" oninput="this.dataset.manual='1';recalc()" /></td>
     <td class="col-eq wtotal">€0</td>
     <td><select class="wreason" onchange="recalc()">${REASONS.map(r=>`<option value="${r}" ${r===reason?'selected':''}>${t('r_'+r)}</option>`).join('')}</select></td>
     <td><button class="btn-del" onclick="this.closest('tr').remove();recalc();">×</button></td>`;
   document.getElementById('wasteRows').appendChild(tr);
-  if (unit !== '' ) tr.querySelector('.wunit').dataset.manual='1';
+  if (unit !== '' ) { tr.querySelector('.wunit').dataset.manual='1'; tr.querySelector('.wuom').dataset.manual='1'; }
   recalc();
 }
 function onName(inp){
-  const tr = inp.closest('tr'), p = findProduct(inp.value), u = tr.querySelector('.wunit');
-  if (p && !u.dataset.manual) { u.value = (p.ingredient_cost||0).toFixed(2); }
+  const tr = inp.closest('tr'), u = tr.querySelector('.wunit'), m = tr.querySelector('.wuom');
+  const p = findProduct(inp.value), ing = p ? null : findIngredient(inp.value);
+  // ad değişince otomatik doldurmayı yeniden etkinleştir
+  delete u.dataset.manual; delete m.dataset.manual;
+  if (p)        { u.value = (p.ingredient_cost||0).toFixed(2); m.value = 'portion'; }
+  else if (ing) { u.value = ing.price.toFixed(2); m.value = ing.uom; }
+  else if (inp.value.trim()) { m.value = 'kg'; }   // tanınmayan kalem: çiğ malzeme varsay, birimi kullanıcı değiştirebilir
   recalc();
 }
 function rowData(tr){
@@ -308,7 +352,8 @@ function rowData(tr){
   const unit = parseFloat(tr.querySelector('.wunit').value) || 0;
   const p = findProduct(name);
   return { log_date: tr.querySelector('.wdate').value, item_name: name, qty, unit_cost: unit,
-           cost: qty*unit, reason: tr.querySelector('.wreason').value, product_id: p ? p.id : null };
+           cost: qty*unit, reason: tr.querySelector('.wreason').value, product_id: p ? p.id : null,
+           unit: tr.querySelector('.wuom').value };
 }
 function recalc() {
   let total = 0; const byR = {}, byI = {};
@@ -316,7 +361,11 @@ function recalc() {
     const d = rowData(tr);
     tr.querySelector('.wtotal').textContent = eur2(d.cost);
     const p = findProduct(d.item_name);
-    tr.querySelector('.src').textContent = (p && Math.abs((p.ingredient_cost||0)-d.unit_cost)<0.005) ? t('src_recipe') : '';
+    const ing = p ? null : findIngredient(d.item_name);
+    let src = '';
+    if (p && Math.abs((p.ingredient_cost||0)-d.unit_cost)<0.005) src = t('src_recipe');
+    else if (ing && Math.abs(ing.price-d.unit_cost)<0.005) src = t('src_ing')(ing.count);
+    tr.querySelector('.src').textContent = src;
     if (d.cost > 0) {
       total += d.cost;
       byR[d.reason] = (byR[d.reason]||0) + d.cost;
@@ -363,7 +412,10 @@ async function saveWaste(){
   const del = await sb.from('waste_logs').delete().eq('month', mk).eq('user_id', currentUser.id);
   if (del.error) { setStatus(t('err_table') + del.error.message, '#DC2626'); return; }
   if (rows.length) {
-    const { error } = await sb.from('waste_logs').insert(rows);
+    let { error } = await sb.from('waste_logs').insert(rows);
+    if (error && /unit/i.test(error.message || '')) {   // 'unit' sütunu henüz eklenmemişse onsuz kaydet
+      ({ error } = await sb.from('waste_logs').insert(rows.map(({unit, ...r}) => r)));
+    }
     if (error) { setStatus(t('err_table') + error.message, '#DC2626'); return; }
   }
   setStatus(t('saved'), '#059669');
@@ -373,7 +425,7 @@ async function loadWaste(){
   const tbody = document.getElementById('wasteRows'); tbody.innerHTML = '';
   if (error) { setStatus(t('err_table') + error.message, '#DC2626'); addWasteRow(); return; }
   if (!data || !data.length) { addWasteRow(); return; }
-  data.forEach(w => addWasteRow(w.log_date, w.item_name, w.qty, w.unit_cost, w.reason));
+  data.forEach(w => addWasteRow(w.log_date, w.item_name, w.qty, w.unit_cost, w.reason, w.unit || (findProduct(w.item_name) ? 'portion' : (findIngredient(w.item_name)||{}).uom || 'kg')));
 }
 function setStatus(msg, color){ const el=document.getElementById('saveStatus'); el.textContent=msg; el.style.color=color; if(msg.startsWith('✅')) setTimeout(()=>{el.textContent='';},2500); }
 
