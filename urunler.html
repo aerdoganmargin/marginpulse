@@ -26,6 +26,12 @@ body{font-family:'Segoe UI',system-ui,sans-serif;background:#F0F4F8;display:flex
 .badge-num{width:22px;height:22px;border-radius:50%;background:#2563EB;color:#fff;font-size:11px;font-weight:700;display:flex;align-items:center;justify-content:center;}
 .row{display:flex;gap:8px;margin-bottom:10px;}
 .row input,.row select{flex:1;padding:9px 12px;border:1px solid #E2E8F0;border-radius:8px;font-size:13px;}
+.desc-field{margin-top:2px;margin-bottom:6px;}
+.desc-field label{font-size:11.5px;color:#64748B;display:block;margin-bottom:4px;}
+.desc-field .opt{color:#94A3B8;font-weight:400;}
+.desc-field textarea{width:100%;padding:9px 12px;border:1px solid #E2E8F0;border-radius:8px;font-size:13px;font-family:inherit;resize:vertical;min-height:44px;box-sizing:border-box;}
+.desc-field textarea:focus{outline:none;border-color:#2563EB;}
+.desc-hint{font-size:11px;color:#94A3B8;margin-top:3px;}
 .cats{display:flex;gap:6px;flex-wrap:wrap;margin-top:8px;}
 .cat{font-size:11px;padding:5px 14px;border-radius:20px;border:1px solid #E2E8F0;background:#fff;color:#64748B;cursor:pointer;}
 .cat.active{background:#0F1F3D;color:#fff;border-color:#0F1F3D;}
@@ -129,6 +135,11 @@ a.nav{text-decoration:none;}
   <div class="card">
     <div class="card-title"><span class="badge-num">1</span> <span data-i18n="step1_title">Ürün adı ve kategori</span></div>
     <div class="row"><input id="productName" data-i18n-ph="ph_product" placeholder="Örn: Saç kavurma" /></div>
+    <div class="desc-field">
+      <label for="productDesc"><span data-i18n="desc_label">İçeriği</span> <span class="opt" data-i18n="desc_optional">(isteğe bağlı)</span></label>
+      <textarea id="productDesc" rows="2" maxlength="400" data-i18n-ph="ph_desc" placeholder="Örn: kuzu eti, közlenmiş patlıcan beğendi, pilav, yoğurt"></textarea>
+      <div class="desc-hint" data-i18n="desc_hint">Kendi yemeğinse ya da adı bilinmiyorsa içindekileri yaz, AI tarifi buna göre hazırlasın.</div>
+    </div>
     <div class="cats" id="categories">
       <div class="cat active" data-cat="Ana yemek" data-i18n="cat_main">Ana yemek</div>
       <div class="cat" data-cat="İçecek" data-i18n="cat_drink">İçecek</div>
@@ -215,6 +226,8 @@ const I18N = {
     welcome_title:"MarginPulse'a hoş geldin! 🎉",
     welcome_body:'Başlamak çok kolay: aşağıya ilk ürününün adını yaz (örn. <em>Adana kebap</em>), reçetesini ekle veya <strong style="color:#fff;">✨ AI ile öner</strong> butonuna bas — malzemeler ve tahmini maliyet otomatik gelsin. Ürünü kaydettiğinde kârını, marjını ve önerileri anında göreceksin.',
     step1_title:"Ürün adı ve kategori", ph_product:"Örn: Saç kavurma",
+    desc_label:"İçeriği", desc_optional:"(isteğe bağlı)", ph_desc:"Örn: kuzu eti, közlenmiş patlıcan beğendi, pilav, yoğurt",
+    desc_hint:"Kendi yemeğinse ya da adı bilinmiyorsa içindekileri yaz, AI tarifi buna göre hazırlasın.",
     cat_main:"Ana yemek", cat_drink:"İçecek", cat_alcohol:"Alkollü içecek", cat_dessert:"Tatlı", cat_starter:"Aperatif",
     portion_label:"1 porsiyon =", unit_piece:"adet", portion_hint:"Boş bırakırsan AI tipik porsiyonu kendi tahmin eder",
     step2_title:"Reçete & maliyet", ai_btn:"✨ AI ile öner", ai_hint:"Ürün adını yaz, reçeteyi AI otomatik doldursun",
@@ -240,6 +253,8 @@ const I18N = {
     welcome_title:"Welcome to MarginPulse! 🎉",
     welcome_body:'Getting started is easy: type your first product name below (e.g. <em>Tomato soup</em>), add its recipe or press <strong style="color:#fff;">✨ Suggest with AI</strong> — ingredients and estimated cost appear automatically. When you save the product, you\'ll instantly see its profit, margin and recommendations.',
     step1_title:"Product name and category", ph_product:"e.g. Grilled chicken",
+    desc_label:"What's in it", desc_optional:"(optional)", ph_desc:"e.g. lamb, smoked aubergine purée, rice, yogurt",
+    desc_hint:"If it's your own dish or a lesser-known name, list what's in it and AI will build the recipe from that.",
     cat_main:"Main dish", cat_drink:"Drink", cat_alcohol:"Alcoholic drink", cat_dessert:"Dessert", cat_starter:"Starter",
     portion_label:"1 serving =", unit_piece:"pcs", portion_hint:"Leave empty and AI will estimate a typical serving",
     step2_title:"Recipe & cost", ai_btn:"✨ Suggest with AI", ai_hint:"Enter the product name and AI fills in the recipe automatically",
@@ -427,6 +442,7 @@ async function suggestRecipe() {
         category: selectedCategory,
         portionSize: document.getElementById('portionSize').value,
         portionUnit: document.getElementById('portionUnit').value,
+        description: document.getElementById('productDesc').value.trim(),
         lang: lang
       })
     });
@@ -540,6 +556,7 @@ function resetForm() {
   document.getElementById('lastMonthQty').value = '';
   document.getElementById('nextMonthQty').value = '';
   document.getElementById('portionSize').value = '';
+  document.getElementById('productDesc').value = '';
   document.getElementById('ingredients').innerHTML = '';
   addIngredient(); addIngredient();
   selectCategory('Ana yemek');
